@@ -3,7 +3,7 @@ import os
 
 version = '1.0'
 
-setup(name='openprocurement.client.python',
+setup(name='openprocurement_client',
       version=version,
       description="",
       long_description=open("README.txt").read() + "\n" +
@@ -19,7 +19,6 @@ setup(name='openprocurement.client.python',
       url='http://svn.plone.org/svn/collective/',
       license='GPL',
       packages=find_packages(exclude=['ez_setup']),
-      namespace_packages=['openprocurement', 'openprocurement.client'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[

@@ -1,5 +1,5 @@
-from gevent import monkey
-monkey.patch_all()
+# from gevent import monkey
+# monkey.patch_all()
 from restkit import Resource, BasicAuth
 from munch import munchify
 from simplejson import loads, dumps
