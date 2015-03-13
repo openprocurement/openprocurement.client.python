@@ -59,7 +59,7 @@ class Client(Resource):
     def _get_tender_resource_list(self, tender, items_name):
         return self._get_resource_item(
             self.prefix_path + '/{}/{}'.format(tender.data.id, items_name),
-            headers={'X-Access-Token': tender.access.token}
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def get_questions(self, tender, params={}):
@@ -87,7 +87,7 @@ class Client(Resource):
         return self._create_resource_item(
             self.prefix_path + '/{}/'.format(tender.data.id) + items_name,
             item_obj,
-            headers={'X-Access-Token': tender.access.token}
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def create_tender(self, tender):
@@ -118,7 +118,7 @@ class Client(Resource):
         if access_token:
             headers = {'X-Access-Token': access_token}
         else:
-            headers = {'X-Access-Token': tender.access.token}
+            headers = {'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         return self._get_resource_item(
             self.prefix_path + '/{}/{}/{}'.format(tender.data.id, items_name, item_id),
             headers=headers
@@ -147,13 +147,13 @@ class Client(Resource):
         return self._patch_resource_item(
             self.prefix_path + '/{}/{}/{}'.format(
                 tender.data.id, items_name, item_obj.data.id
-            ), item_obj, headers={'X-Access-Token': tender.access.token}
+            ), item_obj, headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def patch_tender(self, tender):
         return self._patch_resource_item(
             self.prefix_path + '/{}'.format(tender["data"]["id"]), tender,
-            headers={'X-Access-Token': tender.access.token}
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def patch_question(self, tender, question):
@@ -184,7 +184,7 @@ class Client(Resource):
         return self._upload_resource_file(
             self.prefix_path + '/{}/documents'.format(tender.data.id),
             {"file": file},
-            headers={'X-Access-Token': tender.access.token}
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def update_document(self, tender, document_id, file):
@@ -193,7 +193,7 @@ class Client(Resource):
                 tender.data.id, document_id
             ),
             {"file": file},
-            headers={'X-Access-Token': tender.access.token},
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
         )
     ############################################################################
