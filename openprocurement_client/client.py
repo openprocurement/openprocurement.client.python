@@ -3,7 +3,7 @@
 from restkit import Resource, BasicAuth
 from munch import munchify
 from simplejson import loads, dumps
-
+from StringIO import StringIO
 IGNORE_PARAMS = ('uri', 'path',)
 
 
@@ -13,12 +13,14 @@ class InvalidResponse(Exception):
 
 class Client(Resource):
     """docstring for API"""
-    def __init__(self, key):
+    def __init__(self, key, 
+		 host_url="https://api-sandbox.openprocurement.org",
+		 api_version='0.7'):
         super(Client, self).__init__(
-            "https://api-sandbox.openprocurement.org",
+            host_url,
             filters=[BasicAuth(key, "")]
         )
-        self.prefix_path = '/api/0.7/tenders'
+        self.prefix_path = '/api/{}/tenders'.format(api_version)
         self.params = {"mode": "_all_"}
         self.headers = {"Content-Type": "application/json"}
 
@@ -48,7 +50,7 @@ class Client(Resource):
     def get_tenders(self, params={}):
         self._update_params(params)
         response = self.get(
-            '/api/0.7/tenders',
+            self.prefix_path,
             params_dict=self.params)
         if response.status_int == 200:
             tender_list = munchify(loads(response.body_string()))
@@ -186,7 +188,14 @@ class Client(Resource):
             {"file": file},
             headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
-
+      
+    def upload_tender_document(self, tender):
+	file = StringIO()
+	file.name = 'test.txt'
+	file.write("test text data")
+	file.seek(0)
+	return self.upload_document(tender, file)
+      
     def update_document(self, tender, document_id, file):
         return self._upload_resource_file(
             self.prefix_path + '/{}/documents/{}'.format(
