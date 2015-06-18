@@ -37,6 +37,18 @@ class Client(Resource):
 
         return self.request("PATCH", path=path, payload=payload,
                             headers=headers, params_dict=params_dict, **params)
+	
+    def delete(self, path=None, headers=None,
+              ):
+        """ HTTP DELETE
+        - path: string  additionnal path to the uri
+        - headers: dict, optionnal headers that will
+            be added to HTTP request.
+        - params: Optionnal parameterss added to the request
+        """
+        return self.request("DELETE",  path=path, headers=headers, 
+							)
+	
 
     def _update_params(self, params):
         for key in params:
@@ -189,20 +201,50 @@ class Client(Resource):
             headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
       
-    def upload_tender_document(self, tender):
-	file = StringIO()
-	file.name = 'test.txt'
-	file.write("test text data")
-	file.seek(0)
-	return self.upload_document(tender, file)
+    def upload_tender_document(self, filename, tender):
+		file = StringIO()
+		file.name = filename
+		file.write("test text data")
+		file.seek(0)
+		return self.upload_document(tender, file)
       
-    def update_document(self, tender, document_id, file):
-        return self._upload_resource_file(
-            self.prefix_path + '/{}/documents/{}'.format(
-                tender.data.id, document_id
-            ),
-            {"file": file},
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
-            method='put'
+    def upload_bid_document(self, filename, tender, bid_id):
+		file = StringIO()
+		file.name = filename
+		file.write("test text data")
+		file.seek(0)
+		return self._upload_resource_file(
+			self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
+			{"file": file},
+			headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+    def update_bid_document(self, filename, tender, bid_id, document_id):
+		file = StringIO()
+		file.name = filename
+		file.write("fixed text data")
+		file.seek(0)
+		return self._upload_resource_file(
+			self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
+			{"file": file},
+			headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
+			method='put'
+        )
+
+	############################################################################
+    #             DELETE ITEMS LIST API METHODS
+    ############################################################################
+
+    def _delete_resource_item(self, url, headers={}):
+
+        response_item = self.delete(
+            url, headers=headers)
+        if response_item.status_int == 200:
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
+
+    def delete_bid(self, tender, bid):
+		return self._delete_resource_item(
+            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid.data.id,
+            headers={'X-Access-Token': getattr(getattr(bid, 'access', ''), 'token', '')}
         )
     ############################################################################
