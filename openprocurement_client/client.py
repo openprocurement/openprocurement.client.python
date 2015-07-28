@@ -1,9 +1,15 @@
 # from gevent import monkey
 # monkey.patch_all()
+from urlparse import urlparse, parse_qs
+from tempfile import NamedTemporaryFile
 from restkit import Resource, BasicAuth
 from munch import munchify
 from simplejson import loads, dumps
 from StringIO import StringIO
+from iso8601 import parse_date
+import sys
+from restkit import request
+
 IGNORE_PARAMS = ('uri', 'path',)
 
 
@@ -47,8 +53,7 @@ class Client(Resource):
         - params: Optionnal parameterss added to the request
         """
         return self.request("DELETE",  path=path, headers=headers, 
-							)
-	
+        )
 
     def _update_params(self, params):
         for key in params:
@@ -60,10 +65,25 @@ class Client(Resource):
     ############################################################################
 
     def get_tenders(self, params={}):
+        #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
         self._update_params(params)
         response = self.get(
             self.prefix_path,
             params_dict=self.params)
+        if response.status_int == 200:
+            tender_list = munchify(loads(response.body_string()))
+            self._update_params(tender_list.next_page)
+            return tender_list.data
+        raise InvalidResponse
+
+    def get_latest_tenders(self, date, tenderID):
+        iso_dt=parse_date(date)
+        dt = iso_dt.strftime("%Y-%m-%d")
+        tm = iso_dt.strftime("%H:%M:%S")
+        response = self._get_resource_item(
+            self.prefix_path + '?offset={}T{}&opt_fields=tenderID&mode=test'.format(dt, tm),
+
+        )
         if response.status_int == 200:
             tender_list = munchify(loads(response.body_string()))
             self._update_params(tender_list.next_page)
@@ -144,6 +164,25 @@ class Client(Resource):
     def get_bid(self, tender, bid_id, access_token):
         return self._get_tender_resource_item(tender, bid_id, "bids", access_token)
 
+    def get_file(self, tender, url, access_token):
+        parsed_url = urlparse(url)
+        if access_token:
+            headers = {'X-Access-Token': access_token}
+        else:
+            raise NoToken
+
+        headers.update(self.headers)
+        response_item = self.get(parsed_url.path,
+                                 headers=headers, 
+                                 params_dict=parse_qs(parsed_url.query))
+
+        if response_item.status_int == 302:
+            response_obj = request(response_item.headers['location'])
+            if response_obj.status_int == 200:
+                return response_obj.body_string()
+            #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
+        raise InvalidResponse
+
     ############################################################################
     #             PATCH ITEM API METHODS
     ############################################################################
@@ -175,7 +214,6 @@ class Client(Resource):
 
     def patch_bid(self, tender, bid):
         return self._patch_tender_resource_item(tender, bid, "bids")
-
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
@@ -208,16 +246,13 @@ class Client(Resource):
 		file.seek(0)
 		return self.upload_document(tender, file)
       
-    def upload_bid_document(self, filename, tender, bid_id):
-		file = StringIO()
-		file.name = filename
-		file.write("test text data")
-		file.seek(0)
-		return self._upload_resource_file(
-			self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
-			{"file": file},
-			headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
-        )
+    def upload_bid_document(self, filepath, tender, bid_id):
+		with open(filepath) as file:
+			return self._upload_resource_file(
+				self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
+				{"file": file},
+				headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+			)
     def update_bid_document(self, filename, tender, bid_id, document_id):
 		file = StringIO()
 		file.name = filename
