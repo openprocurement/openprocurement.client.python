@@ -179,8 +179,7 @@ class Client(Resource):
         if response_item.status_int == 302:
             response_obj = request(response_item.headers['location'])
             if response_obj.status_int == 200:
-                return response_obj.body_string()
-            #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
+                return response_obj.body_string(), response_obj.headers['Content-Disposition'].split(";")[1].split('"')[1]
         raise InvalidResponse
 
     ############################################################################
