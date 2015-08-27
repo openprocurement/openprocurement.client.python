@@ -8,11 +8,11 @@ logger = logging.getLogger()
 def tenders_feed(client=Client(''), sleep_time=10):
     while True:
         tender_list = True
-        #Витягнення тендерів
         while tender_list:
-            #logger.info("Get next batch")
+            logger.info("Get next batch")
             tender_list = client.get_tenders()
             for tender in tender_list:
+                logger.debug("Return tender {}".format(str(tender)))
                 yield tender
-                #write_to_db(tender, tenders_folder)
+        logger.info("Wait to get next batch")
         sleep(sleep_time)
