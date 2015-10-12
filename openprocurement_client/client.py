@@ -231,36 +231,36 @@ class Client(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
-    def upload_document(self, tender, file):
+    def upload_document(self, tender, file_):
         return self._upload_resource_file(
             self.prefix_path + '/{}/documents'.format(tender.data.id),
-            {"file": file},
+            {"file": file_},
             headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def upload_tender_document(self, filename, tender):
-        file = StringIO()
-        file.name = filename
-        file.write("test text data")
-        file.seek(0)
-        return self.upload_document(tender, file)
+        file_ = StringIO()
+        file_.name = filename
+        file_.write("test text data")
+        file_.seek(0)
+        return self.upload_document(tender, file_)
 
     def upload_bid_document(self, filepath, tender, bid_id):
-        with open(filepath) as file:
+        with open(filepath) as file_:
             return self._upload_resource_file(
                 self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
-                {"file": file},
+                {"file": file_},
                 headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
             )
 
     def update_bid_document(self, filename, tender, bid_id, document_id):
-        file = StringIO()
-        file.name = filename
-        file.write("fixed text data")
-        file.seek(0)
+        file_ = StringIO()
+        file_.name = filename
+        file_.write("fixed text data")
+        file_.seek(0)
         return self._upload_resource_file(
             self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
-            {"file": file},
+            {"file": file_},
             headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
         )
