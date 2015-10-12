@@ -19,9 +19,9 @@ class InvalidResponse(Exception):
 
 class Client(Resource):
     """docstring for API"""
-    def __init__(self, key, 
-		 host_url="https://api-sandbox.openprocurement.org",
-		 api_version='0.7'):
+    def __init__(self, key,
+                 host_url="https://api-sandbox.openprocurement.org",
+                 api_version='0.7'):
         super(Client, self).__init__(
             host_url,
             filters=[BasicAuth(key, "")]
@@ -43,7 +43,7 @@ class Client(Resource):
 
         return self.request("PATCH", path=path, payload=payload,
                             headers=headers, params_dict=params_dict, **params)
-	
+
     def delete(self, path=None, headers=None,
               ):
         """ HTTP DELETE
@@ -52,7 +52,7 @@ class Client(Resource):
             be added to HTTP request.
         - params: Optionnal parameterss added to the request
         """
-        return self.request("DELETE",  path=path, headers=headers, 
+        return self.request("DELETE",  path=path, headers=headers,
         )
 
     def _update_params(self, params):
@@ -173,7 +173,7 @@ class Client(Resource):
 
         headers.update(self.headers)
         response_item = self.get(parsed_url.path,
-                                 headers=headers, 
+                                 headers=headers,
                                  params_dict=parse_qs(parsed_url.query))
 
         if response_item.status_int == 302:
@@ -237,34 +237,35 @@ class Client(Resource):
             {"file": file},
             headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
-      
+
     def upload_tender_document(self, filename, tender):
-		file = StringIO()
-		file.name = filename
-		file.write("test text data")
-		file.seek(0)
-		return self.upload_document(tender, file)
-      
+        file = StringIO()
+        file.name = filename
+        file.write("test text data")
+        file.seek(0)
+        return self.upload_document(tender, file)
+
     def upload_bid_document(self, filepath, tender, bid_id):
-		with open(filepath) as file:
-			return self._upload_resource_file(
-				self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
-				{"file": file},
-				headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
-			)
+        with open(filepath) as file:
+            return self._upload_resource_file(
+                self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
+                {"file": file},
+                headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            )
+
     def update_bid_document(self, filename, tender, bid_id, document_id):
-		file = StringIO()
-		file.name = filename
-		file.write("fixed text data")
-		file.seek(0)
-		return self._upload_resource_file(
-			self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
-			{"file": file},
-			headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
-			method='put'
+        file = StringIO()
+        file.name = filename
+        file.write("fixed text data")
+        file.seek(0)
+        return self._upload_resource_file(
+            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
+            {"file": file},
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
+            method='put'
         )
 
-	############################################################################
+    ############################################################################
     #             DELETE ITEMS LIST API METHODS
     ############################################################################
 
@@ -277,7 +278,7 @@ class Client(Resource):
         raise InvalidResponse
 
     def delete_bid(self, tender, bid):
-		return self._delete_resource_item(
+        return self._delete_resource_item(
             self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid.data.id,
             headers={'X-Access-Token': getattr(getattr(bid, 'access', ''), 'token', '')}
         )
