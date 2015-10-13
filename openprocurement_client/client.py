@@ -230,7 +230,7 @@ class Client(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
-    def upload_document(self, tender, file_):
+    def upload_document(self, file_, tender):
         return self._upload_resource_file(
             self.prefix_path + '/{}/documents'.format(tender.data.id),
             {"file": file_},
