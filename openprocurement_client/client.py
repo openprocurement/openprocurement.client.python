@@ -77,8 +77,9 @@ class Client(Resource):
     #             GET ITEMS LIST API METHODS
     ############################################################################
 
-    def get_tenders(self, params={}):
+    def get_tenders(self, params={}, feed='changes'):
         #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
+        params['feed'] = feed
         while True:
             try:
                 self._update_params(params)
