@@ -34,7 +34,7 @@ class Client(Resource):
     """docstring for API"""
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
-                 api_version='0.7'):
+                 api_version='0.8'):
         super(Client, self).__init__(
             host_url,
             filters=[BasicAuth(key, "")]
