@@ -1,17 +1,30 @@
 # from gevent import monkey
 # monkey.patch_all()
-from urlparse import urlparse, parse_qs
-from tempfile import NamedTemporaryFile
-from restkit import Resource, BasicAuth
-from munch import munchify
-from simplejson import loads, dumps
 from StringIO import StringIO
+from functools import wraps
 from iso8601 import parse_date
+from munch import munchify
+from restkit import BasicAuth, Resource, request
+from simplejson import dumps, loads
+from tempfile import NamedTemporaryFile
+from urlparse import parse_qs, urlparse
 import sys
-from restkit import request
 
 IGNORE_PARAMS = ('uri', 'path',)
 
+def verify_file(fn):
+    @wraps(fn)
+    def wrapper(self, file_, *args, **kwargs):
+        if isinstance(file_, str):
+            file_ = open(file_, 'rb')
+        if hasattr(file_, 'read'):
+            # A file-like object must have 'read' method
+            return fn(self, file_, *args, **kwargs)
+        else:
+            raise TypeError('Expected either a string '
+                            'containing a path to file or a '
+                            'file-like object, got {}'.format(type(file_)))
+    return wrapper
 
 class InvalidResponse(Exception):
     pass
@@ -19,9 +32,9 @@ class InvalidResponse(Exception):
 
 class Client(Resource):
     """docstring for API"""
-    def __init__(self, key, 
-		 host_url="https://api-sandbox.openprocurement.org",
-		 api_version='0.7'):
+    def __init__(self, key,
+                 host_url="https://api-sandbox.openprocurement.org",
+                 api_version='0.8'):
         super(Client, self).__init__(
             host_url,
             filters=[BasicAuth(key, "")]
@@ -43,7 +56,7 @@ class Client(Resource):
 
         return self.request("PATCH", path=path, payload=payload,
                             headers=headers, params_dict=params_dict, **params)
-	
+
     def delete(self, path=None, headers=None,
               ):
         """ HTTP DELETE
@@ -52,7 +65,7 @@ class Client(Resource):
             be added to HTTP request.
         - params: Optionnal parameterss added to the request
         """
-        return self.request("DELETE",  path=path, headers=headers, 
+        return self.request("DELETE",  path=path, headers=headers,
         )
 
     def _update_params(self, params):
@@ -173,7 +186,7 @@ class Client(Resource):
 
         headers.update(self.headers)
         response_item = self.get(parsed_url.path,
-                                 headers=headers, 
+                                 headers=headers,
                                  params_dict=parse_qs(parsed_url.query))
 
         if response_item.status_int == 302:
@@ -231,40 +244,42 @@ class Client(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
-    def upload_document(self, tender, file):
+    @verify_file
+    def upload_document(self, file_, tender):
         return self._upload_resource_file(
             self.prefix_path + '/{}/documents'.format(tender.data.id),
-            {"file": file},
+            {"file": file_},
             headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
-      
+
     def upload_tender_document(self, filename, tender):
-		file = StringIO()
-		file.name = filename
-		file.write("test text data")
-		file.seek(0)
-		return self.upload_document(tender, file)
-      
-    def upload_bid_document(self, filepath, tender, bid_id):
-		with open(filepath) as file:
-			return self._upload_resource_file(
-				self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
-				{"file": file},
-				headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
-			)
-    def update_bid_document(self, filename, tender, bid_id, document_id):
-		file = StringIO()
-		file.name = filename
-		file.write("fixed text data")
-		file.seek(0)
-		return self._upload_resource_file(
-			self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
-			{"file": file},
-			headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
-			method='put'
+        file_ = StringIO()
+        file_.name = filename
+        file_.write("test text data")
+        file_.seek(0)
+        return self.upload_document(tender, file_)
+
+    @verify_file
+    def upload_bid_document(self, file_, tender, bid_id):
+        return self._upload_resource_file(
+            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
+            {"file": file_},
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-	############################################################################
+    def update_bid_document(self, filename, tender, bid_id, document_id):
+        file_ = StringIO()
+        file_.name = filename
+        file_.write("fixed text data")
+        file_.seek(0)
+        return self._upload_resource_file(
+            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
+            {"file": file_},
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
+            method='put'
+        )
+
+    ############################################################################
     #             DELETE ITEMS LIST API METHODS
     ############################################################################
 
@@ -277,7 +292,7 @@ class Client(Resource):
         raise InvalidResponse
 
     def delete_bid(self, tender, bid):
-		return self._delete_resource_item(
+        return self._delete_resource_item(
             self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid.data.id,
             headers={'X-Access-Token': getattr(getattr(bid, 'access', ''), 'token', '')}
         )
