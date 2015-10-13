@@ -1,6 +1,7 @@
 # from gevent import monkey
 # monkey.patch_all()
 from StringIO import StringIO
+from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
 from restkit import BasicAuth, Resource, request
@@ -11,6 +12,19 @@ import sys
 
 IGNORE_PARAMS = ('uri', 'path',)
 
+def verify_file(fn):
+    @wraps(fn)
+    def wrapper(self, file_, *args, **kwargs):
+        if isinstance(file_, str):
+            file_ = open(file_, 'rb')
+        if hasattr(file_, 'read'):
+            # A file-like object must have 'read' method
+            return fn(self, file_, *args, **kwargs)
+        else:
+            raise TypeError('Expected either a string '
+                            'containing a path to file or a '
+                            'file-like object, got {}'.format(type(file_)))
+    return wrapper
 
 class InvalidResponse(Exception):
     pass
@@ -230,6 +244,7 @@ class Client(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @verify_file
     def upload_document(self, file_, tender):
         return self._upload_resource_file(
             self.prefix_path + '/{}/documents'.format(tender.data.id),
@@ -244,13 +259,13 @@ class Client(Resource):
         file_.seek(0)
         return self.upload_document(tender, file_)
 
-    def upload_bid_document(self, filepath, tender, bid_id):
-        with open(filepath) as file_:
-            return self._upload_resource_file(
-                self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
-                {"file": file_},
-                headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
-            )
+    @verify_file
+    def upload_bid_document(self, file_, tender, bid_id):
+        return self._upload_resource_file(
+            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
+            {"file": file_},
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     def update_bid_document(self, filename, tender, bid_id, document_id):
         file_ = StringIO()
