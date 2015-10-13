@@ -1,14 +1,13 @@
 # from gevent import monkey
 # monkey.patch_all()
-from urlparse import urlparse, parse_qs
-from tempfile import NamedTemporaryFile
-from restkit import Resource, BasicAuth
-from munch import munchify
-from simplejson import loads, dumps
 from StringIO import StringIO
 from iso8601 import parse_date
+from munch import munchify
+from restkit import BasicAuth, Resource, request
+from simplejson import dumps, loads
+from tempfile import NamedTemporaryFile
+from urlparse import parse_qs, urlparse
 import sys
-from restkit import request
 
 IGNORE_PARAMS = ('uri', 'path',)
 
