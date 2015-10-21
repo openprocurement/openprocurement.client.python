@@ -43,6 +43,25 @@ class Client(Resource):
         self.params = {"mode": "_all_"}
         self.headers = {"Content-Type": "application/json"}
 
+    def request(self, method, path=None, payload=None, headers=None,
+                params_dict=None, **params):
+        if not headers:
+            headers = {}
+        headers.update(self.headers)
+        try:
+            response = super(Client, self).request(
+                method, path=path, payload=payload, headers=headers,
+                params_dict=params_dict, **params
+            )
+            if 'Set-Cookie' in response.headers:
+                self.headers['Cookie'] = response.headers['Set-Cookie']
+            return response
+        except errors.ResourceNotFound as e:
+            if 'Set-Cookie' in e.response.headers:
+                self.headers['Cookie'] = e.response.headers['Set-Cookie']
+            raise e
+
+
     def patch(self, path=None, payload=None, headers=None,
               params_dict=None, **params):
         """ HTTP PATCH
