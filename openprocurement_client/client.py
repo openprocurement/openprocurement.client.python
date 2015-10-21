@@ -4,7 +4,7 @@ from StringIO import StringIO
 from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
-from restkit import BasicAuth, Resource, request
+from restkit import BasicAuth, Resource, request, errors
 from simplejson import dumps, loads
 from tempfile import NamedTemporaryFile
 from urlparse import parse_qs, urlparse
@@ -79,10 +79,16 @@ class Client(Resource):
 
     def get_tenders(self, params={}):
         #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
-        self._update_params(params)
-        response = self.get(
-            self.prefix_path,
-            params_dict=self.params)
+        while True:
+            try:
+                self._update_params(params)
+                response = self.get(
+                    self.prefix_path,
+                    params_dict=self.params)
+            except errors.ResourceNotFound:
+                del self.params['offset']
+            else:
+                break
         if response.status_int == 200:
             tender_list = munchify(loads(response.body_string()))
             self._update_params(tender_list.next_page)
