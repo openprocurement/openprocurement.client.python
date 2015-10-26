@@ -4,7 +4,7 @@ from StringIO import StringIO
 from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
-from restkit import BasicAuth, Resource, request
+from restkit import BasicAuth, Resource, request, errors
 from simplejson import dumps, loads
 from tempfile import NamedTemporaryFile
 from urlparse import parse_qs, urlparse
@@ -43,6 +43,25 @@ class Client(Resource):
         self.params = {"mode": "_all_"}
         self.headers = {"Content-Type": "application/json"}
 
+    def request(self, method, path=None, payload=None, headers=None,
+                params_dict=None, **params):
+        if not headers:
+            headers = {}
+        headers.update(self.headers)
+        try:
+            response = super(Client, self).request(
+                method, path=path, payload=payload, headers=headers,
+                params_dict=params_dict, **params
+            )
+            if 'Set-Cookie' in response.headers:
+                self.headers['Cookie'] = response.headers['Set-Cookie']
+            return response
+        except errors.ResourceNotFound as e:
+            if 'Set-Cookie' in e.response.headers:
+                self.headers['Cookie'] = e.response.headers['Set-Cookie']
+            raise e
+
+
     def patch(self, path=None, payload=None, headers=None,
               params_dict=None, **params):
         """ HTTP PATCH
@@ -77,12 +96,19 @@ class Client(Resource):
     #             GET ITEMS LIST API METHODS
     ############################################################################
 
-    def get_tenders(self, params={}):
+    def get_tenders(self, params={}, feed='changes'):
         #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
-        self._update_params(params)
-        response = self.get(
-            self.prefix_path,
-            params_dict=self.params)
+        params['feed'] = feed
+        while True:
+            try:
+                self._update_params(params)
+                response = self.get(
+                    self.prefix_path,
+                    params_dict=self.params)
+            except errors.ResourceNotFound:
+                del self.params['offset']
+            else:
+                break
         if response.status_int == 200:
             tender_list = munchify(loads(response.body_string()))
             self._update_params(tender_list.next_page)
