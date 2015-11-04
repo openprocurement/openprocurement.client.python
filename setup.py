@@ -27,6 +27,7 @@ setup(name='openprocurement_client',
           'restkit',
           'munch',
           'simplejson',
+          'retrying'
           # -*- Extra requirements: -*-
       ],
       entry_points="""

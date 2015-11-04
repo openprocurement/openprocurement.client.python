@@ -9,6 +9,7 @@ from simplejson import dumps, loads
 from tempfile import NamedTemporaryFile
 from urlparse import parse_qs, urlparse
 import sys
+from retrying import retry
 
 IGNORE_PARAMS = ('uri', 'path',)
 
@@ -96,23 +97,24 @@ class Client(Resource):
     #             GET ITEMS LIST API METHODS
     ############################################################################
 
+    @retry(stop_max_attempt_number=5)
     def get_tenders(self, params={}, feed='changes'):
         #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
         params['feed'] = feed
-        while True:
-            try:
-                self._update_params(params)
-                response = self.get(
-                    self.prefix_path,
-                    params_dict=self.params)
-            except errors.ResourceNotFound:
-                del self.params['offset']
-            else:
-                break
-        if response.status_int == 200:
-            tender_list = munchify(loads(response.body_string()))
-            self._update_params(tender_list.next_page)
-            return tender_list.data
+        try:
+            self._update_params(params)
+            response = self.get(
+                self.prefix_path,
+                params_dict=self.params)
+            if response.status_int == 200:
+                tender_list = munchify(loads(response.body_string()))
+                self._update_params(tender_list.next_page)
+                return tender_list.data
+
+        except errors.ResourceNotFound as e:
+            del self.params['offset']
+            raise
+
         raise InvalidResponse
 
     def get_latest_tenders(self, date, tenderID):
