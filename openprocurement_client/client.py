@@ -4,12 +4,11 @@ from StringIO import StringIO
 from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
-from restkit import BasicAuth, Resource, request, errors
+from restkit import BasicAuth, errors, request, Resource
 from retrying import retry
 from simplejson import dumps, loads
-from tempfile import NamedTemporaryFile
+from StringIO import StringIO
 from urlparse import parse_qs, urlparse
-import sys
 
 IGNORE_PARAMS = ('uri', 'path',)
 
