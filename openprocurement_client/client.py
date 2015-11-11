@@ -1,6 +1,3 @@
-# from gevent import monkey
-# monkey.patch_all()
-from StringIO import StringIO
 from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
@@ -97,7 +94,6 @@ class Client(Resource):
 
     @retry(stop_max_attempt_number=5)
     def get_tenders(self, params={}, feed='changes'):
-        #import pdb; pdb.Pdb(stdout=sys.__stdout__).set_trace()
         params['feed'] = feed
         try:
             self._update_params(params)
