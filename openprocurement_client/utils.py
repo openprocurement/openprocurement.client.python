@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from openprocurement_client.client import Client
-import logging
 from time import sleep
+import logging
 logger = logging.getLogger()
 
 

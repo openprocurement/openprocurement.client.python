@@ -1,18 +1,20 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 import os
 
-version = '1.0.a1'
+version = '1.0a2'
 
 setup(name='openprocurement_client',
       version=version,
       description="",
-      long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      long_description="{0}\n{1}".format(
+          open("README.txt").read(),
+          open(os.path.join("docs", "HISTORY.txt")).read()
+      ),
       # Get more strings from
       # http://pypi.python.org/pypi?:action=list_classifiers
       classifiers=[
-        "Programming Language :: Python",
-        ],
+          "Programming Language :: Python",
+      ],
       keywords='',
       author='',
       author_email='',
