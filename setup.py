@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import os
 
-version = '1.0.a1'
+version = '1.0a2'
 
 setup(name='openprocurement_client',
       version=version,
