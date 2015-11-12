@@ -109,7 +109,7 @@ class Client(Resource):
                 self._update_params(tender_list.next_page)
                 return tender_list.data
 
-        except errors.ResourceNotFound as e:
+        except errors.ResourceNotFound:
             del self.params['offset']
             raise
 
