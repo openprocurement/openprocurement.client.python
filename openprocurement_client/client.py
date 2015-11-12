@@ -1,15 +1,16 @@
 # from gevent import monkey
 # monkey.patch_all()
 from StringIO import StringIO
+from copy import deepcopy
 from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
 from restkit import BasicAuth, Resource, request, errors
+from retrying import retry
 from simplejson import dumps, loads
 from tempfile import NamedTemporaryFile
 from urlparse import parse_qs, urlparse
 import sys
-from retrying import retry
 
 IGNORE_PARAMS = ('uri', 'path',)
 
@@ -44,14 +45,13 @@ class Client(Resource):
         self.params = {"mode": "_all_"}
         self.headers = {"Content-Type": "application/json"}
 
-    def request(self, method, path=None, payload=None, headers=None,
+    def request(self, method, path=None, payload=None, headers={},
                 params_dict=None, **params):
-        if not headers:
-            headers = {}
-        headers.update(self.headers)
+        _headers = deepcopy(self.headers)
+        _headers.update(headers)
         try:
             response = super(Client, self).request(
-                method, path=path, payload=payload, headers=headers,
+                method, path=path, payload=payload, headers=_headers,
                 params_dict=params_dict, **params
             )
             if 'Set-Cookie' in response.headers:
