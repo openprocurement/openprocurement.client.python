@@ -27,6 +27,10 @@ class InvalidResponse(Exception):
     pass
 
 
+class NoToken(Exception):
+    pass
+
+
 class Client(Resource):
     """docstring for API"""
     def __init__(self, key,
