@@ -7,7 +7,8 @@ from simplejson import dumps, loads
 from StringIO import StringIO
 from urlparse import parse_qs, urlparse
 
-IGNORE_PARAMS = ('uri', 'path',)
+IGNORE_PARAMS = ('uri', 'path')
+
 
 def verify_file(fn):
     @wraps(fn)
@@ -22,6 +23,7 @@ def verify_file(fn):
                             'containing a path to file or a '
                             'file-like object, got {}'.format(type(file_)))
     return wrapper
+
 
 class InvalidResponse(Exception):
     pass
@@ -61,7 +63,6 @@ class Client(Resource):
                 self.headers['Cookie'] = e.response.headers['Set-Cookie']
             raise e
 
-
     def patch(self, path=None, payload=None, headers=None,
               params_dict=None, **params):
         """ HTTP PATCH
@@ -76,16 +77,14 @@ class Client(Resource):
         return self.request("PATCH", path=path, payload=payload,
                             headers=headers, params_dict=params_dict, **params)
 
-    def delete(self, path=None, headers=None,
-              ):
+    def delete(self, path=None, headers=None):
         """ HTTP DELETE
         - path: string  additionnal path to the uri
         - headers: dict, optionnal headers that will
             be added to HTTP request.
         - params: Optionnal parameterss added to the request
         """
-        return self.request("DELETE",  path=path, headers=headers,
-        )
+        return self.request("DELETE", path=path, headers=headers)
 
     def _update_params(self, params):
         for key in params:
@@ -115,13 +114,16 @@ class Client(Resource):
 
         raise InvalidResponse
 
-    def get_latest_tenders(self, date, tenderID):
-        iso_dt=parse_date(date)
+    def get_latest_tenders(self, date, tender_id):
+        iso_dt = parse_date(date)
         dt = iso_dt.strftime("%Y-%m-%d")
         tm = iso_dt.strftime("%H:%M:%S")
         response = self._get_resource_item(
-            self.prefix_path + '?offset={}T{}&opt_fields=tenderID&mode=test'.format(dt, tm),
-
+            '{}?offset={}T{}&opt_fields=tender_id&mode=test'.format(
+                self.prefix_path,
+                dt,
+                tm
+            )
         )
         if response.status_int == 200:
             tender_list = munchify(loads(response.body_string()))
@@ -131,8 +133,9 @@ class Client(Resource):
 
     def _get_tender_resource_list(self, tender, items_name):
         return self._get_resource_item(
-            self.prefix_path + '/{}/{}'.format(tender.data.id, items_name),
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def get_questions(self, tender, params={}):
@@ -158,9 +161,10 @@ class Client(Resource):
 
     def _create_tender_resource_item(self, tender, item_obj, items_name):
         return self._create_resource_item(
-            self.prefix_path + '/{}/'.format(tender.data.id) + items_name,
+            '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
             item_obj,
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def create_tender(self, tender):
@@ -184,16 +188,20 @@ class Client(Resource):
         raise InvalidResponse
 
     def get_tender(self, id):
-        return self._get_resource_item(self.prefix_path + '/{}'.format(id))
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
     def _get_tender_resource_item(self, tender, item_id, items_name,
                                   access_token=""):
         if access_token:
             headers = {'X-Access-Token': access_token}
         else:
-            headers = {'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers = {'X-Access-Token':
+                       getattr(getattr(tender, 'access', ''), 'token', '')}
         return self._get_resource_item(
-            self.prefix_path + '/{}/{}/{}'.format(tender.data.id, items_name, item_id),
+            '{}/{}/{}/{}'.format(self.prefix_path,
+                                 tender.data.id,
+                                 items_name,
+                                 item_id),
             headers=headers
         )
 
@@ -201,7 +209,8 @@ class Client(Resource):
         return self._get_tender_resource_item(tender, question_id, "questions")
 
     def get_bid(self, tender, bid_id, access_token):
-        return self._get_tender_resource_item(tender, bid_id, "bids", access_token)
+        return self._get_tender_resource_item(tender, bid_id, "bids",
+                                              access_token)
 
     def get_file(self, tender, url, access_token):
         parsed_url = urlparse(url)
@@ -218,7 +227,9 @@ class Client(Resource):
         if response_item.status_int == 302:
             response_obj = request(response_item.headers['location'])
             if response_obj.status_int == 200:
-                return response_obj.body_string(), response_obj.headers['Content-Disposition'].split(";")[1].split('"')[1]
+                return response_obj.body_string(), \
+                    response_obj.headers['Content-Disposition'] \
+                    .split(";")[1].split('"')[1]
         raise InvalidResponse
 
     ###########################################################################
@@ -236,15 +247,19 @@ class Client(Resource):
 
     def _patch_tender_resource_item(self, tender, item_obj, items_name):
         return self._patch_resource_item(
-            self.prefix_path + '/{}/{}/{}'.format(
-                tender.data.id, items_name, item_obj.data.id
-            ), item_obj, headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            '{}/{}/{}/{}'.format(
+                self.prefix_path, tender.data.id, items_name, item_obj.data.id
+            ),
+            item_obj,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def patch_tender(self, tender):
         return self._patch_resource_item(
-            self.prefix_path + '/{}'.format(tender["data"]["id"]), tender,
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            '{}/{}'.format(self.prefix_path, tender["data"]["id"]), tender,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def patch_question(self, tender, question):
@@ -252,6 +267,7 @@ class Client(Resource):
 
     def patch_bid(self, tender, bid):
         return self._patch_tender_resource_item(tender, bid, "bids")
+
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
@@ -273,9 +289,10 @@ class Client(Resource):
     @verify_file
     def upload_document(self, file_, tender):
         return self._upload_resource_file(
-            self.prefix_path + '/{}/documents'.format(tender.data.id),
+            '{}/{}/documents'.format(self.prefix_path, tender.data.id),
             {"file": file_},
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def upload_tender_document(self, filename, tender):
@@ -288,9 +305,14 @@ class Client(Resource):
     @verify_file
     def upload_bid_document(self, file_, tender, bid_id):
         return self._upload_resource_file(
-            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents',
+            '{}/{}/bids/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                bid_id
+            ),
             {"file": file_},
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def update_bid_document(self, filename, tender, bid_id, document_id):
@@ -299,9 +321,15 @@ class Client(Resource):
         file_.write("fixed text data")
         file_.seek(0)
         return self._upload_resource_file(
-            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid_id+'/documents/'+document_id,
+            '{}/{}/bids/{}/documents/{}'.format(
+                self.prefix_path,
+                tender.data.id,
+                bid_id,
+                document_id
+            ),
             {"file": file_},
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
         )
 
@@ -311,15 +339,19 @@ class Client(Resource):
 
     def _delete_resource_item(self, url, headers={}):
 
-        response_item = self.delete(
-            url, headers=headers)
+        response_item = self.delete(url, headers=headers)
         if response_item.status_int == 200:
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
     def delete_bid(self, tender, bid):
         return self._delete_resource_item(
-            self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid.data.id,
-            headers={'X-Access-Token': getattr(getattr(bid, 'access', ''), 'token', '')}
+            '{}/{}/bids/{}'.format(
+                self.prefix_path,
+                tender.data.id,
+                bid.data.id
+            ),
+            headers={'X-Access-Token':
+                     getattr(getattr(bid, 'access', ''), 'token', '')}
         )
     ###########################################################################
