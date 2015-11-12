@@ -46,10 +46,10 @@ class Client(Resource):
         self.params = {"mode": "_all_"}
         self.headers = {"Content-Type": "application/json"}
 
-    def request(self, method, path=None, payload=None, headers={},
+    def request(self, method, path=None, payload=None, headers=None,
                 params_dict=None, **params):
         _headers = dict(self.headers)
-        _headers.update(headers)
+        _headers.update(headers or {})
         try:
             response = super(Client, self).request(
                 method, path=path, payload=payload, headers=_headers,
