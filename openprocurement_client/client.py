@@ -92,9 +92,9 @@ class Client(Resource):
             if key not in IGNORE_PARAMS:
                 self.params[key] = params[key]
 
-    ############################################################################
+    ###########################################################################
     #             GET ITEMS LIST API METHODS
-    ############################################################################
+    ###########################################################################
 
     @retry(stop_max_attempt_number=5)
     def get_tenders(self, params={}, feed='changes'):
@@ -144,9 +144,9 @@ class Client(Resource):
     def get_awards(self, tender, params={}):
         return self._get_tender_resource_list(tender, "awards")
 
-    ############################################################################
+    ###########################################################################
     #             CREATE ITEM API METHODS
-    ############################################################################
+    ###########################################################################
     def _create_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
         response_item = self.post(
@@ -172,9 +172,9 @@ class Client(Resource):
     def create_bid(self, tender, bid):
         return self._create_tender_resource_item(tender, bid, "bids")
 
-    ############################################################################
+    ###########################################################################
     #             GET ITEM API METHODS
-    ############################################################################
+    ###########################################################################
 
     def _get_resource_item(self, url, headers={}):
         headers.update(self.headers)
@@ -221,9 +221,9 @@ class Client(Resource):
                 return response_obj.body_string(), response_obj.headers['Content-Disposition'].split(";")[1].split('"')[1]
         raise InvalidResponse
 
-    ############################################################################
+    ###########################################################################
     #             PATCH ITEM API METHODS
-    ############################################################################
+    ###########################################################################
 
     def _patch_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
@@ -255,9 +255,9 @@ class Client(Resource):
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
-    ############################################################################
+    ###########################################################################
     #             UPLOAD FILE API METHODS
-    ############################################################################
+    ###########################################################################
     def _upload_resource_file(self, url, data, headers={}, method='post'):
         file_headers = {}
         file_headers.update(self.headers)
@@ -305,9 +305,9 @@ class Client(Resource):
             method='put'
         )
 
-    ############################################################################
+    ###########################################################################
     #             DELETE ITEMS LIST API METHODS
-    ############################################################################
+    ###########################################################################
 
     def _delete_resource_item(self, url, headers={}):
 
@@ -322,4 +322,4 @@ class Client(Resource):
             self.prefix_path + '/{}/'.format(tender.data.id)+"bids/"+bid.data.id,
             headers={'X-Access-Token': getattr(getattr(bid, 'access', ''), 'token', '')}
         )
-    ############################################################################
+    ###########################################################################
