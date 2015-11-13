@@ -21,8 +21,8 @@ setup(
 
     author='',
     author_email='',
-    url='http://svn.plone.org/svn/collective/',
-    license='GPL',
+    url='https://github.com/openprocurement/openprocurement.client.python',
+    license='Apache Software License 2.0',
 
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
