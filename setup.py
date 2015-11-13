@@ -35,4 +35,5 @@ setup(name='openprocurement_client',
       entry_points="""
       # -*- Entry points: -*-
       """,
+      test_suite="openprocurement_client.tests"
       )
