@@ -30,6 +30,7 @@ setup(
 
     install_requires=[
         'gevent',
+        'iso8601',
         'munch',
         'restkit',
         'retrying',
