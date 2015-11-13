@@ -1,0 +1,4 @@
+# http://coverage.readthedocs.org/en/latest/config.html
+[run]
+# http://coverage.readthedocs.org/en/latest/branch.html
+branch = True
