@@ -2,12 +2,13 @@ language: python
 python:
   - "2.7"
 install:
-  - pip install --user .
-  - pip install --user coveralls
-script: true
-  - python setup.py build -i
-  - coverage run --source=openprocurement_client setup.py test
-  - python setup.py sdist bdist bdist_egg
+  - pip install .
+  - pip install coveralls
+script:
+  - coverage run -m unittest discover
+  - python setup.py sdist
+  - python setup.py bdist
+  - python setup.py bdist_egg
 after_success:
   - coveralls
 sudo: false
