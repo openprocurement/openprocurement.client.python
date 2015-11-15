@@ -4,6 +4,7 @@ python:
 cache:
   directories:
     - $HOME/.cache/pip
+    - .eggs
 install:
   - pip install .
   - pip install coveralls
