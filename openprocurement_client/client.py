@@ -37,12 +37,13 @@ class Client(Resource):
     """docstring for API"""
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
-                 api_version='0.8'):
+                 api_version='0.8',
+                 resource='tenders'):
         super(Client, self).__init__(
             host_url,
             filters=[BasicAuth(key, "")]
         )
-        self.prefix_path = '/api/{}/tenders'.format(api_version)
+        self.prefix_path = '/api/{}/{}'.format(api_version, resource)
         self.params = {"mode": "_all_"}
         self.headers = {"Content-Type": "application/json"}
         # To perform some operations (e.g. create a tender)
