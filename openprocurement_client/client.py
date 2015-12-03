@@ -152,6 +152,9 @@ class Client(Resource):
     def get_awards(self, tender, params={}):
         return self._get_tender_resource_list(tender, "awards")
 
+    def get_lots(self, tender, params={}):
+        return self._get_tender_resource_list(tender, "lots")
+
     ###########################################################################
     #             CREATE ITEM API METHODS
     ###########################################################################
@@ -180,6 +183,9 @@ class Client(Resource):
 
     def create_bid(self, tender, bid):
         return self._create_tender_resource_item(tender, bid, "bids")
+
+    def create_lot(self, tender, lot):
+        return self._create_tender_resource_item(tender, lot, "lots")
 
     ###########################################################################
     #             GET ITEM API METHODS
@@ -216,6 +222,8 @@ class Client(Resource):
     def get_bid(self, tender, bid_id, access_token):
         return self._get_tender_resource_item(tender, bid_id, "bids",
                                               access_token)
+    def get_lot(self, tender, lot_id):
+        return self._get_tender_resource_item(tender, lot_id, "lots")
 
     def get_file(self, tender, url, access_token):
         parsed_url = urlparse(url)
@@ -275,6 +283,9 @@ class Client(Resource):
 
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
+
+    def patch_lot(self, tender, lot):
+        return self._patch_tender_resource_item(tender, lot, "lots")
 
     ###########################################################################
     #             UPLOAD FILE API METHODS
@@ -358,5 +369,15 @@ class Client(Resource):
             ),
             headers={'X-Access-Token':
                      getattr(getattr(bid, 'access', ''), 'token', '')}
+        )
+    def delete_lot(self, tender, lot):
+        return self._delete_resource_item(
+            '{}/{}/lots/{}'.format(
+                self.prefix_path,
+                tender.data.id,
+                lot.data.id
+            ),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
         )
     ###########################################################################
