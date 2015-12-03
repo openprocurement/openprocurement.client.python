@@ -287,6 +287,8 @@ class Client(Resource):
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
 
+    def patch_document(self, tender, document):
+        return self._patch_tender_resource_item(tender, document, "documents")
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
