@@ -1,4 +1,13 @@
-# http://coverage.readthedocs.org/en/latest/config.html
 [run]
-# http://coverage.readthedocs.org/en/latest/branch.html
-branch = True
+omit =
+    *tests*
+source = openprocurement_client
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    raise InvalidResponse
+    if __name__ == .__main__.:
