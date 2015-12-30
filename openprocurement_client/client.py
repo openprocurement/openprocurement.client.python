@@ -6,6 +6,9 @@ from retrying import retry
 from simplejson import dumps, loads
 from StringIO import StringIO
 from urlparse import parse_qs, urlparse
+import logging
+
+logger = logging.getLogger(__name__)
 
 IGNORE_PARAMS = ('uri', 'path')
 
@@ -47,7 +50,7 @@ class Client(Resource):
             **kwargs
         )
         self.prefix_path = '/api/{}/{}'.format(api_version, resource)
-        if params is None:
+        if not isinstance(params, dict):
             params = {"mode": "_all_"}
         self.params = params
         self.headers = {"Content-Type": "application/json"}
@@ -319,6 +322,7 @@ class Client(Resource):
         )
 
     def upload_tender_document(self, filename, tender):
+        logger.info("upload_tender_document is deprecated. In next update this function will be deleted.")
         file_ = StringIO()
         file_.name = filename
         file_.write("test text data")
@@ -339,10 +343,14 @@ class Client(Resource):
         )
 
     def update_bid_document(self, filename, tender, bid_id, document_id):
-        file_ = StringIO()
-        file_.name = filename
-        file_.write("fixed text data")
-        file_.seek(0)
+        logger.info("update_bid_document is deprecated. In next update this function will takes file instead filename.")
+        if isinstance(filename, basestring):
+            file_ = StringIO()
+            file_.name = filename
+            file_.write("fixed text data")
+            file_.seek(0)
+        else:
+            file_ = filename
         return self._upload_resource_file(
             '{}/{}/bids/{}/documents/{}'.format(
                 self.prefix_path,
@@ -361,28 +369,39 @@ class Client(Resource):
     ###########################################################################
 
     def _delete_resource_item(self, url, headers={}):
-
         response_item = self.delete(url, headers=headers)
         if response_item.status_int == 200:
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
-    def delete_bid(self, tender, bid):
+    def delete_bid(self, tender, bid, access_token=None):
+        logger.info("delete_lot is deprecated. In next update this function will takes bid_id and access_token instead bid.")
+        if isinstance(bid, basestring):
+            bid_id = bid
+            access_token = access_token
+        else:
+            bid_id = bid.data.id
+            access_token = getattr(getattr(bid, 'access', ''), 'token', '')
         return self._delete_resource_item(
             '{}/{}/bids/{}'.format(
                 self.prefix_path,
                 tender.data.id,
-                bid.data.id
+                bid_id
             ),
-            headers={'X-Access-Token':
-                     getattr(getattr(bid, 'access', ''), 'token', '')}
+            headers={'X-Access-Token':access_token}
         )
+
     def delete_lot(self, tender, lot):
+        logger.info("delete_lot is deprecated. In next update this function will takes lot_id instead lot.")
+        if isinstance(lot, basestring):
+            lot_id = lot
+        else:
+            lot_id = lot.data.id
         return self._delete_resource_item(
             '{}/{}/lots/{}'.format(
                 self.prefix_path,
                 tender.data.id,
-                lot.data.id
+                lot_id
             ),
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
