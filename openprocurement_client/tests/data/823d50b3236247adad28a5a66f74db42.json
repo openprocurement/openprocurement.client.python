@@ -1,0 +1,436 @@
+{
+   "data":{
+      "procurementMethod":"open",
+      "status":"complete",
+      "tenderPeriod":{
+         "startDate":"2015-12-30T03:05:00+02:00",
+         "endDate":"2015-12-31T03:05:00+02:00"
+      },
+      "documents":[
+         {
+            "format":"text/plain",
+            "url":"https://lb.api-sandbox.openprocurement.org/api/0.10/tenders/823d50b3236247adad28a5a66f74db42/documents/330822cbbd724671a1d2ff7c3a51dd52?download=5ff4917f29954e5f8dfea1feed8f7455",
+            "title":"test1.txt",
+            "documentOf":"tender",
+            "datePublished":"2015-12-12T03:06:53.209628+02:00",
+            "dateModified":"2015-12-12T03:06:53.209670+02:00",
+            "id":"330822cbbd724671a1d2ff7c3a51dd52"
+         },
+         {
+            "format":"text/plain",
+            "url":"https://lb.api-sandbox.openprocurement.org/api/0.10/tenders/823d50b3236247adad28a5a66f74db42/documents/6badc6f313d2499794bd39a3a7182fc0?download=ab2d7cdd346342a6a0d7b40af39145e2",
+            "title":"test3.txt",
+            "documentOf":"tender",
+            "datePublished":"2015-12-12T03:06:53.724784+02:00",
+            "dateModified":"2015-12-12T03:06:53.724826+02:00",
+            "id":"6badc6f313d2499794bd39a3a7182fc0"
+         },
+         {
+            "format":"text/plain",
+            "url":"https://lb.api-sandbox.openprocurement.org/api/0.10/tenders/823d50b3236247adad28a5a66f74db42/documents/08bcd56de9aa43faa684f8f8e7ab1c98?download=c7afbf3686cc441db7735d5ec284a0de",
+            "title":"test2.txt",
+            "documentOf":"tender",
+            "datePublished":"2015-12-12T03:06:54.280311+02:00",
+            "dateModified":"2015-12-12T03:06:54.280354+02:00",
+            "id":"08bcd56de9aa43faa684f8f8e7ab1c98"
+         }
+      ],
+      "description":"Multilot 4 descr",
+      "title":"Multilot 4 title",
+      "submissionMethodDetails":"quick",
+      "items":[
+         {
+            "relatedLot":"7d774fbf1e86420484c7d1a005cc283f",
+            "description":"itelm descr",
+            "classification":{
+               "scheme":"CPV",
+               "description":"\u041f\u0440\u043e\u0434\u0443\u043a\u0446\u0456\u044f \u0441\u0456\u043b\u044c\u0441\u044c\u043a\u043e\u0433\u043e \u0433\u043e\u0441\u043f\u043e\u0434\u0430\u0440\u0441\u0442\u0432\u0430, \u0444\u0435\u0440\u043c\u0435\u0440\u0441\u0442\u0432\u0430, \u0440\u0438\u0431\u0430\u043b\u044c\u0441\u0442\u0432\u0430, \u043b\u0456\u0441\u043d\u0438\u0446\u0442\u0432\u0430 \u0442\u0430 \u0441\u0443\u043c\u0456\u0436\u043d\u0430 \u043f\u0440\u043e\u0434\u0443\u043a\u0446\u0456\u044f",
+               "id":"03000000-1"
+            },
+            "additionalClassifications":[
+               {
+                  "scheme":"\u0414\u041a\u041f\u041f",
+                  "id":"01",
+                  "description":"\u041f\u0440\u043e\u0434\u0443\u043a\u0446\u0456\u044f \u0441\u0456\u043b\u044c\u0441\u044c\u043a\u043e\u0433\u043e \u0433\u043e\u0441\u043f\u043e\u0434\u0430\u0440\u0441\u0442\u0432\u0430, \u043c\u0438\u0441\u043b\u0438\u0432\u0441\u0442\u0432\u0430 \u0442\u0430 \u043f\u043e\u0432\u2019\u044f\u0437\u0430\u043d\u0456 \u0437 \u0446\u0438\u043c \u043f\u043e\u0441\u043b\u0443\u0433\u0438"
+               }
+            ],
+            "deliveryDate":{
+               "startDate":"2016-06-01T00:00:00+03:00"
+            },
+            "id":"7caa3587fe9041da98f2744ef531d7ce",
+            "unit":{
+               "code":"LO",
+               "name":"\u043b\u043e\u0442"
+            },
+            "quantity":4
+         },
+         {
+            "relatedLot":"7d774fbf1e86420484c7d1a005cc283f",
+            "description":"itelm descr",
+            "classification":{
+               "scheme":"CPV",
+               "description":"\u041f\u0440\u043e\u0434\u0443\u043a\u0446\u0456\u044f \u0441\u0456\u043b\u044c\u0441\u044c\u043a\u043e\u0433\u043e \u0433\u043e\u0441\u043f\u043e\u0434\u0430\u0440\u0441\u0442\u0432\u0430, \u0444\u0435\u0440\u043c\u0435\u0440\u0441\u0442\u0432\u0430, \u0440\u0438\u0431\u0430\u043b\u044c\u0441\u0442\u0432\u0430, \u043b\u0456\u0441\u043d\u0438\u0446\u0442\u0432\u0430 \u0442\u0430 \u0441\u0443\u043c\u0456\u0436\u043d\u0430 \u043f\u0440\u043e\u0434\u0443\u043a\u0446\u0456\u044f",
+               "id":"03000000-1"
+            },
+            "additionalClassifications":[
+               {
+                  "scheme":"\u0414\u041a\u041f\u041f",
+                  "id":"01",
+                  "description":"\u041f\u0440\u043e\u0434\u0443\u043a\u0446\u0456\u044f \u0441\u0456\u043b\u044c\u0441\u044c\u043a\u043e\u0433\u043e \u0433\u043e\u0441\u043f\u043e\u0434\u0430\u0440\u0441\u0442\u0432\u0430, \u043c\u0438\u0441\u043b\u0438\u0432\u0441\u0442\u0432\u0430 \u0442\u0430 \u043f\u043e\u0432\u2019\u044f\u0437\u0430\u043d\u0456 \u0437 \u0446\u0438\u043c \u043f\u043e\u0441\u043b\u0443\u0433\u0438"
+               }
+            ],
+            "deliveryDate":{
+               "startDate":"2016-06-01T00:00:00+03:00"
+            },
+            "id":"563ef5d999f34d36a5a0e4e4d91d7be1",
+            "unit":{
+               "code":"LO",
+               "name":"\u043b\u043e\u0442"
+            },
+            "quantity":4
+         }
+      ],
+      "id":"823d50b3236247adad28a5a66f74db42",
+      "value":{
+         "currency":"UAH",
+         "amount":1000.0,
+         "valueAddedTaxIncluded":false
+      },
+      "submissionMethod":"electronicAuction",
+      "procuringEntity":{
+         "contactPoint":{
+            "telephone":"",
+            "name":"Dmitry",
+            "email":"d.karnaukh+merchant1@smartweb.com.ua"
+         },
+         "identifier":{
+            "scheme":"UA-EDR",
+            "id":"66666692",
+            "legalName":"\u041d\u0410\u041a \"Testov Test\""
+         },
+         "name":"\u041d\u0410\u041a \"Testov Test\"",
+         "address":{
+            "postalCode":"02121",
+            "countryName":"\u0423\u043a\u0440\u0430\u0438\u043d\u0430",
+            "streetAddress":"",
+            "region":"\u041a\u0438\u0435\u0432\u0441\u043a\u0430\u044f \u043e\u0431\u043b\u0430\u0441\u0442\u044c",
+            "locality":"\u041a\u0438\u0435\u0432"
+         }
+      },
+      "minimalStep":{
+         "currency":"UAH",
+         "amount":1.0,
+         "valueAddedTaxIncluded":false
+      },
+      "tenderID":"UA-2015-12-12-000003-1",
+      "questions":[
+         {
+            "description":"Test lot question descr",
+            "title":"Test lot question title",
+            "relatedItem":"563ef5d999f34d36a5a0e4e4d91d7be1",
+            "answer":"Test answer",
+            "date":"2015-12-21T17:31:19.650440+02:00",
+            "id":"615ff8be8eba4a81b300036d6bec991c",
+            "questionOf":"lot"
+         },
+         {
+            "description":"lot 2 question descr?",
+            "title":"lot 2 question title",
+            "relatedItem":"563ef5d999f34d36a5a0e4e4d91d7be1",
+            "answer":"lot 2 answer",
+            "date":"2015-12-21T17:36:30.680576+02:00",
+            "id":"278f269ee482434da6615a21f3deccf0",
+            "questionOf":"lot"
+         },
+         {
+            "description":"lot 3 q descr?",
+            "title":"lot 3 q title",
+            "relatedItem":"563ef5d999f34d36a5a0e4e4d91d7be1",
+            "answer":"lot 3 answer",
+            "date":"2015-12-21T17:57:28.108596+02:00",
+            "id":"da6c1228f81e4c2e8451479d57b685dd",
+            "questionOf":"lot"
+         },
+         {
+            "description":"Tender q 1 descr?",
+            "title":"Tender q 1 title",
+            "relatedItem":"ad681d050d0e42169a80b86d5b591c20",
+            "answer":"Tender q 1 answer",
+            "date":"2015-12-21T17:58:24.489846+02:00",
+            "id":"937b4b9ef3444782b9a3019fcc5c072a",
+            "questionOf":"tender"
+         },
+         {
+            "description":"Item descr?",
+            "title":"Item title?",
+            "relatedItem":"7caa3587fe9041da98f2744ef531d7ce",
+            "answer":"Item answer",
+            "date":"2015-12-21T18:04:35.349936+02:00",
+            "id":"a2d14f4faf9b4ba180b40f08a2be3bd9",
+            "questionOf":"item"
+         }
+      ],
+      "enquiryPeriod":{
+         "startDate":"2015-12-12T03:06:52.664385+02:00",
+         "endDate":"2015-12-30T03:05:00+02:00"
+      },
+      "owner":"prom.ua",
+      "lots":[
+         {
+            "status":"complete",
+            "description":"lot descr1",
+            "title":"lot title",
+            "minimalStep":{
+               "currency":"UAH",
+               "amount":1.0,
+               "valueAddedTaxIncluded":false
+            },
+            "value":{
+               "currency":"UAH",
+               "amount":1000.0,
+               "valueAddedTaxIncluded":false
+            },
+            "id":"7d774fbf1e86420484c7d1a005cc283f"
+         },
+         {
+            "status":"active",
+            "description":"lot descr2",
+            "title":"lot title",
+            "minimalStep":{
+               "currency":"UAH",
+               "amount":1.0,
+               "valueAddedTaxIncluded":false
+            },
+            "value":{
+               "currency":"UAH",
+               "amount":2000.0,
+               "valueAddedTaxIncluded":false
+            },
+            "id":"563ef5d999f34d36a5a0e4e4d91d7be1"
+         }
+      ],
+      "bids":[
+        {
+            "date": "2014-12-16T04:44:23.569815+02:00",
+            "documents": [
+                {
+                    "dateModified": "2014-12-16T04:44:25.010930+02:00",
+                    "datePublished": "2014-12-16T04:44:25.010885+02:00",
+                    "format": "text/plain",
+                    "id": "ff001412c60c4164a0f57101e4eaf8aa",
+                    "title": "Proposal.pdf",
+                    "url": "http://api-sandbox.openprocurement.org/api/0/tenders/6f73bf0f7f734f459f7e37e3787054a0/bids/f7fc1212f9f140bba5c4e3cd4f2b62d9/documents/ff001412c60c4164a0f57101e4eaf8aa?download=4f45bbd414104cd78faf620208efd824"
+                }
+            ],
+            "id": "f7fc1212f9f140bba5c4e3cd4f2b62d9",
+            "lotValues": [
+                {
+                  "value": {"currency": "UAH", "amount": 7750.0, "valueAddedTaxIncluded": true},
+                  "reatedLot": "7d774fbf1e86420484c7d1a005cc283f",
+                  "date": "2015-11-01T12:43:12.482645+02:00"
+                }, {
+                  "value": {"currency": "UAH", "amount": 8125.0, "valueAddedTaxIncluded": true},
+                  "reatedLot": "563ef5d999f34d36a5a0e4e4d91d7be1",
+                  "date": "2015-11-01T12:43:12.482645+02:00"
+                }
+              ],
+            "tenderers": [
+                {
+                    "address": {
+                        "countryName": "Україна",
+                        "locality": "м. Вінниця",
+                        "postalCode": "21100",
+                        "region": "м. Вінниця",
+                        "streetAddress": "вул. Островського, 33"
+                    },
+                    "contactPoint": {
+                        "email": "soleksuk@gmail.com",
+                        "name": "Сергій Олексюк",
+                        "telephone": "+380 (432) 21-69-30"
+                    },
+                    "identifier": {
+                        "id": "13313462",
+                        "legalName": "Державне комунальне підприємство громадського харчування «Школяр»",
+                        "scheme": "UA-EDR",
+                        "uri": "http://sch10.edu.vn.ua/"
+                    },
+                    "name": "ДКП «Школяр»"
+                }
+            ]
+        },
+        {
+            "date": "2014-12-16T04:44:27.976478+02:00",
+            "id": "7ec725815ef448a9b857129024395638",
+            "lotValues": [
+                {
+                  "value": {"currency": "UAH", "amount": 7750.0, "valueAddedTaxIncluded": true},
+                  "reatedLot": "7d774fbf1e86420484c7d1a005cc283f",
+                  "date": "2015-11-01T12:43:12.482645+02:00"
+                }, {
+                  "value": {"currency": "UAH", "amount": 8125.0, "valueAddedTaxIncluded": true},
+                  "reatedLot": "563ef5d999f34d36a5a0e4e4d91d7be1",
+                  "date": "2015-11-01T12:43:12.482645+02:00"
+                }
+              ],
+            "tenderers": [
+                {
+                    "address": {
+                        "countryName": "Україна",
+                        "locality": "м. Вінниця",
+                        "postalCode": "21018",
+                        "region": "м. Вінниця",
+                        "streetAddress": "вул. Юності, 30"
+                    },
+                    "contactPoint": {
+                        "email": "alla.myhailova@i.ua",
+                        "name": "Алла Михайлова",
+                        "telephone": "+380 (432) 460-665"
+                    },
+                    "identifier": {
+                        "id": "13306232",
+                        "legalName": "Державне комунальне підприємство громадського харчування «Меридіан»",
+                        "scheme": "UA-EDR",
+                        "uri": "http://sch10.edu.vn.ua/"
+                    },
+                    "name": "ДКП «Меридіан2»"
+                }
+            ]
+        }
+
+    ],
+    "awards":[
+      {
+         "status":"active",
+         "documents":[
+            {
+               "format":"text/plain",
+               "url":"https://lb.api-sandbox.openprocurement.org/api/0.9/tenders/3216137f17fb452db202daad1f9e73ad/awards/7054491a5e514699a56e44d32e23edf7/documents/c7ac894e4ca34e618e03a02d8799dc69?download=8c4053b0942949f4bd6e998a51e177c5",
+               "title":"2.jpg",
+               "datePublished":"2015-11-13T16:31:03.691781+02:00",
+               "dateModified":"2015-11-13T16:31:03.691829+02:00",
+               "id":"c7ac894e4ca34e618e03a02d8799dc69"
+            }
+         ],
+         "complaintPeriod":{
+            "startDate":"2015-11-13T16:17:00.375880+02:00",
+            "endDate":"2015-11-14T16:31:06.979761+02:00"
+         },
+         "contracts":[
+            {
+               "status":"active",
+               "documents":[
+                  {
+                     "format":"text/plain",
+                     "url":"https://lb.api-sandbox.openprocurement.org/api/0.9/tenders/3216137f17fb452db202daad1f9e73ad/awards/7054491a5e514699a56e44d32e23edf7/contracts/045c478807c04215950b4d74e6861cb1/documents/14dbf158b9ed4a478a59d19c90dbdf5d?download=9d948173e65441409f06e0b81674b39a",
+                     "title":"3.jpg",
+                     "datePublished":"2015-11-13T19:01:16.748785+02:00",
+                     "dateModified":"2015-11-13T19:01:16.748829+02:00",
+                     "id":"14dbf158b9ed4a478a59d19c90dbdf5d"
+                  }
+               ],
+               "awardID":"7054491a5e514699a56e44d32e23edf7",
+               "id":"045c478807c04215950b4d74e6861cb1"
+            }
+         ],
+         "suppliers":[
+            {
+               "contactPoint":{
+                  "telephone":"",
+                  "name":"some6",
+                  "email":"some6@mailinator.com"
+               },
+               "identifier":{
+                  "scheme":"UA-EDR",
+                  "id":"62123463",
+                  "legalName":"some6"
+               },
+               "name":"some6",
+               "address":{
+                  "postalCode":"04119",
+                  "countryName":"\u0423\u043a\u0440\u0430\u0438\u043d\u0430",
+                  "streetAddress":"",
+                  "region":"\u0410\u0420 \u041a\u0440\u044b\u043c",
+                  "locality":"ffff"
+               }
+            }
+         ],
+         "bid_id":"ad9ac917ff0049178acc3613bb14a691",
+         "value":{
+            "currency":"UAH",
+            "amount":300.0,
+            "valueAddedTaxIncluded":false
+         },
+         "date":"2015-11-13T16:17:00.376251+02:00",
+         "id":"7054491a5e514699a56e44d32e23edf7",
+         "lotId": "563ef5d999f34d36a5a0e4e4d91d7be1"
+      },
+      {
+         "status":"active",
+         "documents":[
+            {
+               "format":"text/plain",
+               "url":"https://lb.api-sandbox.openprocurement.org/api/0.9/tenders/3216137f17fb452db202daad1f9e73ad/awards/7054491a5e514699a56e44d32e23edf7/documents/c7ac894e4ca34e618e03a02d8799dc69?download=8c4053b0942949f4bd6e998a51e177c5",
+               "title":"2.jpg",
+               "datePublished":"2015-11-13T16:31:03.691781+02:00",
+               "dateModified":"2015-11-13T16:31:03.691829+02:00",
+               "id":"c7ac894e4ca34e618e03a02d8799dc69"
+            }
+         ],
+         "complaintPeriod":{
+            "startDate":"2015-11-13T16:17:00.375880+02:00",
+            "endDate":"2015-11-14T16:31:06.979761+02:00"
+         },
+         "contracts":[
+            {
+               "status":"active",
+               "documents":[
+                  {
+                     "format":"text/plain",
+                     "url":"https://lb.api-sandbox.openprocurement.org/api/0.9/tenders/3216137f17fb452db202daad1f9e73ad/awards/7054491a5e514699a56e44d32e23edf7/contracts/045c478807c04215950b4d74e6861cb1/documents/14dbf158b9ed4a478a59d19c90dbdf5d?download=9d948173e65441409f06e0b81674b39a",
+                     "title":"3.jpg",
+                     "datePublished":"2015-11-13T19:01:16.748785+02:00",
+                     "dateModified":"2015-11-13T19:01:16.748829+02:00",
+                     "id":"14dbf158b9ed4a478a59d19c90dbdf5d"
+                  }
+               ],
+               "awardID":"7054491a5e514699a56e44d32e23edf7",
+               "id":"045c478807c04215950b4d74e6861cb1"
+            }
+         ],
+         "suppliers":[
+            {
+               "contactPoint":{
+                  "telephone":"",
+                  "name":"some6",
+                  "email":"some6@mailinator.com"
+               },
+               "identifier":{
+                  "scheme":"UA-EDR",
+                  "id":"62123463",
+                  "legalName":"some6"
+               },
+               "name":"some6",
+               "address":{
+                  "postalCode":"04119",
+                  "countryName":"\u0423\u043a\u0440\u0430\u0438\u043d\u0430",
+                  "streetAddress":"",
+                  "region":"\u0410\u0420 \u041a\u0440\u044b\u043c",
+                  "locality":"ffff"
+               }
+            }
+         ],
+         "bid_id":"ad9ac917ff0049178acc3613bb14a691",
+         "value":{
+            "currency":"UAH",
+            "amount":300.0,
+            "valueAddedTaxIncluded":false
+         },
+         "date":"2015-11-13T16:17:00.376251+02:00",
+         "id":"7054491a5e514699a56e44d32e23edf7",
+         "lotId": "7d774fbf1e86420484c7d1a005cc283f"
+      }
+      ],
+      "dateModified":"2015-12-12T03:06:54.370277+02:00",
+      "awardCriteria":"lowestCost"
+   }
+}

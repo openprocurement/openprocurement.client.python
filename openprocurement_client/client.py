@@ -38,13 +38,18 @@ class Client(Resource):
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
                  api_version='0.8',
-                 resource='tenders'):
+                 resource='tenders',
+                 params=None,
+                 **kwargs):
         super(Client, self).__init__(
             host_url,
-            filters=[BasicAuth(key, "")]
+            filters=[BasicAuth(key, "")],
+            **kwargs
         )
         self.prefix_path = '/api/{}/{}'.format(api_version, resource)
-        self.params = {"mode": "_all_"}
+        if params is None:
+            params = {"mode": "_all_"}
+        self.params = params
         self.headers = {"Content-Type": "application/json"}
         # To perform some operations (e.g. create a tender)
         # we first need to obtain a cookie. For that reason,

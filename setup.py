@@ -3,6 +3,9 @@ import os
 
 version = '1.0a3'
 
+tests_require = {
+    'test': 'bottle'
+}
 setup(
     name='openprocurement_client',
     version=version,
@@ -37,6 +40,8 @@ setup(
         'simplejson'
         # -*- Extra requirements: -*-
     ],
+    tests_require=tests_require,
+    extras_require = tests_require,
     entry_points="""
     # -*- Entry points: -*-
     """,
