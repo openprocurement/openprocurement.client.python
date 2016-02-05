@@ -194,6 +194,12 @@ class Client(Resource):
     def create_lot(self, tender, lot):
         return self._create_tender_resource_item(tender, lot, "lots")
 
+    def create_award(self, tender, award):
+        return self._create_tender_resource_item(tender, award, "awards")
+
+    def create_cancellation(self, tender, cancellation):
+        return self._create_tender_resource_item(tender, cancellation, "cancellations")
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
@@ -293,11 +299,30 @@ class Client(Resource):
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
+    def patch_cancellation(self, tender, cancellation):
+        return self._patch_tender_resource_item(tender, cancellation, "cancellations")
+
+    def patch_cancellation_document(self, tender, cancellation_data, cancel_num, doc_num):
+        cancel_num = int(cancel_num)
+        doc_num = int(doc_num)
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, "cancellations", tender['data']['cancellations'][cancel_num]['id'], tender['data']['cancellations'][cancel_num]['documents'][doc_num]['id']
+            ),
+            payload=cancellation_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
 
     def patch_document(self, tender, document):
         return self._patch_tender_resource_item(tender, document, "documents")
+
+    def patch_contract(self, tender, contract):
+        return self._patch_tender_resource_item(tender, contract, "contracts")
+
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
@@ -352,6 +377,34 @@ class Client(Resource):
                      getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
         )
+
+    @verify_file
+    def upload_cancellation_document(self, file_, tender, cancellation_id):
+        return self._upload_resource_file(
+            '{}/{}/cancellations/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                cancellation_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    @verify_file
+    def update_cancellation_document(self, file_, tender, cancellation_id, document_id):
+            return self._upload_resource_file(
+                '{}/{}/cancellations/{}/documents/{}'.format(
+                    self.prefix_path,
+                    tender.data.id,
+                    cancellation_id,
+                    document_id
+                ),
+                data={"file": file_},
+                headers={'X-Access-Token':
+                         getattr(getattr(tender, 'access', ''), 'token', '')},
+                method='put'
+            )
 
     ###########################################################################
     #             DELETE ITEMS LIST API METHODS
