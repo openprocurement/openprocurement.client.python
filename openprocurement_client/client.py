@@ -4,7 +4,6 @@ from munch import munchify
 from restkit import BasicAuth, errors, request, Resource
 from retrying import retry
 from simplejson import dumps, loads
-from StringIO import StringIO
 from urlparse import parse_qs, urlparse
 import logging
 
@@ -320,14 +319,6 @@ class Client(Resource):
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
-
-    def upload_tender_document(self, filename, tender):
-        logger.info("upload_tender_document is deprecated. In next update this function will be deleted.")
-        file_ = StringIO()
-        file_.name = filename
-        file_.write("test text data")
-        file_.seek(0)
-        return self.upload_document(tender, file_)
 
     @verify_file
     def upload_bid_document(self, file_, tender, bid_id):
