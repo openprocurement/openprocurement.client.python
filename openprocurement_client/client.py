@@ -229,6 +229,7 @@ class Client(Resource):
     def get_bid(self, tender, bid_id, access_token):
         return self._get_tender_resource_item(tender, bid_id, "bids",
                                               access_token)
+
     def get_lot(self, tender, lot_id):
         return self._get_tender_resource_item(tender, lot_id, "lots")
 
@@ -268,16 +269,17 @@ class Client(Resource):
     def _patch_tender_resource_item(self, tender, item_obj, items_name):
         return self._patch_resource_item(
             '{}/{}/{}/{}'.format(
-                self.prefix_path, tender.data.id, items_name, item_obj.data.id
+                self.prefix_path, tender.data.id, items_name, item_obj['data']['id']
             ),
-            item_obj,
+            payload=item_obj,
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def patch_tender(self, tender):
         return self._patch_resource_item(
-            '{}/{}'.format(self.prefix_path, tender["data"]["id"]), tender,
+            '{}/{}'.format(self.prefix_path, tender["data"]["id"]),
+            payload=tender,
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -331,7 +333,7 @@ class Client(Resource):
                 tender.data.id,
                 bid_id
             ),
-            {"file": file_},
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -375,7 +377,7 @@ class Client(Resource):
                 tender.data.id,
                 bid_id
             ),
-            headers={'X-Access-Token':access_token}
+            headers={'X-Access-Token': access_token}
         )
 
     def delete_lot(self, tender, lot):
