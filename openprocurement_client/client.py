@@ -314,8 +314,11 @@ class Client(Resource):
     @verify_file
     def upload_document(self, file_, tender):
         return self._upload_resource_file(
-            '{}/{}/documents'.format(self.prefix_path, tender.data.id),
-            {"file": file_},
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id
+            ),
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -333,15 +336,8 @@ class Client(Resource):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    def update_bid_document(self, filename, tender, bid_id, document_id):
-        logger.info("update_bid_document is deprecated. In next update this function will takes file instead filename.")
-        if isinstance(filename, basestring):
-            file_ = StringIO()
-            file_.name = filename
-            file_.write("fixed text data")
-            file_.seek(0)
-        else:
-            file_ = filename
+    @verify_file
+    def update_bid_document(self, file_, tender, bid_id, document_id):
         return self._upload_resource_file(
             '{}/{}/bids/{}/documents/{}'.format(
                 self.prefix_path,
@@ -349,7 +345,7 @@ class Client(Resource):
                 bid_id,
                 document_id
             ),
-            {"file": file_},
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
