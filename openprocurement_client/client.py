@@ -4,7 +4,6 @@ from munch import munchify
 from restkit import BasicAuth, errors, request, Resource
 from retrying import retry
 from simplejson import dumps, loads
-from StringIO import StringIO
 from urlparse import parse_qs, urlparse
 import logging
 
@@ -195,6 +194,12 @@ class Client(Resource):
     def create_lot(self, tender, lot):
         return self._create_tender_resource_item(tender, lot, "lots")
 
+    def create_award(self, tender, award):
+        return self._create_tender_resource_item(tender, award, "awards")
+
+    def create_cancellation(self, tender, cancellation):
+        return self._create_tender_resource_item(tender, cancellation, "cancellations")
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
@@ -230,6 +235,7 @@ class Client(Resource):
     def get_bid(self, tender, bid_id, access_token):
         return self._get_tender_resource_item(tender, bid_id, "bids",
                                               access_token)
+
     def get_lot(self, tender, lot_id):
         return self._get_tender_resource_item(tender, lot_id, "lots")
 
@@ -269,16 +275,17 @@ class Client(Resource):
     def _patch_tender_resource_item(self, tender, item_obj, items_name):
         return self._patch_resource_item(
             '{}/{}/{}/{}'.format(
-                self.prefix_path, tender.data.id, items_name, item_obj.data.id
+                self.prefix_path, tender.data.id, items_name, item_obj['data']['id']
             ),
-            item_obj,
+            payload=item_obj,
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     def patch_tender(self, tender):
         return self._patch_resource_item(
-            '{}/{}'.format(self.prefix_path, tender["data"]["id"]), tender,
+            '{}/{}'.format(self.prefix_path, tender["data"]["id"]),
+            payload=tender,
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -292,11 +299,30 @@ class Client(Resource):
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
+    def patch_cancellation(self, tender, cancellation):
+        return self._patch_tender_resource_item(tender, cancellation, "cancellations")
+
+    def patch_cancellation_document(self, tender, cancellation_data, cancel_num, doc_num):
+        cancel_num = int(cancel_num)
+        doc_num = int(doc_num)
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, "cancellations", tender['data']['cancellations'][cancel_num]['id'], tender['data']['cancellations'][cancel_num]['documents'][doc_num]['id']
+            ),
+            payload=cancellation_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
 
     def patch_document(self, tender, document):
         return self._patch_tender_resource_item(tender, document, "documents")
+
+    def patch_contract(self, tender, contract):
+        return self._patch_tender_resource_item(tender, contract, "contracts")
+
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
@@ -315,19 +341,14 @@ class Client(Resource):
     @verify_file
     def upload_document(self, file_, tender):
         return self._upload_resource_file(
-            '{}/{}/documents'.format(self.prefix_path, tender.data.id),
-            {"file": file_},
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id
+            ),
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
-
-    def upload_tender_document(self, filename, tender):
-        logger.info("upload_tender_document is deprecated. In next update this function will be deleted.")
-        file_ = StringIO()
-        file_.name = filename
-        file_.write("test text data")
-        file_.seek(0)
-        return self.upload_document(tender, file_)
 
     @verify_file
     def upload_bid_document(self, file_, tender, bid_id):
@@ -337,20 +358,13 @@ class Client(Resource):
                 tender.data.id,
                 bid_id
             ),
-            {"file": file_},
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    def update_bid_document(self, filename, tender, bid_id, document_id):
-        logger.info("update_bid_document is deprecated. In next update this function will takes file instead filename.")
-        if isinstance(filename, basestring):
-            file_ = StringIO()
-            file_.name = filename
-            file_.write("fixed text data")
-            file_.seek(0)
-        else:
-            file_ = filename
+    @verify_file
+    def update_bid_document(self, file_, tender, bid_id, document_id):
         return self._upload_resource_file(
             '{}/{}/bids/{}/documents/{}'.format(
                 self.prefix_path,
@@ -358,11 +372,39 @@ class Client(Resource):
                 bid_id,
                 document_id
             ),
-            {"file": file_},
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
         )
+
+    @verify_file
+    def upload_cancellation_document(self, file_, tender, cancellation_id):
+        return self._upload_resource_file(
+            '{}/{}/cancellations/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                cancellation_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    @verify_file
+    def update_cancellation_document(self, file_, tender, cancellation_id, document_id):
+            return self._upload_resource_file(
+                '{}/{}/cancellations/{}/documents/{}'.format(
+                    self.prefix_path,
+                    tender.data.id,
+                    cancellation_id,
+                    document_id
+                ),
+                data={"file": file_},
+                headers={'X-Access-Token':
+                         getattr(getattr(tender, 'access', ''), 'token', '')},
+                method='put'
+            )
 
     ###########################################################################
     #             DELETE ITEMS LIST API METHODS
@@ -388,7 +430,7 @@ class Client(Resource):
                 tender.data.id,
                 bid_id
             ),
-            headers={'X-Access-Token':access_token}
+            headers={'X-Access-Token': access_token}
         )
 
     def delete_lot(self, tender, lot):
