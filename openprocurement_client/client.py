@@ -302,12 +302,10 @@ class Client(Resource):
     def patch_cancellation(self, tender, cancellation):
         return self._patch_tender_resource_item(tender, cancellation, "cancellations")
 
-    def patch_cancellation_document(self, tender, cancellation_data, cancel_num, doc_num):
-        cancel_num = int(cancel_num)
-        doc_num = int(doc_num)
+    def patch_cancellation_document(self, tender, cancellation_data, cancellation_id, cancellation_doc_id):
         return self._patch_resource_item(
             '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, "cancellations", tender['data']['cancellations'][cancel_num]['id'], tender['data']['cancellations'][cancel_num]['documents'][doc_num]['id']
+                self.prefix_path, tender.data.id, "cancellations", cancellation_id, cancellation_doc_id
             ),
             payload=cancellation_data,
             headers={'X-Access-Token':
