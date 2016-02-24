@@ -129,6 +129,19 @@ def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document
                     return dumps({"data": document})
     return location_error(subpage_name)
 
+def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_id):
+    response.status = 200
+    subpage = tender_partition(tender_id, subpage_name)
+    if not subpage:
+        return location_error("tender")
+    for unit in subpage:
+        if unit['id'] == subpage_id:
+            for document in unit['documents']:
+                if document['id'] == document_id:
+                    document.description = request.json['data']['description']
+                    return dumps({"data": document})
+    return location_error(subpage_name)
+
 def get_file(filename):
     redirect("/download/" + filename, code=302)
 
@@ -165,6 +178,7 @@ routs_dict = {
         "tender_subpage_item_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'POST', tender_subpage_item_create),
         "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/documents", 'POST', tender_subpage_document_create),
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/documents/<document_id>", 'PUT', tender_subpage_document_update),
+        "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/documents/<document_id>", 'PATCH', tender_subpage_document_patch),
         "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
         "tender_subpage_item_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'PATCH', tender_subpage_item_patch),
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),

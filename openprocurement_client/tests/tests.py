@@ -28,6 +28,15 @@ TEST_KEYS = munchify({
     "error_id": '111a11a1111111aaa11111a1a1a111a1'
 })
 
+TEST_KEYS_LIMITED = munchify({
+    "tender_id": '668c3156c8cb496fb28359909cde6e96',
+    "cancellation_id": "0dd6f9e8cc4f4d1c9c404d842b56d0d7",
+    "cancellation_document_id": "1afca9faaf2b4f9489ee264b136371c6",
+    "document_id": "330822cbbd724671a1d2ff7c3a51dd52",
+    "contract_id": "c65d3526cdc44f75b2457b4489970a7c",
+    "complaint_id": "22b086222a7a4bc6a9cc8adeaa91a57f",
+    "complaint_document_id": "129f4013b33a45b8bc70699a62a81499"
+})
 
 class ViewerTestCase(unittest.TestCase):
     """"""
@@ -90,6 +99,9 @@ class UserTestCase(unittest.TestCase):
         with open(ROOT + TEST_KEYS.empty_tender + '.json') as tender:
             self.empty_tender = munchify(load(tender))
             self.empty_tender.update({'access':{"token": API_KEY}})
+        with open(ROOT + TEST_KEYS_LIMITED.tender_id + '.json') as tender:
+            self.limited_tender = munchify(load(tender))
+            self.limited_tender.update({'access':{"token": API_KEY}})
 
     def tearDown(self):
         self.server.stop()
@@ -142,6 +154,21 @@ class UserTestCase(unittest.TestCase):
         setup_routing(self.app, routs=["tender_subpage_item_create"])
         lot = munchify({'data': 'lot'})
         self.assertEqual(self.client.create_lot(self.tender, lot), lot)
+
+    def test_create_award(self):
+        setup_routing(self.app, routs=["tender_subpage_item_create"])
+        award = munchify({'data': 'award'})
+        self.assertEqual(self.client.create_award(self.limited_tender, award), award)
+
+    def test_create_cancellation(self):
+        setup_routing(self.app, routs=["tender_subpage_item_create"])
+        cancellation = munchify({'data': 'cancellation'})
+        self.assertEqual(self.client.create_cancellation(self.limited_tender, cancellation), cancellation)
+
+    def test_create_complaint(self):
+        setup_routing(self.app, routs=["tender_subpage_item_create"])
+        complaint = munchify({'data': 'complaint'})
+        self.assertEqual(self.client.create_complaint(self.limited_tender, complaint), complaint)
 
     ###########################################################################
     #             GET ITEM TEST
@@ -220,6 +247,27 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(patched_award.data.id, award.data.id)
         self.assertEqual(patched_award.data.description, award.data.description)
 
+    def test_patch_cancellation(self):
+        setup_routing(self.app, routs=["tender_subpage_item_patch"])
+        cancellation = munchify({"data": {"id": TEST_KEYS_LIMITED.cancellation_id, "description": "test_patch_cancellation"}})
+        patched_cancellation =self.client.patch_cancellation(self.limited_tender, cancellation)
+        self.assertEqual(patched_cancellation.data.id, cancellation.data.id)
+        self.assertEqual(patched_cancellation.data.description, cancellation.data.description)
+
+    def test_patch_cancellation_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_patch"])
+        cancellation_document = munchify({"data": {"id": TEST_KEYS_LIMITED.cancellation_document_id, "description": "test_patch_cancellation_document"}})
+        patched_cancellation_document =self.client.patch_cancellation_document(self.limited_tender, cancellation_document, TEST_KEYS_LIMITED.cancellation_id, TEST_KEYS_LIMITED.cancellation_document_id)
+        self.assertEqual(patched_cancellation_document.data.id, cancellation_document.data.id)
+        self.assertEqual(patched_cancellation_document.data.description, cancellation_document.data.description)
+
+    def test_patch_complaint(self):
+        setup_routing(self.app, routs=["tender_subpage_item_patch"])
+        complaint = munchify({"data": {"id": TEST_KEYS_LIMITED.complaint_id, "description": "test_patch_complaint"}})
+        patched_complaint =self.client.patch_complaint(self.limited_tender, complaint)
+        self.assertEqual(patched_complaint.data.id, complaint.data.id)
+        self.assertEqual(patched_complaint.data.description, complaint.data.description)
+
     def test_patch_lot(self):
         setup_routing(self.app, routs=["tender_subpage_item_patch"])
         lot = munchify({"data": {"id": TEST_KEYS.lot_id, "description": "test_patch_lot"}})
@@ -233,6 +281,13 @@ class UserTestCase(unittest.TestCase):
         patched_document = self.client.patch_document(self.tender, document)
         self.assertEqual(patched_document.data.id, document.data.id)
         self.assertEqual(patched_document.data.title, document.data.title)
+
+    def test_patch_contract(self):
+        setup_routing(self.app, routs=["tender_subpage_item_patch"])
+        contract = munchify({"data": {"id": TEST_KEYS_LIMITED.contract_id, "title": "test_patch_contract.txt"}})
+        patched_contract = self.client.patch_contract(self.limited_tender, contract)
+        self.assertEqual(patched_contract.data.id, contract.data.id)
+        self.assertEqual(patched_contract.data.title, contract.data.title)
 
     def test_patch_location_error(self):
         setup_routing(self.app, routs=["tender_subpage_item_patch"])
@@ -304,6 +359,29 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
         file_.close()
 
+    def test_upload_cancellation_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_cancellation_document(file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
+    def test_upload_complaint_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_complaint_document(file_, self.limited_tender, TEST_KEYS_LIMITED.complaint_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
+
     def test_upload_document_type_error(self):
         setup_routing(self.app, routs=["tender_document_create"])
         self.assertRaises(TypeError,self.client.upload_document, (object, self.tender))
@@ -319,12 +397,20 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(doc.data.id, TEST_KEYS.bid_document_id)
         file_.close()
 
-
+    def test_update_cancellation_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_update"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.update_cancellation_document(file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id, TEST_KEYS_LIMITED.cancellation_document_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS_LIMITED.cancellation_document_id)
+        file_.close()
 
     ###########################################################################
     #             DELETE ITEMS LIST TEST
     ###########################################################################
-
 
     def test_delete_bid(self):
         setup_routing(self.app, routs=["tender_subpage_item_delete"])
