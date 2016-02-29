@@ -200,6 +200,9 @@ class Client(Resource):
     def create_cancellation(self, tender, cancellation):
         return self._create_tender_resource_item(tender, cancellation, "cancellations")
 
+    def create_complaint(self, tender, complaint):
+        return self._create_tender_resource_item(tender, complaint, "complaints")
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
@@ -312,6 +315,9 @@ class Client(Resource):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
+    def patch_complaint(self, tender, complaint):
+        return self._patch_tender_resource_item(tender, complaint, "complaints")
+
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
 
@@ -403,6 +409,19 @@ class Client(Resource):
                          getattr(getattr(tender, 'access', ''), 'token', '')},
                 method='put'
             )
+
+    @verify_file
+    def upload_complaint_document(self, file_, tender, complaint_id):
+        return self._upload_resource_file(
+            '{}/{}/complaints/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                complaint_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     ###########################################################################
     #             DELETE ITEMS LIST API METHODS
