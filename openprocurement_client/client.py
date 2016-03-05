@@ -296,6 +296,16 @@ class Client(Resource):
     def patch_bid(self, tender, bid):
         return self._patch_tender_resource_item(tender, bid, "bids")
 
+    def patch_bid_document(self, tender, document_data, bid_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, "bids", bid_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
@@ -319,6 +329,9 @@ class Client(Resource):
 
     def patch_document(self, tender, document):
         return self._patch_tender_resource_item(tender, document, "documents")
+
+    def patch_qualification(self, tender, qualification):
+        return self._patch_tender_resource_item(tender, qualification, "qualifications")
 
     def patch_contract(self, tender, contract):
         return self._patch_tender_resource_item(tender, contract, "contracts")
@@ -351,12 +364,13 @@ class Client(Resource):
         )
 
     @verify_file
-    def upload_bid_document(self, file_, tender, bid_id):
+    def upload_bid_document(self, file_, tender, bid_id, doc_type="documents"):
         return self._upload_resource_file(
-            '{}/{}/bids/{}/documents'.format(
+            '{}/{}/bids/{}/{}'.format(
                 self.prefix_path,
                 tender.data.id,
-                bid_id
+                bid_id,
+                doc_type
             ),
             data={"file": file_},
             headers={'X-Access-Token':
@@ -405,6 +419,19 @@ class Client(Resource):
                          getattr(getattr(tender, 'access', ''), 'token', '')},
                 method='put'
             )
+
+    @verify_file
+    def upload_qualification_document(self, file_, tender, qualification_id):
+        return self._upload_resource_file(
+            '{}/{}/qualifications/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                qualification_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     ###########################################################################
     #             DELETE ITEMS LIST API METHODS
