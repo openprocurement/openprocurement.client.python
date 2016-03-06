@@ -23,6 +23,7 @@ TEST_KEYS = munchify({
     "bid_id": 'f7fc1212f9f140bba5c4e3cd4f2b62d9',
     "bid_document_id":"ff001412c60c4164a0f57101e4eaf8aa",
     "award_id": '7054491a5e514699a56e44d32e23edf7',
+    "qualification_id": "cec4b82d2708465291fb4af79f8a3e52",
     "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
     "new_document_id": '12345678123456781234567812345678',
     "error_id": '111a11a1111111aaa11111a1a1a111a1'
@@ -220,6 +221,13 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(patched_award.data.id, award.data.id)
         self.assertEqual(patched_award.data.description, award.data.description)
 
+    def test_patch_qualification(self):
+        setup_routing(self.app, routs=["tender_subpage_item_patch"])
+        qualification = munchify({"data": {"id": TEST_KEYS.qualification_id, "description": "test_patch_qualification"}})
+        patched_qualification = self.client.patch_qualification(self.tender, qualification)
+        self.assertEqual(patched_qualification.data.id, qualification.data.id)
+        self.assertEqual(patched_qualification.data.description, qualification.data.description)
+
     def test_patch_lot(self):
         setup_routing(self.app, routs=["tender_subpage_item_patch"])
         lot = munchify({"data": {"id": TEST_KEYS.lot_id, "description": "test_patch_lot"}})
@@ -247,6 +255,15 @@ class UserTestCase(unittest.TestCase):
                          munchify(loads(location_error('lots'))))
         self.assertEqual(self.client.patch_document(self.empty_tender, error),
                          munchify(loads(location_error('documents'))))
+        self.assertEqual(self.client.patch_qualification(self.empty_tender, error),
+                         munchify(loads(location_error('qualifications'))))
+
+    def test_patch_bid_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_patch"])
+        document = munchify({"data": {"id": TEST_KEYS.document_id, "title": "test_patch_document.txt"}})
+        patched_document = self.client.patch_bid_document(self.tender, document, TEST_KEYS.bid_id, TEST_KEYS.bid_document_id)
+        self.assertEqual(patched_document.data.id, document.data.id)
+        self.assertEqual(patched_document.data.title, document.data.title)
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
@@ -293,6 +310,17 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(doc.data.title, file_name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
 
+    def test_upload_qualification_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload qualification document text data")
+        file_.seek(0)
+        doc = self.client.upload_qualification_document(file_, self.tender, TEST_KEYS.qualification_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
     def test_upload_bid_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
         file_ = StringIO()
@@ -300,6 +328,42 @@ class UserTestCase(unittest.TestCase):
         file_.write("test upload tender document text data")
         file_.seek(0)
         doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
+    def test_upload_bid_financial_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        document_type = "financial_documents"
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id, document_type)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
+    def test_upload_bid_qualification_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        document_type = "qualificationDocuments"
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id, document_type)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
+    def test_upload_bid_eligibility_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        document_type = "eligibility_documents"
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id, document_type)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
         file_.close()

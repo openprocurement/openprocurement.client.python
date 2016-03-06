@@ -6,6 +6,35 @@
          "startDate":"2015-12-30T03:05:00+02:00",
          "endDate":"2015-12-31T03:05:00+02:00"
       },
+      "qualifications": [
+      {
+        "status": "pending",
+        "id": "cec4b82d2708465291fb4af79f8a3e52",
+        "bidID": "c41709780fa8434399c62a1facf369cb",
+        "documents": [
+          {
+            "confidentiality": "public",
+            "language": "uk",
+            "title": "Proposal.pdf",
+            "url": "http://api-sandbox.openprocurement.org/api/0.12/tenders/e3e16eb63b584378b75d9eb01dc2f8b9/bids/c41709780fa8434399c62a1facf369cb/documents/a05aff4e91c942bbad7e49e551399ec7?download=d0984048f149465699fd402bfe20881c",
+            "format": "application/pdf",
+            "documentOf": "tender",
+            "datePublished": "2016-02-24T14:13:36.127526+02:00",
+            "id": "a05aff4e91c942bbad7e49e551399ec7",
+            "dateModified": "2016-02-24T14:13:36.127580+02:00"
+          }]
+      },
+      {
+        "status": "pending",
+        "id": "9d562bbbf05e44f8a6a1f07ddb0415b1",
+        "bidID": "dda102997a4d4d5d8b5dac6ce2225e1c"
+      },
+      {
+        "status": "pending",
+        "id": "36ac59607c434c8198730cc372672c8c",
+        "bidID": "6e0d218c8e964b42ac4a8ca086c100f9"
+      }
+    ],
       "documents":[
          {
             "format":"text/plain",
