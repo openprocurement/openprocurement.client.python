@@ -448,6 +448,17 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
         file_.close()
 
+    def test_upload_award_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_award_document.txt'
+        file_.write("test upload award document text data")
+        file_.seek(0)
+        doc = self.client.upload_award_document(file_, self.tender, TEST_KEYS.award_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
     def test_upload_document_type_error(self):
         setup_routing(self.app, routs=["tender_document_create"])
         self.assertRaises(TypeError,self.client.upload_document, (object, self.tender))
