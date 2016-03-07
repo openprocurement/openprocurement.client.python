@@ -449,6 +449,19 @@ class Client(Resource):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
+    @verify_file
+    def upload_award_document(self, file_, tender, award_id):
+        return self._upload_resource_file(
+            '{}/{}/awards/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                award_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     ###########################################################################
     #             DELETE ITEMS LIST API METHODS
     ###########################################################################
