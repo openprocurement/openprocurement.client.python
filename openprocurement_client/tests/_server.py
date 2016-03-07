@@ -129,6 +129,7 @@ def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document
                     return dumps({"data": document})
     return location_error(subpage_name)
 
+
 def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
     subpage = tender_partition(tender_id, subpage_name)

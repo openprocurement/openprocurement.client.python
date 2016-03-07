@@ -200,6 +200,9 @@ class Client(Resource):
     def create_cancellation(self, tender, cancellation):
         return self._create_tender_resource_item(tender, cancellation, "cancellations")
 
+    def create_complaint(self, tender, complaint):
+        return self._create_tender_resource_item(tender, complaint, "complaints")
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
@@ -312,17 +315,18 @@ class Client(Resource):
     def patch_cancellation(self, tender, cancellation):
         return self._patch_tender_resource_item(tender, cancellation, "cancellations")
 
-    def patch_cancellation_document(self, tender, cancellation_data, cancel_num, doc_num):
-        cancel_num = int(cancel_num)
-        doc_num = int(doc_num)
+    def patch_cancellation_document(self, tender, cancellation, cancellation_id, cancellation_doc_id):
         return self._patch_resource_item(
             '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, "cancellations", tender['data']['cancellations'][cancel_num]['id'], tender['data']['cancellations'][cancel_num]['documents'][doc_num]['id']
+                self.prefix_path, tender.data.id, "cancellations", cancellation_id, cancellation_doc_id
             ),
-            payload=cancellation_data,
+            payload=cancellation,
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
+
+    def patch_complaint(self, tender, complaint):
+        return self._patch_tender_resource_item(tender, complaint, "complaints")
 
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
@@ -419,6 +423,18 @@ class Client(Resource):
                          getattr(getattr(tender, 'access', ''), 'token', '')},
                 method='put'
             )
+
+    @verify_file
+    def upload_complaint_document(self, file_, tender, complaint_id):
+        return self._upload_resource_file(
+            '{}/{}/complaints/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                complaint_id),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     @verify_file
     def upload_qualification_document(self, file_, tender, qualification_id):
