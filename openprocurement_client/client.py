@@ -382,12 +382,13 @@ class Client(Resource):
         )
 
     @verify_file
-    def update_bid_document(self, file_, tender, bid_id, document_id):
+    def update_bid_document(self, file_, tender, bid_id, document_id, doc_type="documents"):
         return self._upload_resource_file(
-            '{}/{}/bids/{}/documents/{}'.format(
+            '{}/{}/bids/{}/{}/{}'.format(
                 self.prefix_path,
                 tender.data.id,
                 bid_id,
+                doc_type,
                 document_id
             ),
             data={"file": file_},
