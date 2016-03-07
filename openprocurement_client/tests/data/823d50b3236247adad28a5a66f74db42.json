@@ -251,6 +251,45 @@
                     "url": "http://api-sandbox.openprocurement.org/api/0/tenders/6f73bf0f7f734f459f7e37e3787054a0/bids/f7fc1212f9f140bba5c4e3cd4f2b62d9/documents/ff001412c60c4164a0f57101e4eaf8aa?download=4f45bbd414104cd78faf620208efd824"
                 }
             ],
+            "qualificationDocuments": [
+                {
+                    "confidentiality": "public",
+                    "language": "uk",
+                    "title": "qualification_document.pdf",
+                    "url": "http://api-sandbox.openprocurement.org/api/0.12/tenders/e3e16eb63b584378b75d9eb01dc2f8b9/bids/c41709780fa8434399c62a1facf369cb/financial_documents/7519d21b32af432396acd6e2c9e18ee5?download=5db59ae05361427b84c4caddb0b6d92b",
+                    "format": "application/pdf",
+                    "documentOf": "tender",
+                    "datePublished": "2016-02-24T14:13:36.625252+02:00",
+                    "id": "7519d21b32af432396acd6e2c9e18ee5",
+                    "dateModified": "2016-02-24T14:13:36.625290+02:00"
+              }
+            ],
+            "financial_documens": [
+                {
+                    "confidentiality": "public",
+                    "language": "uk",
+                    "title": "financial_doc.pdf",
+                    "url": "http://api-sandbox.openprocurement.org/api/0.12/tenders/e3e16eb63b584378b75d9eb01dc2f8b9/bids/c41709780fa8434399c62a1facf369cb/financial_documents/7519d21b32af432396acd6e2c9e18ee5?download=5db59ae05361427b84c4caddb0b6d92b",
+                    "format": "application/pdf",
+                    "documentOf": "tender",
+                    "datePublished": "2016-02-24T14:13:36.625252+02:00",
+                    "id": "7519d21b32af432396acd6e2c9e18ee5",
+                    "dateModified": "2016-02-24T14:13:36.625290+02:00"
+              }
+            ],
+            "eligibility_documents": [
+                {
+                    "confidentiality": "public",
+                    "language": "uk",
+                    "title": "eligibility_doc.pdf",
+                    "url": "http://api-sandbox.openprocurement.org/api/0.12/tenders/e3e16eb63b584378b75d9eb01dc2f8b9/bids/c41709780fa8434399c62a1facf369cb/financial_documents/7519d21b32af432396acd6e2c9e18ee5?download=5db59ae05361427b84c4caddb0b6d92b",
+                    "format": "application/pdf",
+                    "documentOf": "tender",
+                    "datePublished": "2016-02-24T14:13:36.625252+02:00",
+                    "id": "7519d21b32af432396acd6e2c9e18ee5",
+                    "dateModified": "2016-02-24T14:13:36.625290+02:00"
+              }
+            ],
             "id": "f7fc1212f9f140bba5c4e3cd4f2b62d9",
             "lotValues": [
                 {

@@ -22,6 +22,9 @@ TEST_KEYS = munchify({
     "lot_id": '563ef5d999f34d36a5a0e4e4d91d7be1',
     "bid_id": 'f7fc1212f9f140bba5c4e3cd4f2b62d9',
     "bid_document_id":"ff001412c60c4164a0f57101e4eaf8aa",
+    "bid_qualification_document_id": "7519d21b32af432396acd6e2c9e18ee5",
+    "bid_financial_document_id": "7519d21b32af432396acd6e2c9e18ee5",
+    "bid_eligibility_document_id": "7519d21b32af432396acd6e2c9e18ee5",
     "award_id": '7054491a5e514699a56e44d32e23edf7',
     "qualification_id": "cec4b82d2708465291fb4af79f8a3e52",
     "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
@@ -399,28 +402,6 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
         file_.close()
 
-    def test_upload_cancellation_document(self):
-        setup_routing(self.app, routs=["tender_subpage_document_create"])
-        file_ = StringIO()
-        file_.name = 'test_document.txt'
-        file_.write("test upload tender document text data")
-        file_.seek(0)
-        doc = self.client.upload_cancellation_document(file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id)
-        self.assertEqual(doc.data.title, file_.name)
-        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
-
-    def test_upload_complaint_document(self):
-        setup_routing(self.app, routs=["tender_subpage_document_create"])
-        file_ = StringIO()
-        file_.name = 'test_document.txt'
-        file_.write("test upload tender document text data")
-        file_.seek(0)
-        doc = self.client.upload_complaint_document(file_, self.limited_tender, TEST_KEYS_LIMITED.complaint_id)
-        self.assertEqual(doc.data.title, file_.name)
-        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
-
     def test_upload_bid_qualification_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
         document_type = "qualificationDocuments"
@@ -445,6 +426,28 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
         file_.close()
 
+    def test_upload_cancellation_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_cancellation_document(file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
+    def test_upload_complaint_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.upload_complaint_document(file_, self.limited_tender, TEST_KEYS_LIMITED.complaint_id)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
+        file_.close()
+
     def test_upload_document_type_error(self):
         setup_routing(self.app, routs=["tender_document_create"])
         self.assertRaises(TypeError,self.client.upload_document, (object, self.tender))
@@ -458,6 +461,42 @@ class UserTestCase(unittest.TestCase):
         doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_document_id)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.bid_document_id)
+        file_.close()
+
+    def test_update_bid_qualification_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_update"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender qualification_document text data")
+        file_.seek(0)
+        document_type = "qualificationDocuments"
+        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_qualification_document_id, document_type)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.bid_qualification_document_id)
+        file_.close()
+
+    def test_update_bid_financial_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_update"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender financial_document text data")
+        file_.seek(0)
+        document_type = "financial_documens"
+        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_financial_document_id, document_type)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.bid_financial_document_id)
+        file_.close()
+
+    def test_update_bid_eligibility_document(self):
+        setup_routing(self.app, routs=["tender_subpage_document_update"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender eligibility_document text data")
+        file_.seek(0)
+        document_type = "eligibility_documents"
+        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_eligibility_document_id, document_type)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_KEYS.bid_eligibility_document_id)
         file_.close()
 
     def test_update_cancellation_document(self):
