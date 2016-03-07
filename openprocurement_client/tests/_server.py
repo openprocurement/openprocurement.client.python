@@ -103,42 +103,43 @@ def tender_document_create(tender_id):
     document.id = '12345678123456781234567812345678'
     return dumps({"data": document})
 
-def tender_subpage_document_create(tender_id, subpage_name, subpage_id):
+def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document_type):
     response.status = 201
     subpage = tender_partition(tender_id, subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
         if unit['id'] == subpage_id:
-            document= unit['documents'][0]
+            document= unit["documents"][0]
             document.title = request.files.file.filename
             document.id = '12345678123456781234567812345678'
             return dumps({"data": document})
     return location_error(subpage_name)
 
-def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document_id):
+def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 201
     subpage = tender_partition(tender_id, subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
         if unit['id'] == subpage_id:
-            for document in unit['documents']:
+            for document in unit[document_type]:
                 if document['id'] == document_id:
                     document.title = request.files.file.filename
                     return dumps({"data": document})
     return location_error(subpage_name)
 
-def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_id):
+
+def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
     subpage = tender_partition(tender_id, subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
         if unit['id'] == subpage_id:
-            for document in unit['documents']:
+            for document in unit[document_type]:
                 if document['id'] == document_id:
-                    document.description = request.json['data']['description']
+                    document.update(request.json['data'])
                     return dumps({"data": document})
     return location_error(subpage_name)
 
@@ -176,9 +177,9 @@ routs_dict = {
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
         "tender_subpage_item_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'POST', tender_subpage_item_create),
-        "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/documents", 'POST', tender_subpage_document_create),
-        "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/documents/<document_id>", 'PUT', tender_subpage_document_update),
-        "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/documents/<document_id>", 'PATCH', tender_subpage_document_patch),
+        "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
+        "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
+        "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
         "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
         "tender_subpage_item_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'PATCH', tender_subpage_item_patch),
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
