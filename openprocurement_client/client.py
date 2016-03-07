@@ -382,12 +382,13 @@ class Client(Resource):
         )
 
     @verify_file
-    def update_bid_document(self, file_, tender, bid_id, document_id):
+    def update_bid_document(self, file_, tender, bid_id, document_id, doc_type="documents"):
         return self._upload_resource_file(
-            '{}/{}/bids/{}/documents/{}'.format(
+            '{}/{}/bids/{}/{}/{}'.format(
                 self.prefix_path,
                 tender.data.id,
                 bid_id,
+                doc_type,
                 document_id
             ),
             data={"file": file_},
@@ -443,6 +444,19 @@ class Client(Resource):
                 self.prefix_path,
                 tender.data.id,
                 qualification_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    @verify_file
+    def upload_award_document(self, file_, tender, award_id):
+        return self._upload_resource_file(
+            '{}/{}/awards/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                award_id
             ),
             data={"file": file_},
             headers={'X-Access-Token':
