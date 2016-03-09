@@ -145,14 +145,14 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
-class Client(APIBaseClient):
+class TendersClient(APIBaseClient):
     """client for tenders"""
 
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
                  api_version='0.8',
                  params=None):
-        APIBaseClient.__init__(self, key, host_url,api_version, "tenders", params)
+        super(TendersClient, self).__init__(key, host_url,api_version, "tenders", params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -517,5 +517,5 @@ class Client(APIBaseClient):
         )
     ###########################################################################
 
-class TendersClient(Client):
+class Client(TendersClient):
     """client for tenders for backward compatibility"""

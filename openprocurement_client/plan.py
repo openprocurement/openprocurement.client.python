@@ -15,7 +15,7 @@ class PlansClient(APIBaseClient):
                  host_url="https://api-sandbox.openprocurement.org",
                  api_version='0.8',
                  params=None):
-        APIBaseClient.__init__(self, key, host_url,api_version, "plans", params)
+        super(PlansClient, self).__init__(key, host_url,api_version, "plans", params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
