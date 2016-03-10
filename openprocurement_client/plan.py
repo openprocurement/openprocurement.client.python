@@ -40,7 +40,7 @@ class PlansClient(APIBaseClient):
 
         raise InvalidResponse
 
-    def get_latest_plans(self, date, plan_id):
+    def get_latest_plans(self, date):
         iso_dt = parse_date(date)
         dt = iso_dt.strftime("%Y-%m-%d")
         tm = iso_dt.strftime("%H:%M:%S")
@@ -83,8 +83,8 @@ class PlansClient(APIBaseClient):
     #             GET ITEM API METHODS
     ###########################################################################
 
-    def get_plan(self, id):
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
+    def get_plan(self, plan_id):
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, plan_id))
 
     def _get_plan_resource_item(self, plan, item_id, items_name,
                                   access_token=""):
@@ -92,10 +92,10 @@ class PlansClient(APIBaseClient):
             headers = {'X-Access-Token': access_token}
         else:
             headers = {'X-Access-Token':
-                       getattr(getattr(tender, 'access', ''), 'token', '')}
+                       getattr(getattr(plan, 'access', ''), 'token', '')}
         return self._get_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path,
-                                 tender.data.id,
+                                 plan.data.id,
                                  items_name,
                                  item_id),
             headers=headers
