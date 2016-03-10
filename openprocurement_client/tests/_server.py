@@ -8,6 +8,7 @@ ROOT = os.path.dirname(__file__) + '/data/'
 
 API_PATH = '/api/{0}/{1}'
 TENDERS_PATH = API_PATH.format('0.10', "tenders")
+PLANS_PATH = API_PATH.format('0.10', "plans")
 SPORE_PATH = API_PATH.format('0.10', "spore")
 
 def setup_routing(app, routs=None):
@@ -165,6 +166,46 @@ def tender_partition(tender_id, part="tender"):
 def location_error(name):
     return dumps({"status": "error", "errors": [{"location": "url", "name": name + '_id', "description": "Not Found"}]})
 
+### Plan operations
+#
+
+def plan_offset_error():
+    response.status = 404
+    setup_routing(request.app, routs=["plans"])
+
+def plans_page_get():
+    with open(ROOT + 'plans.json') as json:
+        plans = load(json)
+    return dumps(plans)
+
+def plan_create():
+    response.status = 201
+    return request.json
+
+def plan_page(plan_id):
+    plan = plan_partition(plan_id)
+    if not plan:
+        return location_error("plan")
+    return dumps(plan)
+
+def plan_patch(plan_id):
+    plan = plan_partition(plan_id)
+    if not plan:
+        return location_error("plan")
+    plan.update(request.json['data'])
+    return dumps({"data": plan})
+
+def plan_partition(plan_id, part="plan"):
+    try:
+        with open(ROOT + 'plan_' + plan_id + '.json') as json:
+            plan = load(json)
+            if part=="plan":
+                return plan
+            else:
+                return munchify(plan['data'][part])
+    except (KeyError, IOError):
+        return []
+
 #### Routs
 
 routs_dict = {
@@ -185,4 +226,8 @@ routs_dict = {
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
         "redirect": ('/redirect/<filename:path>', 'GET', get_file),
         "download": ('/download/<filename:path>', 'GET', download_file),
+        "plans": (PLANS_PATH, 'GET', plans_page_get),
+        "plan_create": (PLANS_PATH, 'POST', plan_create),
+        "plan": (PLANS_PATH + "/<plan_id>", 'GET', plan_page),
+        "plan_offset_error": (PLANS_PATH, 'GET', plan_offset_error),
         }

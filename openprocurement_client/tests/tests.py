@@ -6,7 +6,8 @@ from collections import Iterable
 from simplejson import loads, load
 from munch import munchify
 import unittest
-from openprocurement_client import client
+from openprocurement_client import client as tender_client
+from openprocurement_client import plan as plan_client
 from openprocurement_client.tests._server import (tender_partition, location_error,
                                                  setup_routing, ROOT)
 
@@ -42,7 +43,12 @@ TEST_KEYS_LIMITED = munchify({
     "complaint_document_id": "129f4013b33a45b8bc70699a62a81499"
 })
 
-class ViewerTestCase(unittest.TestCase):
+TEST_PLAN_KEYS = munchify({
+    "plan_id": '34cebf0e7b474753854b0ef155b4a0f1',
+    "error_id": 'xxx111'
+})
+
+class ViewerTenderTestCase(unittest.TestCase):
     """"""
     def setUp(self):
         #self._testMethodName
@@ -51,7 +57,7 @@ class ViewerTestCase(unittest.TestCase):
         self.server = WSGIServer(('localhost', 20602), self.app, log=None)
         self.server.start()
 
-        self.client = client.Client('', host_url=HOST_URL, api_version=API_VERSION)
+        self.client = tender_client.TendersClient('', host_url=HOST_URL, api_version=API_VERSION)
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
@@ -84,7 +90,46 @@ class ViewerTestCase(unittest.TestCase):
         self.assertIsInstance(tenders, Iterable)
         self.assertEqual(tenders, self.tenders.data)
 
+class ViewerPlanTestCase(unittest.TestCase):
+    """"""
+    def setUp(self):
+        self.app = Bottle()
+        setup_routing(self.app)
+        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server.start()
 
+        self.client = plan_client.PlansClient('', host_url=HOST_URL, api_version=API_VERSION)
+
+        with open(ROOT + 'plans.json') as plans:
+            self.plans = munchify(load(plans))
+        with open(ROOT + 'plan_' + TEST_PLAN_KEYS.plan_id + '.json') as plan:
+            self.plan = munchify(load(plan))
+
+    def tearDown(self):
+        self.server.stop()
+
+
+    def test_get_plans(self):
+        setup_routing(self.app, routs=["plans"])
+        plans = self.client.get_plans()
+        self.assertIsInstance(plans, Iterable)
+        self.assertEqual(plans, self.plans.data)
+
+    def test_get_plan(self):
+        setup_routing(self.app, routs=["plan"])
+        plan = self.client.get_plan(TEST_PLAN_KEYS.plan_id)
+        self.assertEqual(plan, self.plan)
+
+    def test_get_plan_location_error(self):
+        setup_routing(self.app, routs=["plan"])
+        tender = self.client.get_plan(TEST_PLAN_KEYS.error_id)
+        self.assertEqual(tender, munchify(loads(location_error('plan'))))
+
+    def test_offset_error(self):
+        setup_routing(self.app, routs=['plan_offset_error'])
+        plans = self.client.get_plans()
+        self.assertIsInstance(plans, Iterable)
+        self.assertEqual(plans, self.plans.data)
 
 class UserTestCase(unittest.TestCase):
     """"""
@@ -95,7 +140,7 @@ class UserTestCase(unittest.TestCase):
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', 20602), self.app, log=None)
         self.server.start()
-        self.client = client.Client(API_KEY,  host_url=HOST_URL, api_version=API_VERSION)
+        self.client = tender_client.TendersClient(API_KEY,  host_url=HOST_URL, api_version=API_VERSION)
 
         with open(ROOT + TEST_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
@@ -341,13 +386,13 @@ class UserTestCase(unittest.TestCase):
         setup_routing(self.app, routs=["redirect","download"])
         file_name = 'error.txt'
         url = HOST_URL + '/redirect/' + file_name
-        self.assertRaises(client.InvalidResponse, self.client.get_file, self.tender, url, API_KEY)
+        self.assertRaises(tender_client.InvalidResponse, self.client.get_file, self.tender, url, API_KEY)
 
     def test_get_file_no_token_error(self):
         setup_routing(self.app, routs=["redirect","download"])
         file_name = 'test_document.txt'
         url = HOST_URL + '/redirect/' + file_name
-        self.assertRaises(client.NoToken, self.client.get_file, self.tender, url, '')
+        self.assertRaises(tender_client.NoToken, self.client.get_file, self.tender, url, '')
 
     def test_upload_tender_document(self):
         setup_routing(self.app, routs=["tender_document_create"])

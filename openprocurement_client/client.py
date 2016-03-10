@@ -34,16 +34,15 @@ class InvalidResponse(Exception):
 class NoToken(Exception):
     pass
 
-
-class Client(Resource):
-    """docstring for API"""
+class APIBaseClient(Resource):
+    """base class for API"""
     def __init__(self, key,
-                 host_url="https://api-sandbox.openprocurement.org",
-                 api_version='0.8',
-                 resource='tenders',
+                 host_url,
+                 api_version,
+                 resource,
                  params=None,
                  **kwargs):
-        super(Client, self).__init__(
+        super(APIBaseClient, self).__init__(
             host_url,
             filters=[BasicAuth(key, "")],
             **kwargs
@@ -63,7 +62,7 @@ class Client(Resource):
         _headers = dict(self.headers)
         _headers.update(headers or {})
         try:
-            response = super(Client, self).request(
+            response = super(APIBaseClient, self).request(
                 method, path=path, payload=payload, headers=_headers,
                 params_dict=params_dict, **params
             )
@@ -102,6 +101,58 @@ class Client(Resource):
         for key in params:
             if key not in IGNORE_PARAMS:
                 self.params[key] = params[key]
+
+    def _create_resource_item(self, url, payload, headers={}):
+        headers.update(self.headers)
+        response_item = self.post(
+            url, headers=headers, payload=dumps(payload)
+        )
+        if response_item.status_int == 201:
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
+
+    def _get_resource_item(self, url, headers={}):
+        headers.update(self.headers)
+        response_item = self.get(url, headers=headers)
+        if response_item.status_int == 200:
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
+
+    def _patch_resource_item(self, url, payload, headers={}):
+        headers.update(self.headers)
+        response_item = self.patch(
+            url, headers=headers, payload=dumps(payload)
+        )
+        if response_item.status_int == 200:
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
+
+    def _upload_resource_file(self, url, data, headers={}, method='post'):
+        file_headers = {}
+        file_headers.update(self.headers)
+        file_headers.update(headers)
+        file_headers['Content-Type'] = "multipart/form-data"
+        response_item = getattr(self, method)(
+            url, headers=file_headers, payload=data
+        )
+        if response_item.status_int in (201, 200):
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
+
+    def _delete_resource_item(self, url, headers={}):
+        response_item = self.delete(url, headers=headers)
+        if response_item.status_int == 200:
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
+
+class TendersClient(APIBaseClient):
+    """client for tenders"""
+
+    def __init__(self, key,
+                 host_url="https://api-sandbox.openprocurement.org",
+                 api_version='0.8',
+                 params=None):
+        super(TendersClient, self).__init__(key, host_url,api_version, "tenders", params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -165,14 +216,6 @@ class Client(Resource):
     ###########################################################################
     #             CREATE ITEM API METHODS
     ###########################################################################
-    def _create_resource_item(self, url, payload, headers={}):
-        headers.update(self.headers)
-        response_item = self.post(
-            url, headers=headers, payload=dumps(payload)
-        )
-        if response_item.status_int == 201:
-            return munchify(loads(response_item.body_string()))
-        raise InvalidResponse
 
     def _create_tender_resource_item(self, tender, item_obj, items_name):
         return self._create_resource_item(
@@ -206,13 +249,6 @@ class Client(Resource):
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
-
-    def _get_resource_item(self, url, headers={}):
-        headers.update(self.headers)
-        response_item = self.get(url, headers=headers)
-        if response_item.status_int == 200:
-            return munchify(loads(response_item.body_string()))
-        raise InvalidResponse
 
     def get_tender(self, id):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
@@ -265,15 +301,6 @@ class Client(Resource):
     ###########################################################################
     #             PATCH ITEM API METHODS
     ###########################################################################
-
-    def _patch_resource_item(self, url, payload, headers={}):
-        headers.update(self.headers)
-        response_item = self.patch(
-            url, headers=headers, payload=dumps(payload)
-        )
-        if response_item.status_int == 200:
-            return munchify(loads(response_item.body_string()))
-        raise InvalidResponse
 
     def _patch_tender_resource_item(self, tender, item_obj, items_name):
         return self._patch_resource_item(
@@ -343,17 +370,6 @@ class Client(Resource):
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
-    def _upload_resource_file(self, url, data, headers={}, method='post'):
-        file_headers = {}
-        file_headers.update(self.headers)
-        file_headers.update(headers)
-        file_headers['Content-Type'] = "multipart/form-data"
-        response_item = getattr(self, method)(
-            url, headers=file_headers, payload=data
-        )
-        if response_item.status_int in (201, 200):
-            return munchify(loads(response_item.body_string()))
-        raise InvalidResponse
 
     @verify_file
     def upload_document(self, file_, tender):
@@ -467,12 +483,6 @@ class Client(Resource):
     #             DELETE ITEMS LIST API METHODS
     ###########################################################################
 
-    def _delete_resource_item(self, url, headers={}):
-        response_item = self.delete(url, headers=headers)
-        if response_item.status_int == 200:
-            return munchify(loads(response_item.body_string()))
-        raise InvalidResponse
-
     def delete_bid(self, tender, bid, access_token=None):
         logger.info("delete_lot is deprecated. In next update this function will takes bid_id and access_token instead bid.")
         if isinstance(bid, basestring):
@@ -506,3 +516,6 @@ class Client(Resource):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
     ###########################################################################
+
+class Client(TendersClient):
+    """client for tenders for backward compatibility"""
