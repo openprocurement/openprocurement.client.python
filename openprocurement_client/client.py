@@ -1,11 +1,13 @@
 from functools import wraps
 from iso8601 import parse_date
 from munch import munchify
-from restkit import BasicAuth, errors, request, Resource
+from restkit import BasicAuth, request, Resource
+from restkit.errors import ResourceNotFound
 from retrying import retry
 from simplejson import dumps, loads
 from urlparse import parse_qs, urlparse
 import logging
+from openprocurement_client.exceptions import InvalidResponse, NoToken
 
 logger = logging.getLogger(__name__)
 
@@ -27,19 +29,11 @@ def verify_file(fn):
     return wrapper
 
 
-class InvalidResponse(Exception):
-    pass
-
-
-class NoToken(Exception):
-    pass
-
-
 class Client(Resource):
     """docstring for API"""
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
-                 api_version='0.8',
+                 api_version='2.0',
                  resource='tenders',
                  params=None,
                  **kwargs):
@@ -70,7 +64,7 @@ class Client(Resource):
             if 'Set-Cookie' in response.headers:
                 self.headers['Cookie'] = response.headers['Set-Cookie']
             return response
-        except errors.ResourceNotFound as e:
+        except ResourceNotFound as e:
             if 'Set-Cookie' in e.response.headers:
                 self.headers['Cookie'] = e.response.headers['Set-Cookie']
             raise e
@@ -120,7 +114,7 @@ class Client(Resource):
                 self._update_params(tender_list.next_page)
                 return tender_list.data
 
-        except errors.ResourceNotFound:
+        except ResourceNotFound:
             del self.params['offset']
             raise
 
