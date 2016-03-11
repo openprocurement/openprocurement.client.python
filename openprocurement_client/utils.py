@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openprocurement_client.client import Client
+from openprocurement_client.exceptions import IdNotFound
 from time import sleep
 import logging
 logger = logging.getLogger()
@@ -16,3 +17,19 @@ def tenders_feed(client=Client(''), sleep_time=10):
                 yield tender
         logger.info("Wait to get next batch")
         sleep(sleep_time)
+
+
+def get_tender_id_by_uaid(ua_id, client=Client(''), descending=True):
+    params = {'opt_fields': 'tenderID', 'descending': descending}
+    tender_list = True
+    while tender_list:
+        tender_list = client.get_tenders(params)
+        for tender in tender_list:
+            if tender.tenderID == ua_id:
+                return tender.id
+    raise IdNotFound
+
+
+def get_tender_by_uaid(ua_id, client=Client('')):
+    tender_id = get_tender_id_by_uaid(ua_id, client)
+    return client.get_tender(tender_id)
