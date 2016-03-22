@@ -1,10 +1,12 @@
-from client import APIBaseClient, InvalidResponse
+import logging
+
 from iso8601 import parse_date
 from munch import munchify
-from restkit import BasicAuth, errors, request, Resource
 from retrying import retry
-from simplejson import dumps, loads
-import logging
+from simplejson import loads
+
+from .base import APIBaseClient
+from .exceptions import InvalidResponse, ResourceNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,7 @@ class PlansClient(APIBaseClient):
                 self._update_params(plan_list.next_page)
                 return plan_list.data
 
-        except errors.ResourceNotFound:
+        except ResourceNotFound:
             del self.params['offset']
             raise
 
