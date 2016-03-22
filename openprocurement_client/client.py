@@ -1,8 +1,10 @@
+import logging
 from iso8601 import parse_date
 from restkit import request
 from munch import munchify
 from retrying import retry
 from urlparse import parse_qs, urlparse
+
 try:
     from json import dumps, loads
 except ImportError as e:
@@ -11,6 +13,8 @@ except ImportError as e:
 
 from .base import APIBaseClient, verify_file
 from .exceptions import InvalidResponse, ResourceNotFound, NoToken
+
+logger = logging.getLogger(__name__)
 
 class TendersClient(APIBaseClient):
     """client for tenders"""
