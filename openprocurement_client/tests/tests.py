@@ -7,6 +7,7 @@ from simplejson import loads, load
 from munch import munchify
 import unittest
 from openprocurement_client import client as tender_client
+from openprocurement_client.contract import ContractingClient
 from openprocurement_client import plan as plan_client
 from openprocurement_client.tests._server import (tender_partition, location_error,
                                                  setup_routing, ROOT)
@@ -46,6 +47,12 @@ TEST_KEYS_LIMITED = munchify({
 TEST_PLAN_KEYS = munchify({
     "plan_id": '34cebf0e7b474753854b0ef155b4a0f1',
     "error_id": 'xxx111'
+})
+
+TEST_CONTRACT_KEYS = munchify({
+    "contract_id": '3c0bf3eed3fc4b189103e62b828c599d',
+    "new_document_id": '12345678123456781234567812345678',
+    "error_id": 'zzzxxx111'
 })
 
 class ViewerTenderTestCase(unittest.TestCase):
@@ -589,6 +596,49 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(self.client.delete_lot(self.empty_tender, TEST_KEYS.error_id),
                          munchify(loads(location_error('lots'))))
 
+
+class ContractingUserTestCase(unittest.TestCase):
+    """"""
+    def setUp(self):
+        #self._testMethodName
+        self.app = Bottle()
+
+        setup_routing(self.app)
+        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server.start()
+        self.client = ContractingClient(API_KEY,  host_url=HOST_URL,
+                                        api_version=API_VERSION)
+
+        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
+            self.contract = munchify(load(contract))
+            self.contract.update({'access':{"token": API_KEY}})
+
+    def tearDown(self):
+        self.server.stop()
+
+    ###########################################################################
+    #             CREATE ITEM TEST
+    ###########################################################################
+
+    def test_create_contract(self):
+        setup_routing(self.app, routs=["contract_create"])
+        contract = munchify({'data': 'contract'})
+        self.client.create_contract(contract)
+
+    ###########################################################################
+    #             DOCUMENTS FILE TEST
+    ###########################################################################
+
+    def test_upload_contract_document(self):
+        setup_routing(self.app, routs=["contract_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload contract document text data")
+        file_.seek(0)
+        doc = self.client.upload_document(file_, self.contract)
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
+        file_.close()
 
 
 if __name__ == '__main__':

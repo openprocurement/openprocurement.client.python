@@ -9,6 +9,7 @@ ROOT = os.path.dirname(__file__) + '/data/'
 API_PATH = '/api/{0}/{1}'
 TENDERS_PATH = API_PATH.format('0.10', "tenders")
 PLANS_PATH = API_PATH.format('0.10', "plans")
+CONTRACTS_PATH = API_PATH.format('0.10', "contracts")
 SPORE_PATH = API_PATH.format('0.10', "spore")
 
 def setup_routing(app, routs=None):
@@ -206,6 +207,53 @@ def plan_partition(plan_id, part="plan"):
     except (KeyError, IOError):
         return []
 
+### Contract operations
+#
+
+def contract_offset_error():
+    response.status = 404
+    setup_routing(request.app, routs=["contracts"])
+
+def contracts_page_get():
+    with open(ROOT + 'contracts.json') as json:
+        contracts = load(json)
+    return dumps(contracts)
+
+def contract_create():
+    response.status = 201
+    return request.json
+
+def contract_page(contract_id):
+    contract = contract_partition(contract_id)
+    if not contract:
+        return location_error("contract")
+    return dumps(contract)
+
+def contract_patch(contract_id):
+    contract = contract_partition(contract_id)
+    if not contract:
+        return location_error("contract")
+    contract.update(request.json['data'])
+    return dumps({"data": contract})
+
+def contract_document_create(contract_id):
+    response.status = 201
+    document = contract_partition(contract_id, 'documents')[0]
+    document.title = request.files.file.filename
+    document.id = '12345678123456781234567812345678'
+    return dumps({"data": document})
+
+def contract_partition(contract_id, part="contract"):
+    try:
+        with open(ROOT + 'contract_' + contract_id + '.json') as json:
+            contract = load(json)
+            if part=="contract":
+                return contract
+            else:
+                return munchify(contract['data'][part])
+    except (KeyError, IOError):
+        return []
+
 #### Routs
 
 routs_dict = {
@@ -230,4 +278,9 @@ routs_dict = {
         "plan_create": (PLANS_PATH, 'POST', plan_create),
         "plan": (PLANS_PATH + "/<plan_id>", 'GET', plan_page),
         "plan_offset_error": (PLANS_PATH, 'GET', plan_offset_error),
+        "contracts": (CONTRACTS_PATH, 'GET', contracts_page_get),
+        "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
+        "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
+        "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
+        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
         }
