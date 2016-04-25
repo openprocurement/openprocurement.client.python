@@ -293,6 +293,9 @@ class TendersClient(APIBaseClient):
                     .split(";")[1].split('"')[1]
         raise InvalidResponse
 
+    def extract_credentials(self, id):
+        return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, id))
+
     ###########################################################################
     #             PATCH ITEM API METHODS
     ###########################################################################
