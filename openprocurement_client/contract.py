@@ -1,3 +1,5 @@
+from json import loads
+from munch import munchify
 from client import APIBaseClient, verify_file
 
 
@@ -28,3 +30,14 @@ class ContractingClient(APIBaseClient):
 
     def get_contract(self, id):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
+
+    def get_contracts(self, params={}, feed='changes'):
+        params['feed'] = feed
+        self._update_params(params)
+        response = self.get(
+            self.prefix_path,
+            params_dict=self.params)
+        if response.status_int == 200:
+            data = munchify(loads(response.body_string()))
+            self._update_params(data.next_page)
+            return data.data
