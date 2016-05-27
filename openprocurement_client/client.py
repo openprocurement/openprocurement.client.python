@@ -241,6 +241,14 @@ class TendersClient(APIBaseClient):
     def create_complaint(self, tender, complaint):
         return self._create_tender_resource_item(tender, complaint, "complaints")
 
+    def create_award_complaint(self, tender, complaint, award_id):
+        return self._create_resource_item(
+            '{}/{}/{}'.format(self.prefix_path, tender.data.id, "awards/{0}/complaints".format(award_id)),
+            complaint,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
@@ -353,6 +361,16 @@ class TendersClient(APIBaseClient):
     def patch_complaint(self, tender, complaint):
         return self._patch_tender_resource_item(tender, complaint, "complaints")
 
+    def patch_award_complaint(self, tender, complaint, award_id):
+        return self._patch_resource_item(
+            '{}/{}/awards/{}/complaints/{}'.format(
+                self.prefix_path, tender.data.id, award_id, complaint.data.id
+            ),
+            payload=complaint,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
 
@@ -445,6 +463,19 @@ class TendersClient(APIBaseClient):
             '{}/{}/complaints/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
+                complaint_id),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    @verify_file
+    def upload_award_complaint_document(self, file_, tender, award_id, complaint_id):
+        return self._upload_resource_file(
+            '{}/{}/awards/{}/complaints/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                award_id,
                 complaint_id),
             data={"file": file_},
             headers={'X-Access-Token':
