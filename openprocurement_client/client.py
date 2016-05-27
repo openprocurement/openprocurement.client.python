@@ -97,6 +97,8 @@ class APIBaseClient(Resource):
             if key not in IGNORE_PARAMS:
                 self.params[key] = params[key]
 
+
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _create_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
         response_item = self.post(
@@ -106,6 +108,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _get_resource_item(self, url, headers={}):
         headers.update(self.headers)
         response_item = self.get(url, headers=headers)
@@ -113,6 +116,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _patch_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
         response_item = self.patch(
@@ -122,6 +126,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _upload_resource_file(self, url, data, headers={}, method='post'):
         file_headers = {}
         file_headers.update(self.headers)
@@ -134,6 +139,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _delete_resource_item(self, url, headers={}):
         response_item = self.delete(url, headers=headers)
         if response_item.status_int == 200:
@@ -153,7 +159,6 @@ class TendersClient(APIBaseClient):
     #             GET ITEMS LIST API METHODS
     ###########################################################################
 
-    @retry(stop_max_attempt_number=5)
     def get_tenders(self, params={}, feed='changes'):
         params['feed'] = feed
         try:
@@ -172,7 +177,6 @@ class TendersClient(APIBaseClient):
 
         raise InvalidResponse
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_latest_tenders(self, date, tender_id):
         iso_dt = parse_date(date)
         dt = iso_dt.strftime("%Y-%m-%d")
@@ -197,19 +201,15 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_questions(self, tender, params={}):
         return self._get_tender_resource_list(tender, "questions")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_documents(self, tender, params={}):
         return self._get_tender_resource_list(tender, "documents")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_awards(self, tender, params={}):
         return self._get_tender_resource_list(tender, "awards")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_lots(self, tender, params={}):
         return self._get_tender_resource_list(tender, "lots")
 
@@ -258,7 +258,6 @@ class TendersClient(APIBaseClient):
     #             GET ITEM API METHODS
     ###########################################################################
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_tender(self, id):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
@@ -277,20 +276,16 @@ class TendersClient(APIBaseClient):
             headers=headers
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_question(self, tender, question_id):
         return self._get_tender_resource_item(tender, question_id, "questions")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_bid(self, tender, bid_id, access_token):
         return self._get_tender_resource_item(tender, bid_id, "bids",
                                               access_token)
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_lot(self, tender, lot_id):
         return self._get_tender_resource_item(tender, lot_id, "lots")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def get_file(self, tender, url, access_token):
         parsed_url = urlparse(url)
         if access_token:
@@ -328,7 +323,6 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_tender(self, tender):
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, tender["data"]["id"]),
@@ -337,15 +331,12 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_question(self, tender, question):
         return self._patch_tender_resource_item(tender, question, "questions")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_bid(self, tender, bid):
         return self._patch_tender_resource_item(tender, bid, "bids")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_bid_document(self, tender, document_data, bid_id, document_id):
         return self._patch_resource_item(
             '{}/{}/{}/{}/documents/{}'.format(
@@ -356,15 +347,12 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_cancellation(self, tender, cancellation):
         return self._patch_tender_resource_item(tender, cancellation, "cancellations")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_cancellation_document(self, tender, cancellation, cancellation_id, cancellation_doc_id):
         return self._patch_resource_item(
             '{}/{}/{}/{}/documents/{}'.format(
@@ -375,7 +363,6 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_complaint(self, tender, complaint):
         return self._patch_tender_resource_item(tender, complaint, "complaints")
 
@@ -389,19 +376,15 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_lot(self, tender, lot):
         return self._patch_tender_resource_item(tender, lot, "lots")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_document(self, tender, document):
         return self._patch_tender_resource_item(tender, document, "documents")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_qualification(self, tender, qualification):
         return self._patch_tender_resource_item(tender, qualification, "qualifications")
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def patch_contract(self, tender, contract):
         return self._patch_tender_resource_item(tender, contract, "contracts")
 
@@ -435,7 +418,6 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     @verify_file
     def update_bid_document(self, file_, tender, bid_id, document_id, doc_type="documents"):
         return self._upload_resource_file(
@@ -465,7 +447,6 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     @verify_file
     def update_cancellation_document(self, file_, tender, cancellation_id, document_id):
             return self._upload_resource_file(
@@ -536,7 +517,6 @@ class TendersClient(APIBaseClient):
     #             DELETE ITEMS LIST API METHODS
     ###########################################################################
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def delete_bid(self, tender, bid, access_token=None):
         logger.info("delete_lot is deprecated. In next update this function will takes bid_id and access_token instead bid.")
         if isinstance(bid, basestring):
@@ -554,7 +534,6 @@ class TendersClient(APIBaseClient):
             headers={'X-Access-Token': access_token}
         )
 
-    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def delete_lot(self, tender, lot):
         logger.info("delete_lot is deprecated. In next update this function will takes lot_id instead lot.")
         if isinstance(lot, basestring):
