@@ -548,3 +548,20 @@ class TendersClient(APIBaseClient):
 
 class Client(TendersClient):
     """client for tenders for backward compatibility"""
+
+
+class TendersClientSync(TendersClient):
+
+    def sync_tenders(self, params={}, extra_headers={}):
+        params['feed'] = 'changes'
+        self.headers.update(extra_headers)
+
+        response = self.get(self.prefix_path, params_dict=params)
+        if response.status_int == 200:
+            tender_list = munchify(loads(response.body_string()))
+            return tender_list
+
+    @retry(stop_max_attempt_number=5)
+    def get_tender(self, id, extra_headers={}):
+        self.headers.update(extra_headers)
+        return super(TendersClientSync, self).get_tender(id)
