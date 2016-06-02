@@ -285,8 +285,6 @@ class TendersClient(APIBaseClient):
         parsed_url = urlparse(url)
         if access_token:
             headers = {'X-Access-Token': access_token}
-        else:
-            raise NoToken
 
         headers.update(self.headers)
         response_item = self.get(parsed_url.path,
