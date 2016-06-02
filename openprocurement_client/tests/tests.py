@@ -395,11 +395,15 @@ class UserTestCase(unittest.TestCase):
         url = HOST_URL + '/redirect/' + file_name
         self.assertRaises(tender_client.InvalidResponse, self.client.get_file, self.tender, url, API_KEY)
 
-    def test_get_file_no_token_error(self):
+    def test_get_file_no_token(self):
         setup_routing(self.app, routs=["redirect","download"])
         file_name = 'test_document.txt'
+        with open(ROOT + file_name) as local_file:
+            test_file_data = local_file.read()
         url = HOST_URL + '/redirect/' + file_name
-        self.assertRaises(tender_client.NoToken, self.client.get_file, self.tender, url, '')
+        doc = self.client.get_file(self.tender, url)
+        self.assertEqual(test_file_data, doc[0])
+        self.assertEqual(file_name, doc[1])
 
     def test_upload_tender_document(self):
         setup_routing(self.app, routs=["tender_document_create"])
