@@ -283,10 +283,9 @@ class TendersClient(APIBaseClient):
 
     def get_file(self, tender, url, access_token):
         parsed_url = urlparse(url)
+        headers = {}
         if access_token:
             headers = {'X-Access-Token': access_token}
-        else:
-            raise NoToken
 
         headers.update(self.headers)
         response_item = self.get(parsed_url.path,
