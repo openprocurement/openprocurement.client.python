@@ -281,12 +281,11 @@ class TendersClient(APIBaseClient):
     def get_lot(self, tender, lot_id):
         return self._get_tender_resource_item(tender, lot_id, "lots")
 
-    def get_file(self, tender, url, access_token):
+    def get_file(self, tender, url, access_token=None):
         parsed_url = urlparse(url)
+        headers = {}
         if access_token:
             headers = {'X-Access-Token': access_token}
-        else:
-            raise NoToken
 
         headers.update(self.headers)
         response_item = self.get(parsed_url.path,
