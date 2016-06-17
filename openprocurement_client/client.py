@@ -1,5 +1,7 @@
 import logging
 from functools import wraps
+from io import FileIO
+from os import path
 from urlparse import parse_qs, urlparse
 
 from iso8601 import parse_date
@@ -24,7 +26,23 @@ def verify_file(fn):
     @wraps(fn)
     def wrapper(self, file_, *args, **kwargs):
         if isinstance(file_, str):
-            file_ = open(file_, 'rb')
+            # Using FileIO here instead of open()
+            # to be able to override the filename
+            # which is later used when uploading the file.
+            #
+            # Explanation:
+            #
+            # 1) Restkit reads the filename
+            # from "name" attribute of a file-like object,
+            # there is no other way to specify a filename;
+            #
+            # 2) The attribute may contain the full path to file,
+            # which does not work well as a filename;
+            #
+            # 3) The attribute is readonly when using open(),
+            # unlike FileIO object.
+            file_ = FileIO(file_, 'rb')
+            file_.name = path.basename(file_.name)
         if hasattr(file_, 'read'):
             # A file-like object must have 'read' method
             return fn(self, file_, *args, **kwargs)
