@@ -1,13 +1,19 @@
-from functools import wraps
-from iso8601 import parse_date
-from munch import munchify
-from restkit import BasicAuth, request, Resource
-from restkit.errors import ResourceNotFound
-from retrying import retry
-from simplejson import dumps, loads
-from urlparse import parse_qs, urlparse
 import logging
-from openprocurement_client.exceptions import InvalidResponse, NoToken
+from functools import wraps
+from urlparse import parse_qs, urlparse
+
+from iso8601 import parse_date
+
+from munch import munchify
+
+from restkit import BasicAuth, Resource, request
+from restkit.errors import ResourceNotFound
+
+from retrying import retry
+
+from simplejson import dumps, loads
+
+from .exceptions import InvalidResponse, NoToken
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +146,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+
 class TendersClient(APIBaseClient):
     """client for tenders"""
 
@@ -148,7 +155,7 @@ class TendersClient(APIBaseClient):
                  api_version='2.0',
                  params=None,
                  resource='tenders'):
-        super(TendersClient, self).__init__(key, host_url,api_version, resource, params)
+        super(TendersClient, self).__init__(key, host_url, api_version, resource, params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -545,6 +552,7 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
     ###########################################################################
+
 
 class Client(TendersClient):
     """client for tenders for backward compatibility"""
