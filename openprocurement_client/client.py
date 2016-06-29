@@ -146,8 +146,9 @@ class TendersClient(APIBaseClient):
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
                  api_version='2.0',
-                 params=None):
-        super(TendersClient, self).__init__(key, host_url,api_version, "tenders", params)
+                 params=None,
+                 resource='tenders'):
+        super(TendersClient, self).__init__(key, host_url,api_version, resource, params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
