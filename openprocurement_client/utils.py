@@ -19,14 +19,14 @@ def tenders_feed(client=Client(''), sleep_time=10):
         sleep(sleep_time)
 
 
-def get_tender_id_by_uaid(ua_id, client=Client(''), descending=True):
-    params = {'offset': '', 'opt_fields': 'tenderID', 'descending': descending}
+def get_tender_id_by_uaid(ua_id, client=Client(''), descending=True, id_field='tenderID'):
+    params = {'offset': '', 'opt_fields': id_field, 'descending': descending}
     tender_list = True
     client._update_params(params)
     while tender_list:
         tender_list = client.get_tenders()
         for tender in tender_list:
-            if tender.tenderID == ua_id:
+            if tender[id_field] == ua_id:
                 return tender.id
     raise IdNotFound
 
