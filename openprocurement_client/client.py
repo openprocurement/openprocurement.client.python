@@ -1,21 +1,13 @@
-import logging
 from functools import wraps
-from io import FileIO
-from os import path
-from urlparse import parse_qs, urlparse
-
 from iso8601 import parse_date
-
 from munch import munchify
-
-from restkit import BasicAuth, Resource, request
+from restkit import BasicAuth, request, Resource
 from restkit.errors import ResourceNotFound
-
 from retrying import retry
-
 from simplejson import dumps, loads
-
-from .exceptions import InvalidResponse, NoToken
+from urlparse import parse_qs, urlparse
+import logging
+from openprocurement_client.exceptions import InvalidResponse, NoToken
 
 logger = logging.getLogger(__name__)
 
@@ -26,23 +18,7 @@ def verify_file(fn):
     @wraps(fn)
     def wrapper(self, file_, *args, **kwargs):
         if isinstance(file_, str):
-            # Using FileIO here instead of open()
-            # to be able to override the filename
-            # which is later used when uploading the file.
-            #
-            # Explanation:
-            #
-            # 1) Restkit reads the filename
-            # from "name" attribute of a file-like object,
-            # there is no other way to specify a filename;
-            #
-            # 2) The attribute may contain the full path to file,
-            # which does not work well as a filename;
-            #
-            # 3) The attribute is readonly when using open(),
-            # unlike FileIO object.
-            file_ = FileIO(file_, 'rb')
-            file_.name = path.basename(file_.name)
+            file_ = open(file_, 'rb')
         if hasattr(file_, 'read'):
             # A file-like object must have 'read' method
             return fn(self, file_, *args, **kwargs)
@@ -164,7 +140,6 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
-
 class TendersClient(APIBaseClient):
     """client for tenders"""
 
@@ -173,7 +148,7 @@ class TendersClient(APIBaseClient):
                  api_version='2.0',
                  params=None,
                  resource='tenders'):
-        super(TendersClient, self).__init__(key, host_url, api_version, resource, params)
+        super(TendersClient, self).__init__(key, host_url,api_version, resource, params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -570,7 +545,6 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
     ###########################################################################
-
 
 class Client(TendersClient):
     """client for tenders for backward compatibility"""
