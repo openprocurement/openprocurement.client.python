@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from openprocurement_client.client import Client
 from openprocurement_client.exceptions import IdNotFound
+from openprocurement_client.contract import ContractingClient
 from time import sleep
 import logging
 logger = logging.getLogger()
@@ -34,3 +35,16 @@ def get_tender_id_by_uaid(ua_id, client=Client(''), descending=True, id_field='t
 def get_tender_by_uaid(ua_id, client=Client('')):
     tender_id = get_tender_id_by_uaid(ua_id, client)
     return client.get_tender(tender_id)
+
+
+def get_contract_id_by_uaid(ua_id, client=ContractingClient(''), descending=True):
+    params = {'offset': '', 'opt_fields': 'contractID', 'descending': descending}
+    contract_list = True
+    client._update_params(params)
+    while contract_list:
+        contract_list = client.get_contracts()
+        print contract_list
+        for contract in contract_list:
+            if contract.contractID == ua_id:
+                return contract.id
+    raise IdNotFound
