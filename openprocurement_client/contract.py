@@ -14,15 +14,14 @@ class ContractingClient(APIBaseClient):
                                                 "contracts", params)
 
     @verify_file
-    def upload_document(self, file_, contract):
+    def upload_document(self, file_, contract_id, access_token):
         return self._upload_resource_file(
             '{}/{}/documents'.format(
                 self.prefix_path,
-                contract.data.id
+                contract_id
             ),
             data={"file": file_},
-            headers={'X-Access-Token':
-                     getattr(getattr(contract, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': access_token}
         )
 
     def create_contract(self, contract):
@@ -41,3 +40,42 @@ class ContractingClient(APIBaseClient):
             data = munchify(loads(response.body_string()))
             self._update_params(data.next_page)
             return data.data
+
+    def _create_contract_resource_item(self, contract_id, access_token, item_obj, items_name):
+        return self._create_resource_item(
+            '{}/{}/{}'.format(self.prefix_path, contract_id, items_name),
+            item_obj,
+            headers={'X-Access-Token': access_token}
+        )
+
+    def create_change(self, contract_id, access_token, change_data):
+        return self._create_contract_resource_item(contract_id, access_token, change_data, "changes")
+
+    def get_contract_credentials(self, contract_id, access_token):
+        return self._patch_resource_item(
+            '{}/{}/credentials'.format(self.prefix_path, contract_id),
+            payload={},
+            headers={'X-Access-Token': access_token}
+        )
+
+    def patch_document(self, contract_id, document_id, access_token, data):
+        return self._patch_resource_item(
+            "{}/{}/{}/{}".format(self.prefix_path, contract_id, "documents", document_id
+            ),
+            payload=data,
+            headers={'X-Access-Token': access_token}
+        )
+
+    def patch_contract(self, contract_id, access_token, data):
+        return self._patch_resource_item(
+            "{}/{}".format(self.prefix_path, contract_id),
+            payload=data,
+            headers={'X-Access-Token': access_token}
+        )
+
+    def patch_change(self, contract_id, change_id, access_token, data):
+        return self._patch_resource_item(
+            "{}/{}/{}/{}".format(self.prefix_path, contract_id, "changes", change_id),
+            payload=data,
+            headers={'X-Access-Token': access_token}
+        )
