@@ -639,7 +639,7 @@ class ContractingUserTestCase(unittest.TestCase):
         file_.name = 'test_document.txt'
         file_.write("test upload contract document text data")
         file_.seek(0)
-        doc = self.client.upload_document(file_, self.contract)
+        doc = self.client.upload_document(file_, self.contract.data.id, self.contract.access['token'])
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
         file_.close()
