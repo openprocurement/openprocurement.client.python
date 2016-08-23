@@ -1,6 +1,7 @@
 from json import loads
 from munch import munchify
 from client import APIBaseClient, verify_file
+from restkit.errors import ResourceNotFound
 
 
 class ContractingClient(APIBaseClient):
@@ -32,14 +33,21 @@ class ContractingClient(APIBaseClient):
 
     def get_contracts(self, params={}, feed='changes'):
         params['feed'] = feed
-        self._update_params(params)
-        response = self.get(
-            self.prefix_path,
-            params_dict=self.params)
-        if response.status_int == 200:
-            data = munchify(loads(response.body_string()))
-            self._update_params(data.next_page)
-            return data.data
+        try:
+            self._update_params(params)
+            response = self.get(
+                self.prefix_path,
+                params_dict=self.params)
+            if response.status_int == 200:
+                contract_list = munchify(loads(response.body_string()))
+                self._update_params(contract_list.next_page)
+                return contract_list.data
+
+        except ResourceNotFound:
+            self.params.pop('offset', 'None')
+            raise
+
+        raise InvalidResponse
 
     def _create_contract_resource_item(self, contract_id, access_token, item_obj, items_name):
         return self._create_resource_item(

@@ -211,8 +211,11 @@ def plan_partition(plan_id, part="plan"):
 #
 
 def contract_offset_error():
-    response.status = 404
-    setup_routing(request.app, routs=["contracts"])
+    #response.status = 404
+    #setup_routing(request.app, routs=["contracts"])
+    with open(ROOT + 'contracts.json') as json:
+        contracts = load(json)
+    return dumps(contracts)
 
 def contracts_page_get():
     with open(ROOT + 'contracts.json') as json:
@@ -254,6 +257,14 @@ def contract_partition(contract_id, part="contract"):
     except (KeyError, IOError):
         return []
 
+def contract_subpage_item_patch(tender_id, subpage_name, subpage_id):
+    subpage = contract_partition(tender_id, subpage_name)
+    for unit in subpage:
+        if unit.id == subpage_id:
+            unit.update(request.json['data'])
+            return dumps({"data": unit})
+    return location_error(subpage_name)
+
 #### Routs
 
 routs_dict = {
@@ -283,4 +294,5 @@ routs_dict = {
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
+        "contract_subpage_item_patch": (CONTRACTS_PATH + "/<contract_id>/<subpage_name>/<subpage_id>", 'PATCH', contract_subpage_item_patch)
         }

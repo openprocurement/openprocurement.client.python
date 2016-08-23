@@ -645,5 +645,64 @@ class ContractingUserTestCase(unittest.TestCase):
         file_.close()
 
 
+class ContractingUserTestCase(unittest.TestCase):
+    """"""
+    def setUp(self):
+        #self._testMethodName
+        self.app = Bottle()
+
+        setup_routing(self.app)
+        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server.start()
+        self.client = ContractingClient(API_KEY,  host_url=HOST_URL,
+                                        api_version=API_VERSION)
+
+        with open(ROOT + 'contracts.json') as contracts:
+            self.contracts = munchify(load(contracts))
+        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
+            self.contract = munchify(load(contract))
+            #self.contract.update({'access':{"token": API_KEY}})
+
+    def tearDown(self):
+        self.server.stop()
+
+
+    def test_get_contracts(self):
+        setup_routing(self.app, routs=["contracts"])
+        contracts = self.client.get_contracts()
+        self.assertIsInstance(contracts, Iterable)
+        self.assertEqual(contracts, self.contracts.data)
+
+    def test_get_contract(self):
+        setup_routing(self.app, routs=["contract"])
+        contract = self.client.get_contract(TEST_CONTRACT_KEYS.contract_id)
+        self.assertEqual(contract, self.contract)
+
+    def test_get_contract_location_error(self):
+        setup_routing(self.app, routs=["contract"])
+        contract = self.client.get_contract(TEST_CONTRACT_KEYS.error_id)
+        self.assertEqual(contract, munchify(loads(location_error('contract'))))
+
+    def test_offset_error(self):
+        setup_routing(self.app, routs=['contract_offset_error'])
+        import pdb; pdb.set_trace()
+        contracts = self.client.get_contracts()
+        self.assertIsInstance(contracts, Iterable)
+        self.assertEqual(contracts, self.contracts.data)
+
+    def test_patch_document(self):
+        setup_routing(self.app, routs=["contract_subpage_item_patch"])
+        document = munchify({"data": {"title": "test_patch_document.txt"}})
+        patched_document = self.client.patch_document(TEST_CONTRACT_KEYS.contract_id, TEST_CONTRACT_KEYS.contract_id, self.contract.access['token'], document)
+        self.assertEqual(patched_document.data.id, TEST_CONTRACT_KEYS.document_id)
+        self.assertEqual(patched_document.data.title, document.data.title)
+
+    def test_patch_contract(self):
+        setup_routing(self.app, routs=["contract_patch"])
+        self.contract.data.description = 'test_patch_contract'
+        patched_contract = self.client.patch_contract(self.contract)
+        self.assertEqual(patched_contract.data.id, self.contract.data.id)
+        self.assertEqual(patched_contract.data.description, self.contract.data.description)
+
 if __name__ == '__main__':
     unittest.main()
