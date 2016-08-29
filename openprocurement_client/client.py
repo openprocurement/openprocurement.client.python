@@ -329,6 +329,11 @@ class TendersClient(APIBaseClient):
     def extract_credentials(self, id):
         return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, id))
 
+    def credentials(self, id, access_token):
+        return self._patch_resource_item('{}/{}/credentials'.format(self.prefix_path, id),
+                                         payload={},
+                                         headers={'X-Access-Token': access_token})
+
     ###########################################################################
     #             PATCH ITEM API METHODS
     ###########################################################################
