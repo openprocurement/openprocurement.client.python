@@ -11,7 +11,7 @@ setup(
     version=version,
     description="",
     long_description="{0}\n{1}".format(
-        open("README.md").read(),
+        open("README.rst").read(),
         open(os.path.join("docs", "HISTORY.txt")).read()
     ),
 
