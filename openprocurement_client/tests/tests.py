@@ -379,6 +379,7 @@ class UserTestCase(unittest.TestCase):
         setup_routing(self.app, routs=['tender_patch_credentials'])
         tender = self.client.patch_credentials(self.tender.data.id, self.tender.access['token'])
         self.assertTrue(tender['access']['token'])
+        self.assertTrue(tender['data'])
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
