@@ -375,6 +375,11 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(patched_document.data.id, document.data.id)
         self.assertEqual(patched_document.data.title, document.data.title)
 
+    def test_tender_patch_credentials(self):
+        setup_routing(self.app, routs=['tender_patch_credentials'])
+        tender = self.client.patch_credentials(self.tender.data.id, self.tender.access['token'])
+        self.assertTrue(tender['access']['token'])
+
     ###########################################################################
     #             DOCUMENTS FILE TEST
     ###########################################################################

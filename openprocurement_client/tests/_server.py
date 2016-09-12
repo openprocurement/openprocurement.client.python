@@ -1,6 +1,7 @@
 from bottle import request, response, redirect, static_file
 from munch import munchify
 from simplejson import dumps, load
+from uuid import uuid4
 import os
 
 
@@ -254,6 +255,14 @@ def contract_partition(contract_id, part="contract"):
     except (KeyError, IOError):
         return []
 
+
+def tender_patch_credentials(tender_id):
+    tender = tender_partition(tender_id)
+    if not tender:
+        return location_error("tender")
+    tender['access'] = {'token': uuid4().hex}
+    return tender
+
 #### Routs
 
 routs_dict = {
@@ -283,4 +292,5 @@ routs_dict = {
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
+        "tender_patch_credentials": (TENDERS_PATH + "/<tender_id>/credentials", 'PATCH', tender_patch_credentials)
         }
