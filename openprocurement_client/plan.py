@@ -1,7 +1,6 @@
 from client import APIBaseClient, InvalidResponse
 from iso8601 import parse_date
 from munch import munchify
-from restkit import BasicAuth, errors, request, Resource
 from retrying import retry
 from simplejson import dumps, loads
 import logging
@@ -24,19 +23,16 @@ class PlansClient(APIBaseClient):
     @retry(stop_max_attempt_number=5)
     def get_plans(self, params={}, feed='changes'):
         params['feed'] = feed
-        try:
-            self._update_params(params)
-            response = self.get(
-                self.prefix_path,
-                params_dict=self.params)
-            if response.status_int == 200:
-                plan_list = munchify(loads(response.body_string()))
-                self._update_params(plan_list.next_page)
-                return plan_list.data
-
-        except errors.ResourceNotFound:
+        self._update_params(params)
+        response = self.request("GET", 
+            self.prefix_path,
+            params_dict=self.params)
+        if response.status_code == 200:
+            plan_list = munchify(loads(response.text))
+            self._update_params(plan_list.next_page)
+            return plan_list.data
+        elif response.status_code == 412:
             del self.params['offset']
-            raise
 
         raise InvalidResponse
 
@@ -51,8 +47,8 @@ class PlansClient(APIBaseClient):
                 tm
             )
         )
-        if response.status_int == 200:
-            plan_list = munchify(loads(response.body_string()))
+        if response.status_code == 200:
+            plan_list = munchify(loads(response.text))
             self._update_params(plan_list.next_page)
             return plan_list.data
         raise InvalidResponse
