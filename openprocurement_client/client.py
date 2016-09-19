@@ -408,6 +408,11 @@ class TendersClient(APIBaseClient):
     def patch_contract(self, tender, contract):
         return self._patch_tender_resource_item(tender, contract, "contracts")
 
+    def patch_credentials(self, id, access_token):
+        return self._patch_resource_item('{}/{}/credentials'.format(self.prefix_path, id),
+                                         payload={},
+                                         headers={'X-Access-Token': access_token})
+
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
