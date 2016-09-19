@@ -95,6 +95,12 @@ def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
             return {}
     return location_error(subpage_name)
 
+def tender_patch_credentials(tender_id):
+    tender = tender_partition(tender_id)
+    if not tender:
+        return location_error("tender")
+    tender['access'] = {'token': uuid4().hex}
+    return tender
 
 ### Document and file operations
 #
@@ -255,14 +261,6 @@ def contract_partition(contract_id, part="contract"):
     except (KeyError, IOError):
         return []
 
-
-def tender_patch_credentials(tender_id):
-    tender = tender_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    tender['access'] = {'token': uuid4().hex}
-    return tender
-
 #### Routs
 
 routs_dict = {
@@ -281,6 +279,7 @@ routs_dict = {
         "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
         "tender_subpage_item_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'PATCH', tender_subpage_item_patch),
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
+        "tender_patch_credentials": (TENDERS_PATH + "/<tender_id>/credentials", 'PATCH', tender_patch_credentials),
         "redirect": ('/redirect/<filename:path>', 'GET', get_file),
         "download": ('/download/<filename:path>', 'GET', download_file),
         "plans": (PLANS_PATH, 'GET', plans_page_get),
@@ -291,6 +290,5 @@ routs_dict = {
         "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
-        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
-        "tender_patch_credentials": (TENDERS_PATH + "/<tender_id>/credentials", 'PATCH', tender_patch_credentials)
+        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error)
         }
