@@ -7,6 +7,7 @@ from simplejson import loads, load
 from munch import munchify
 import unittest
 from openprocurement_client import client as tender_client
+from openprocurement_client import change_owner
 from openprocurement_client.contract import ContractingClient
 from openprocurement_client import plan as plan_client
 from openprocurement_client.tests._server import (tender_partition, location_error,
@@ -16,6 +17,11 @@ from openprocurement_client.tests._server import (tender_partition, location_err
 HOST_URL = "http://localhost:20602"
 API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
 API_VERSION = '0.10'
+
+test_owner_change = { "data": { "transfer": "2e92410f70a842cf9cb448608f15f71e",
+                           "id": "a5a9d0af94cdebf91d8ea39b8702410a"
+                        }
+}
 
 TEST_KEYS = munchify({
     "tender_id": '823d50b3236247adad28a5a66f74db42',
@@ -54,6 +60,60 @@ TEST_CONTRACT_KEYS = munchify({
     "new_document_id": '12345678123456781234567812345678',
     "error_id": 'zzzxxx111'
 })
+
+TEST_TRANSFER = munchify({
+    "transfer_id" : "a5a9d0af94cdebf91d8ea39b8702410a",
+})
+
+class Transfer_and_Ownership(unittest.TestCase):
+
+    def setUp(self):
+        #self._testMethodName
+        self.app = Bottle()
+        setup_routing(self.app)
+        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server.start()
+
+        self.client = change_owner.Owner_change('', host_url=HOST_URL, api_version=API_VERSION)
+
+        with open(ROOT + TEST_KEYS.tender_id + '.json') as tender:
+            self.tender = munchify(load(tender))
+            self.tender.update({'access':{"token": API_KEY}})
+
+        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
+            self.contract = munchify(load(contract))
+            self.contract.update({'access':{"token": API_KEY}})
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_create_transfer(self):
+        setup_routing(self.app, routs=["create_transfer"])
+        self.client.create_transfer()
+
+    def test_get_transfer(self):
+        setup_routing(self.app, routs=["get_transfer"])
+        self.client.get_transfer(TEST_TRANSFER.transfer_id)
+
+    def test_get_used_transfer(self):
+        setup_routing(self.app, routs=["get_used_transfer"])
+        self.client.get_transfer(TEST_TRANSFER.transfer_id)
+
+    def test_change_tenders_owner(self):
+        setup_routing(self.app, routs=["change_tender_owner", "create_transfer"])
+        self.client.change_tender_owner(self.tender.data.id, tender_transfer = "1234"*8)
+
+    def test_change_bid_owner(self):
+        setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
+        self.client.change_bid_owner(self.tender.data.id, TEST_KEYS.bid_id,  bid_transfer = "1234"*8)
+
+    def test_change_complaint_owner(self):
+        setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
+        self.client.change_complaint_owner(self.tender.data.id, TEST_KEYS_LIMITED.complaint_id,  complaint_transfer = "1234"*8)
+
+    def test_change_contracts_owner(self):
+        setup_routing(self.app, routs=["change_contract_ownership", "create_transfer", "contract_patch_credentials"])
+        self.client.change_contract_owner(self.contract.data.id, self.tender)
 
 class ViewerTenderTestCase(unittest.TestCase):
     """"""
@@ -634,7 +694,7 @@ class ContractingUserTestCase(unittest.TestCase):
         setup_routing(self.app, routs=["contract_create"])
         contract = munchify({'data': 'contract'})
         self.client.create_contract(contract)
-
+        
     ###########################################################################
     #             DOCUMENTS FILE TEST
     ###########################################################################

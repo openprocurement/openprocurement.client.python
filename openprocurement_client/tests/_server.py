@@ -12,6 +12,7 @@ TENDERS_PATH = API_PATH.format('0.10', "tenders")
 PLANS_PATH = API_PATH.format('0.10', "plans")
 CONTRACTS_PATH = API_PATH.format('0.10', "contracts")
 SPORE_PATH = API_PATH.format('0.10', "spore")
+TRANSFER_PATH = API_PATH.format('0.10', "transfers")
 
 def setup_routing(app, routs=None):
     if routs is None:
@@ -38,6 +39,53 @@ def tenders_page_get():
     with open(ROOT + 'tenders.json') as json:
         tenders = load(json)
     return dumps(tenders)
+
+### Transfer operations
+#
+
+def create_transfer():
+    response.status = 201
+    data = {
+        "data": {
+            "date": "2016-07-04T19:00:54.613149+03:00",
+            "id": "a5a9d0af94cdebf91d8ea39b8702410a"
+                }
+        }
+    return dumps(data)
+
+def get_transfer(transfer_id):
+    response.status = 200
+    return {"data": { "date": "2016-07-04T19:00:54.613149+03:00",
+                      "id": transfer_id
+           }}
+
+def get_used_transfer(transfer_id):
+    response.status = 200
+    return {"data": { "date": "2016-07-04T19:00:54.613149+03:00",
+                      "id": transfer_id,
+                      "usedFor": ""
+           }}
+
+### Owner change
+#
+
+def change_tender_owner(tender_id):
+    response.status = 200
+    with open(ROOT + 'tendersowner.json') as json:
+        tenders = load(json)
+    return dumps(tenders)
+
+
+def change_subpage_owner(tender_id, subpage_name, subpage_id):
+    response.status = 200
+    with open(ROOT + 'change_' + subpage_name + '_owner.json') as json:
+        subpage = load(json)
+    return dumps({'data':""})
+
+def contract_ownership(contract_id):
+    with open(ROOT + 'change_contract_owner.json') as json:
+        contract_owner = load(json)
+    return dumps(contract_owner)
 
 ### Tender operations
 #
@@ -236,6 +284,13 @@ def contract_page(contract_id):
         return location_error("contract")
     return dumps(contract)
 
+def contract_patch_credentials(contract_id):
+    contract = contract_partition(contract_id)
+    if not contract:
+        return location_error("contract")
+    contract['access'] = {'token': uuid4().hex, 'transfer': uuid4().hex}
+    return contract
+
 def contract_patch(contract_id):
     contract = contract_partition(contract_id)
     if not contract:
@@ -290,5 +345,14 @@ routs_dict = {
         "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
-        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error)
+        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
+        #owner change
+        "contract_patch_credentials": (CONTRACTS_PATH + "/<contract_id>/credentials", 'PATCH', contract_patch_credentials),
+        "change_contract_ownership":(CONTRACTS_PATH + "/<contract_id>/ownership", 'POST', contract_ownership),
+        "change_tender_owner": (TENDERS_PATH + "/<tender_id>/ownership", 'POST', change_tender_owner),
+        "change_subpage_owner": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/ownership", 'POST', change_subpage_owner),
+        #for transfer
+        "create_transfer": (TRANSFER_PATH, 'POST', create_transfer),
+        "get_transfer": (TRANSFER_PATH + "/<transfer_id>", 'GET', get_transfer),
+        "get_used_transfer": (TRANSFER_PATH + "/<transfer_id>", 'GET', get_used_transfer),
         }
