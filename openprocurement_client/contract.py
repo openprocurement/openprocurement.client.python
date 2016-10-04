@@ -20,7 +20,7 @@ class ContractingClient(APIBaseClient):
                 self.prefix_path,
                 contract.data.id
             ),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(contract, 'access', ''), 'token', '')}
         )
@@ -34,10 +34,10 @@ class ContractingClient(APIBaseClient):
     def get_contracts(self, params={}, feed='changes'):
         params['feed'] = feed
         self._update_params(params)
-        response = self.get(
+        response = self.request("GET",
             self.prefix_path,
             params_dict=self.params)
-        if response.status_int == 200:
-            data = munchify(loads(response.body_string()))
+        if response.status_code == 200:
+            data = munchify(loads(response.text))
             self._update_params(data.next_page)
             return data.data

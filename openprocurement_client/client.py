@@ -7,15 +7,14 @@ from urlparse import parse_qs, urlparse
 from iso8601 import parse_date
 
 from munch import munchify
-
-from restkit import BasicAuth, Resource, request
-from restkit.errors import ResourceNotFound
-
 from retrying import retry
 
 from simplejson import dumps, loads
 
 from .exceptions import InvalidResponse, NoToken
+from requests import Session
+from requests.auth import HTTPBasicAuth
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ def verify_file(fn):
     return wrapper
 
 
-class APIBaseClient(Resource):
+class APIBaseClient(object):
     """base class for API"""
     def __init__(self, key,
                  host_url,
@@ -61,12 +60,11 @@ class APIBaseClient(Resource):
                  resource,
                  params=None,
                  **kwargs):
-        super(APIBaseClient, self).__init__(
-            host_url,
-            filters=[BasicAuth(key, "")],
-            **kwargs
-        )
-        self.prefix_path = '/api/{}/{}'.format(api_version, resource)
+
+        self.session = Session()
+        self.session.auth = HTTPBasicAuth(key, '')
+        self.host_url = host_url
+        self.prefix_path = '{}/api/{}/{}'.format(host_url, api_version, resource)
         if not isinstance(params, dict):
             params = {"mode": "_all_"}
         self.params = params
@@ -74,47 +72,22 @@ class APIBaseClient(Resource):
         # To perform some operations (e.g. create a tender)
         # we first need to obtain a cookie. For that reason,
         # here we send a HEAD request to a neutral URL.
-        self.head('/api/{}/spore'.format(api_version))
+        self.session.head('{}/api/{}/spore'.format(host_url, api_version))
 
     def request(self, method, path=None, payload=None, headers=None,
-                params_dict=None, **params):
+                params_dict=None, files=None, **params):
         _headers = dict(self.headers)
         _headers.update(headers or {})
-        try:
-            response = super(APIBaseClient, self).request(
-                method, path=path, payload=payload, headers=_headers,
-                params_dict=params_dict, **params
-            )
-            if 'Set-Cookie' in response.headers:
-                self.headers['Cookie'] = response.headers['Set-Cookie']
-            return response
-        except ResourceNotFound as e:
-            if 'Set-Cookie' in e.response.headers:
-                self.headers['Cookie'] = e.response.headers['Set-Cookie']
-            raise e
+        if files:
+            del _headers["Content-Type"]
+        response = self.session.request(
+            method, path, data=payload, headers=_headers,
+            params=params_dict, files=files
+        )
+        if 'Set-Cookie' in response.headers:
+            self.headers['Cookie'] = response.headers['Set-Cookie']
+        return response
 
-    def patch(self, path=None, payload=None, headers=None,
-              params_dict=None, **params):
-        """ HTTP PATCH
-
-        - payload: string passed to the body of the request
-        - path: string  additionnal path to the uri
-        - headers: dict, optionnal headers that will
-            be added to HTTP request.
-        - params: Optionnal parameterss added to the request
-        """
-
-        return self.request("PATCH", path=path, payload=payload,
-                            headers=headers, params_dict=params_dict, **params)
-
-    def delete(self, path=None, headers=None):
-        """ HTTP DELETE
-        - path: string  additionnal path to the uri
-        - headers: dict, optionnal headers that will
-            be added to HTTP request.
-        - params: Optionnal parameterss added to the request
-        """
-        return self.request("DELETE", path=path, headers=headers)
 
     def _update_params(self, params):
         for key in params:
@@ -123,45 +96,47 @@ class APIBaseClient(Resource):
 
     def _create_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
-        response_item = self.post(
+        response_item = self.request("POST", 
             url, headers=headers, payload=dumps(payload)
         )
-        if response_item.status_int == 201:
-            return munchify(loads(response_item.body_string()))
+        if response_item.status_code == 201:
+            return munchify(loads(response_item.text))
         raise InvalidResponse
 
     def _get_resource_item(self, url, headers={}):
         headers.update(self.headers)
-        response_item = self.get(url, headers=headers)
-        if response_item.status_int == 200:
-            return munchify(loads(response_item.body_string()))
+        response_item = self.request("GET", url, headers=headers)
+        if response_item.status_code == 200:
+            return munchify(loads(response_item.text))
         raise InvalidResponse
 
     def _patch_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
-        response_item = self.patch(
+        response_item = self.request('PATCH',
             url, headers=headers, payload=dumps(payload)
         )
-        if response_item.status_int == 200:
-            return munchify(loads(response_item.body_string()))
+        if response_item.status_code == 200:
+            return munchify(loads(response_item.text))
         raise InvalidResponse
 
-    def _upload_resource_file(self, url, data, headers={}, method='post'):
+    def _upload_resource_file(self, url, files, headers={}, method='post'):
         file_headers = {}
         file_headers.update(self.headers)
         file_headers.update(headers)
-        file_headers['Content-Type'] = "multipart/form-data"
-        response_item = getattr(self, method)(
-            url, headers=file_headers, payload=data
+        # file_headers['Content-Type'] = "multipart/form-data"
+        response_item = self.request(method,
+            url, headers=file_headers, files=files
         )
-        if response_item.status_int in (201, 200):
-            return munchify(loads(response_item.body_string()))
+        if response_item.status_code in (201, 200):
+            return munchify(loads(response_item.text))
+        elif response_item.status_code in (401, 403, 405, 409, 412, 423):
+            return munchify(loads(response_item.text))
         raise InvalidResponse
 
     def _delete_resource_item(self, url, headers={}):
-        response_item = self.delete(url, headers=headers)
-        if response_item.status_int == 200:
-            return munchify(loads(response_item.body_string()))
+        response_item = self.request('DELETE', url, headers=headers)
+        if response_item.status_code == 200:
+            return munchify(loads(response_item.text))
         raise InvalidResponse
 
 
@@ -182,19 +157,16 @@ class TendersClient(APIBaseClient):
     @retry(stop_max_attempt_number=5)
     def get_tenders(self, params={}, feed='changes'):
         params['feed'] = feed
-        try:
-            self._update_params(params)
-            response = self.get(
-                self.prefix_path,
-                params_dict=self.params)
-            if response.status_int == 200:
-                tender_list = munchify(loads(response.body_string()))
-                self._update_params(tender_list.next_page)
-                return tender_list.data
-
-        except ResourceNotFound:
+        self._update_params(params)
+        response = self.request("GET", 
+            self.prefix_path,
+            params_dict=self.params)
+        if response.status_code == 200:
+            tender_list = munchify(loads(response.text))
+            self._update_params(tender_list.next_page)
+            return tender_list.data
+        elif response.status_code == 404:
             del self.params['offset']
-            raise
 
         raise InvalidResponse
 
@@ -209,8 +181,8 @@ class TendersClient(APIBaseClient):
                 tm
             )
         )
-        if response.status_int == 200:
-            tender_list = munchify(loads(response.body_string()))
+        if response.status_code == 200:
+            tender_list = munchify(loads(response.text))
             self._update_params(tender_list.next_page)
             return tender_list.data
         raise InvalidResponse
@@ -308,22 +280,20 @@ class TendersClient(APIBaseClient):
         return self._get_tender_resource_item(tender, lot_id, "lots")
 
     def get_file(self, tender, url, access_token=None):
-        parsed_url = urlparse(url)
         headers = {}
         if access_token:
             headers = {'X-Access-Token': access_token}
 
         headers.update(self.headers)
-        response_item = self.get(parsed_url.path,
-                                 headers=headers,
-                                 params_dict=parse_qs(parsed_url.query))
+        response_item = self.request("GET",
+            url, headers=headers)
 
-        if response_item.status_int == 302:
-            response_obj = request(response_item.headers['location'])
-            if response_obj.status_int == 200:
-                return response_obj.body_string(), \
-                    response_obj.headers['Content-Disposition'] \
-                    .split(";")[1].split('"')[1]
+        # if response_item.status_code == 302:
+        #     response_obj = request(response_item.headers['location'])
+        if response_item.status_code == 200:
+            return response_item.text, \
+                response_item.headers['Content-Disposition'] \
+                .split(";")[1].split('"')[1]
         raise InvalidResponse
 
     def extract_credentials(self, id):
@@ -424,9 +394,8 @@ class TendersClient(APIBaseClient):
                 self.prefix_path,
                 tender.data.id
             ),
-            data={"file": file_},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            files={"file": (file_.name, file_)},
+            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     @verify_file
@@ -438,7 +407,7 @@ class TendersClient(APIBaseClient):
                 bid_id,
                 doc_type
             ),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -453,7 +422,7 @@ class TendersClient(APIBaseClient):
                 doc_type,
                 document_id
             ),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')},
             method='put'
@@ -467,7 +436,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 cancellation_id
             ),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -481,7 +450,7 @@ class TendersClient(APIBaseClient):
                     cancellation_id,
                     document_id
                 ),
-                data={"file": file_},
+                files={"file": (file_.name, file_)},
                 headers={'X-Access-Token':
                          getattr(getattr(tender, 'access', ''), 'token', '')},
                 method='put'
@@ -494,7 +463,7 @@ class TendersClient(APIBaseClient):
                 self.prefix_path,
                 tender.data.id,
                 complaint_id),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -507,7 +476,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 award_id,
                 complaint_id),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -520,7 +489,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 qualification_id
             ),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -533,7 +502,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 award_id
             ),
-            data={"file": file_},
+            files={"file": (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -587,9 +556,9 @@ class TendersClientSync(TendersClient):
         params['feed'] = 'changes'
         self.headers.update(extra_headers)
 
-        response = self.get(self.prefix_path, params_dict=params)
-        if response.status_int == 200:
-            tender_list = munchify(loads(response.body_string()))
+        response = self.request("GET", self.prefix_path, params_dict=params)
+        if response.status_code == 200:
+            tender_list = munchify(loads(response.text))
             return tender_list
 
     @retry(stop_max_attempt_number=5)
