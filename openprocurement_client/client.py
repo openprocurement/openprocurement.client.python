@@ -127,9 +127,7 @@ class APIBaseClient(object):
         response_item = self.request(method,
             url, headers=file_headers, files=files
         )
-        if response_item.status_code in (201, 200):
-            return munchify(loads(response_item.text))
-        elif response_item.status_code in (401, 403, 405, 409, 412, 423):
+        if response_item.status_code in (201, 200, 401, 403, 405, 409, 412, 423):
             return munchify(loads(response_item.text))
         raise InvalidResponse
 
