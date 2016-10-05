@@ -72,7 +72,7 @@ class APIBaseClient(object):
         # To perform some operations (e.g. create a tender)
         # we first need to obtain a cookie. For that reason,
         # here we send a HEAD request to a neutral URL.
-        self.session.head('{}/api/{}/spore'.format(host_url, api_version))
+        self.request('HEAD', '{}/api/{}/spore'.format(host_url, api_version))
 
     def request(self, method, path=None, payload=None, headers=None,
                 params_dict=None, files=None, **params):
