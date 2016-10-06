@@ -25,7 +25,7 @@ IGNORE_PARAMS = ('uri', 'path')
 def verify_file(fn):
     @wraps(fn)
     def wrapper(self, file_, *args, **kwargs):
-        if isinstance(file_, str):
+        if isinstance(file_, basestring):
             # Using FileIO here instead of open()
             # to be able to override the filename
             # which is later used when uploading the file.
