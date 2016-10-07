@@ -275,6 +275,17 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
+    def create_thin_document(self, tender, document_data):
+        return self._create_resource_item(
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id
+            ),
+            document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
