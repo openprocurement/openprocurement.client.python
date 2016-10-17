@@ -1,15 +1,17 @@
-from gevent import monkey, sleep
+from gevent import monkey
 monkey.patch_all()
 
 import logging
 from .client import TendersClientSync
-from gevent import spawn
-from gevent.queue import Queue
+from gevent import spawn, sleep, idle
+from gevent.queue import Queue, Empty
 
-RETRIEVER_DOWN_REQUESTS_SLEEP = 5
-RETRIEVER_UP_REQUESTS_SLEEP = 1
-RETRIEVER_UP_WAIT_SLEEP = 30
-RETRIEVERS_QUEUE_SIZE = 30
+DEFAULT_RETRIEVERS_PARAMS = {
+    'down_requests_sleep': 5,
+    'up_requests_sleep': 1,
+    'up_wait_sleep': 30,
+    'queue_size': 101
+}
 
 DEFAULT_API_HOST = 'https://lb.api-sandbox.openprocurement.org/'
 DEFAULT_API_VERSION = '2.3'
@@ -21,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
-               key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS):
+               key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS, retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
     """
     Start retrieving from Openprocurement API.
 
@@ -47,22 +49,23 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
 
     response = backfard.sync_tenders(backfard_params)
 
-    queue = Queue()
+    queue = Queue(maxsize=retrievers_params['queue_size'])
     for tender in response.data:
+        idle()
         queue.put(tender)
     backfard_params['offset'] = response.next_page.offset
     forward_params['offset'] = response.prev_page.offset
 
     backfard_worker = spawn(retriever_backward, queue,
-                            backfard, Cookie, backfard_params)
+                            backfard, Cookie, backfard_params, retrievers_params['down_requests_sleep'])
     forward_worker = spawn(retriever_forward, queue,
-                           forward, Cookie, forward_params)
+                           forward, Cookie, forward_params, retrievers_params['up_requests_sleep'], retrievers_params['up_wait_sleep'])
 
     return queue, forward_worker, backfard_worker
 
 
 def restart_sync(up_worker, down_worker,
-                 host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS):
+                 host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS, retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
     """
     Restart retrieving from Openprocurement API.
 
@@ -89,7 +92,7 @@ def restart_sync(up_worker, down_worker,
     return start_sync(host=host, version=version, key=key, extra_params=extra_params)
 
 
-def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS):
+def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS, retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
     """
     Prepare iterator for retrieving from Openprocurement API.
 
@@ -105,7 +108,7 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_
     """
 
     queue, up_worker, down_worker = start_sync(
-        host=host, version=version, key=key, extra_params=extra_params)
+        host=host, version=version, key=key, extra_params=extra_params, retrievers_params=retrievers_params)
     check_down_worker = True
     while 1:
         if check_down_worker and down_worker.ready():
@@ -114,36 +117,40 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_
                 check_down_worker = False
             else:
                 queue, up_worker, down_worker = restart_sync(up_worker, down_worker,
-                                                             host=host, version=version, key=key, extra_params=extra_params)
+                                                             host=host, version=version, key=key, extra_params=extra_params, retrievers_params=retrievers_params)
                 check_down_worker = True
         if up_worker.ready():
             queue, up_worker, down_worker = restart_sync(up_worker, down_worker,
-                                                         host=host, version=version, key=key, extra_params=extra_params)
+                                                         host=host, version=version, key=key, extra_params=extra_params, retrievers_params=retrievers_params)
             check_down_worker = True
         while not queue.empty():
             yield queue.get()
-        sleep(5)
+        try:
+            queue.peek(block=True, timeout=5)
+        except Empty:
+            pass
 
 
-def retriever_backward(queue, client, origin_cookie, params):
+def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
     logger.info('Backward: Start worker')
     response = client.sync_tenders(params)
     if origin_cookie != client.headers['Cookie']:
         raise Exception('LB Server mismatch')
     while response.data:
         for tender in response.data:
+            idle()
             queue.put(tender)
         params['offset'] = response.next_page.offset
         response = client.sync_tenders(params)
         if origin_cookie != client.headers['Cookie']:
             raise Exception('LB Server mismatch')
         logger.info('Backward: pause between requests')
-        sleep(RETRIEVER_DOWN_REQUESTS_SLEEP)
+        sleep(requests_sleep)
     logger.info('Backward: finished')
     return 0
 
 
-def retriever_forward(queue, client, origin_cookie, params):
+def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait_sleep):
     logger.info('Forward: Start worker')
     response = client.sync_tenders(params)
     if origin_cookie != client.headers['Cookie']:
@@ -151,6 +158,7 @@ def retriever_forward(queue, client, origin_cookie, params):
     while 1:
         while response.data:
             for tender in response.data:
+                idle()
                 queue.put(tender)
             params['offset'] = response.next_page.offset
             response = client.sync_tenders(params)
@@ -158,10 +166,10 @@ def retriever_forward(queue, client, origin_cookie, params):
                 raise Exception('LB Server mismatch')
             if len(response.data) != 0:
                 logger.info('Forward: pause between requests')
-                sleep(RETRIEVER_UP_REQUESTS_SLEEP)
+                sleep(requests_sleep)
 
         logger.info('Forward: pause after empty response')
-        sleep(RETRIEVER_UP_WAIT_SLEEP)
+        sleep(wait_sleep)
 
         params['offset'] = response.next_page.offset
         response = client.sync_tenders(params)
