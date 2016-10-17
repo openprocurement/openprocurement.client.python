@@ -15,7 +15,7 @@ DEFAULT_API_HOST = 'https://lb.api-sandbox.openprocurement.org/'
 DEFAULT_API_VERSION = '2.3'
 DEFAULT_API_KEY = ''
 DEFAULT_API_EXTRA_PARAMS = {
-    'opt_fields': 'status,auctionPeriod,lots', 'mode': '_all_'}
+    'opt_fields': 'status', 'mode': '_all_'}
 
 logger = logging.getLogger(__name__)
 
@@ -172,5 +172,4 @@ def retriever_forward(queue, client, origin_cookie, params):
 
 if __name__ == '__main__':
     for tender_item in get_tenders():
-        if tender_item['status'] == 'active.auction':
-            print 'Tender {0[id]}'.format(tender_item)
+        print 'Tender {0[id]}'.format(tender_item)
