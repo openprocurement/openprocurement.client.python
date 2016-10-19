@@ -419,6 +419,16 @@ class TendersClient(APIBaseClient):
     def patch_contract(self, tender, contract):
         return self._patch_tender_resource_item(tender, contract, "contracts")
 
+    def patch_contract_document(self, tender, document_data, contract_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, "contracts", contract_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def patch_credentials(self, id, access_token):
         return self._patch_resource_item('{}/{}/credentials'.format(self.prefix_path, id),
                                          payload={},
@@ -543,6 +553,20 @@ class TendersClient(APIBaseClient):
                 self.prefix_path,
                 tender.data.id,
                 award_id
+            ),
+            data={"file": file_},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    @verify_file
+    def upload_contract_document(self, file_, tender, contract_id, doc_type="documents"):
+        return self._upload_resource_file(
+            '{}/{}/contracts/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                contract_id,
+                doc_type
             ),
             data={"file": file_},
             headers={'X-Access-Token':
