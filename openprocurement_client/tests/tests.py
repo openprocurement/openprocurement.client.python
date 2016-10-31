@@ -83,6 +83,15 @@ class Transfer_and_Ownership(unittest.TestCase):
         with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
             self.contract = munchify(load(contract))
             self.contract.update({'access':{"token": API_KEY}})
+        
+        with open(ROOT + 'change_contract_owner.json') as change_contract:
+            self.change_contract = munchify(load(change_contract))
+            
+        with open(ROOT + 'change_bids_owner.json') as change_bid:
+            self.change_bid = munchify(load(change_bid))
+        
+        
+        
 
     def tearDown(self):
         self.server.stop()
@@ -105,15 +114,17 @@ class Transfer_and_Ownership(unittest.TestCase):
 
     def test_change_bid_owner(self):
         setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
-        self.client.change_bid_owner(self.tender.data.id, TEST_KEYS.bid_id,  bid_transfer = "1234"*8)
+        change_bid = self.client.change_bid_owner(self.tender.data.id, TEST_KEYS.bid_id,  bid_transfer = "1234"*8)
+        
 
     def test_change_complaint_owner(self):
         setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
         self.client.change_complaint_owner(self.tender.data.id, TEST_KEYS_LIMITED.complaint_id,  complaint_transfer = "1234"*8)
-
+        
     def test_change_contracts_owner(self):
         setup_routing(self.app, routs=["change_contract_ownership", "create_transfer", "contract_patch_credentials"])
-        self.client.change_contract_owner(self.contract.data.id, self.tender)
+        change_contract = self.client.change_contract_owner(self.contract.data.id, self.tender)
+        self.assertEqual(change_contract, self.change_contract)
 
 class ViewerTenderTestCase(unittest.TestCase):
     """"""
@@ -122,6 +133,7 @@ class ViewerTenderTestCase(unittest.TestCase):
         self.app = Bottle()
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        
         self.server.start()
 
         self.client = tender_client.TendersClient('', host_url=HOST_URL, api_version=API_VERSION)

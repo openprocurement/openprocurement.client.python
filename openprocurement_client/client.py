@@ -129,6 +129,15 @@ class APIBaseClient(Resource):
         if response_item.status_int == 201:
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
+    
+    def _change_owner_item(self, url, payload, headers={}):
+        headers.update(self.headers)
+        response_item = self.post(
+            url, headers=headers, payload=dumps(payload)
+        )
+        if response_item.status_int == 200:
+            return munchify(loads(response_item.body_string()))
+        raise InvalidResponse
 
     def _get_resource_item(self, url, headers={}):
         headers.update(self.headers)

@@ -73,14 +73,14 @@ def change_tender_owner(tender_id):
     response.status = 200
     with open(ROOT + 'tendersowner.json') as json:
         tenders = load(json)
-    return dumps(tenders)
+    return tenders
 
 
 def change_subpage_owner(tender_id, subpage_name, subpage_id):
     response.status = 200
     with open(ROOT + 'change_' + subpage_name + '_owner.json') as json:
         subpage = load(json)
-    return dumps({'data':""})
+    return dumps(subpage)
 
 def contract_ownership(contract_id):
     with open(ROOT + 'change_contract_owner.json') as json:
