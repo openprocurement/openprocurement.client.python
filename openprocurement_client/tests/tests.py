@@ -90,8 +90,6 @@ class TransferandOwnership(unittest.TestCase):
         with open(ROOT + 'change_bids_owner.json') as change_bid:
             self.change_bid = munchify(load(change_bid))
         
-        
-        
 
     def tearDown(self):
         self.server.stop()
@@ -123,6 +121,7 @@ class TransferandOwnership(unittest.TestCase):
         
     def test_change_contracts_owner(self):
         setup_routing(self.app, routs=["change_contract_ownership", "create_transfer", "contract_patch_credentials"])
+        change_contract = self.client.change_contract_owner(self.contract.data.id, {"data":{"id":"1234"*8}})
         change_contract = self.client.change_contract_owner(self.contract.data.id, self.tender)
         self.assertEqual(change_contract, self.change_contract)
 
