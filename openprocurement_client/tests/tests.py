@@ -65,7 +65,7 @@ TEST_TRANSFER = munchify({
     "transfer_id" : "a5a9d0af94cdebf91d8ea39b8702410a",
 })
 
-class Transfer_and_Ownership(unittest.TestCase):
+class TransferandOwnership(unittest.TestCase):
 
     def setUp(self):
         #self._testMethodName
@@ -74,7 +74,7 @@ class Transfer_and_Ownership(unittest.TestCase):
         self.server = WSGIServer(('localhost', 20602), self.app, log=None)
         self.server.start()
 
-        self.client = change_owner.Owner_change('', host_url=HOST_URL, api_version=API_VERSION)
+        self.client = change_owner.Ownerchange('', host_url=HOST_URL, api_version=API_VERSION)
 
         with open(ROOT + TEST_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))

@@ -2,13 +2,13 @@ from client import TendersClient
 from json import loads, dumps
 from munch import munchify
 
-class Owner_change(TendersClient):
+class Ownerchange(TendersClient):
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
                  api_version='2.0',
                  params=None,
                  resource=''):
-        super(Owner_change, self).__init__(key, host_url, api_version, resource, params)
+        super(Ownerchange, self).__init__(key, host_url, api_version, resource, params)
         self.prefix_path = '/api/{}'.format(api_version)
         
     def _change_owner_item(self, url, payload, headers={}):
