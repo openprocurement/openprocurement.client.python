@@ -122,9 +122,9 @@ class TransferandOwnership(unittest.TestCase):
         self.client.change_complaint_owner(self.tender.data.id, TEST_KEYS_LIMITED.complaint_id,  complaint_transfer = "1234"*8)
         
     def test_change_contracts_owner(self):
-        setup_routing(self.app, routs=["change_contract_ownership", "create_transfer", "contract_patch_credentials"])
-        change_contract = self.client.change_contract_owner(self.contract.data.id, {"data":{"id":"1234"*8}})
-        change_contract = self.client.change_contract_owner(self.contract.data.id, self.tender)
+        setup_routing(self.app, routs=["change_contract_ownership", "create_transfer"])
+        change_contract = self.client.change_contract_owner("1234"*8, self.contract.data.id, {"data":{"id":"1234"*8}})
+        change_contract = self.client.change_contract_owner("1234"*8, self.contract.data.id, self.tender)
         self.assertEqual(change_contract, self.change_contract)
 
 class ViewerTenderTestCase(unittest.TestCase):

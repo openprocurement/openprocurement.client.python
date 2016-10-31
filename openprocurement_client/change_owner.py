@@ -47,14 +47,8 @@ class Ownerchange(TendersClient):
     ### Others owner change
     #
     
-    def patch_contract(self, contract_id, tender):
-        url = '{}/contracts/{}/credentials'.format(self.prefix_path, contract_id)
-        return self._patch_resource_item( url, payload={'data': ''}, headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')})
-    
-    
-    def change_contract_owner(self, contract_id, tender):
+    def change_contract_owner(self, transfer, contract_id, tender):
         tr_data = self.create_transfer()
-        contract = self.patch_contract(contract_id, tender)
-        url = '{}/contracts/{}/ownership'.format(self.prefix_path, contract.data.id)
-        data = {"data": {"id": tr_data.data.id, 'transfer': contract.access.transfer}}
+        url = '{}/contracts/{}/ownership'.format(self.prefix_path, contract_id)
+        data = {"data": {"id": tr_data.data.id, 'transfer': transfer}}
         return self.change_owner_item(url, payload=dumps(data)) 

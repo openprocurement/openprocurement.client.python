@@ -284,13 +284,6 @@ def contract_page(contract_id):
         return location_error("contract")
     return dumps(contract)
 
-def contract_patch_credentials(contract_id):
-    contract = contract_partition(contract_id)
-    if not contract:
-        return location_error("contract")
-    contract['access'] = {'token': uuid4().hex, 'transfer': uuid4().hex}
-    return contract
-
 def contract_patch(contract_id):
     contract = contract_partition(contract_id)
     if not contract:
@@ -347,7 +340,6 @@ routs_dict = {
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
         #owner change
-        "contract_patch_credentials": (CONTRACTS_PATH + "/<contract_id>/credentials", 'PATCH', contract_patch_credentials),
         "change_contract_ownership":(CONTRACTS_PATH + "/<contract_id>/ownership", 'POST', contract_ownership),
         "change_tender_owner": (TENDERS_PATH + "/<tender_id>/ownership", 'POST', change_tender_owner),
         "change_subpage_owner": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/ownership", 'POST', change_subpage_owner),
