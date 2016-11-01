@@ -31,7 +31,7 @@ def verify_file(fn):
             #
             # Explanation:
             #
-            # 1) Restkit reads the filename
+            # 1) requests reads the filename
             # from "name" attribute of a file-like object,
             # there is no other way to specify a filename;
             #
@@ -521,13 +521,13 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 award_id
             ),
-            files={"file": (file_.name, file_)},
+            files={'file': (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
     @verify_file
-    def upload_contract_document(self, file_, tender, contract_id, doc_type="documents"):
+    def upload_contract_document(self, file_, tender, contract_id, doc_type='documents'):
         return self._upload_resource_file(
             '{}/{}/contracts/{}/documents'.format(
                 self.prefix_path,
@@ -535,7 +535,7 @@ class TendersClient(APIBaseClient):
                 contract_id,
                 doc_type
             ),
-            data={"file": file_},
+            files={'file': (file_.name, file_)},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
@@ -545,7 +545,7 @@ class TendersClient(APIBaseClient):
     ###########################################################################
 
     def delete_bid(self, tender, bid, access_token=None):
-        logger.info("delete_lot is deprecated. In next update this function will takes bid_id and access_token instead bid.")
+        logger.info('delete_lot is deprecated. In next update this function will takes bid_id and access_token instead bid.')
         if isinstance(bid, basestring):
             bid_id = bid
             access_token = access_token
@@ -562,7 +562,7 @@ class TendersClient(APIBaseClient):
         )
 
     def delete_lot(self, tender, lot):
-        logger.info("delete_lot is deprecated. In next update this function will takes lot_id instead lot.")
+        logger.info('delete_lot is deprecated. In next update this function will takes lot_id instead lot.')
         if isinstance(lot, basestring):
             lot_id = lot
         else:
@@ -589,7 +589,7 @@ class TendersClientSync(TendersClient):
         params['feed'] = 'changes'
         self.headers.update(extra_headers)
 
-        response = self.request("GET", self.prefix_path, params_dict=params)
+        response = self.request('GET', self.prefix_path, params_dict=params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             return tender_list
