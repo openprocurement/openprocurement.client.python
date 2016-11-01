@@ -78,14 +78,14 @@ class APIBaseClient(object):
         # here we send a HEAD request to a neutral URL.
         self.session.request('HEAD', '{}/api/{}/spore'.format(host_url, api_version))
 
-    def request(self, method, path=None, payload=None, headers=None,
-                params_dict=None, files=None, **params):
+    def request(self, method, path=None, payload=None, json=None,
+                headers=None, params_dict=None, files=None):
         _headers = dict(self.headers)
         _headers.update(headers or {})
         if files:
             del _headers['Content-Type']
         response = self.session.request(
-            method, path, data=payload, headers=_headers,
+            method, path, data=payload, json=json, headers=_headers,
             params=params_dict, files=files
         )
         if 'Set-Cookie' in response.headers:
