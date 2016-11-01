@@ -24,14 +24,14 @@ IGNORE_PARAMS = ('uri', 'path')
 def verify_file(fn):
     @wraps(fn)
     def wrapper(self, file_, *args, **kwargs):
-        if isinstance(file_, str):
+        if isinstance(file_, (str, unicode)):
             # Using FileIO here instead of open()
             # to be able to override the filename
             # which is later used when uploading the file.
             #
             # Explanation:
             #
-            # 1) Restkit reads the filename
+            # 1) requests reads the filename
             # from "name" attribute of a file-like object,
             # there is no other way to specify a filename;
             #
