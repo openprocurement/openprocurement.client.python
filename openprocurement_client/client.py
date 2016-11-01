@@ -3,16 +3,15 @@ from functools import wraps
 from io import FileIO
 from os import path
 
+from exceptions import Conflict, Forbidden, InvalidResponse, Locked, \
+    MethodNotAllowed, PreconditionFailed, ResourceGone, RequestFailed, \
+    ResourceNotFound, Unauthorized, UnprocessableEntity
 from iso8601 import parse_date
-
 from munch import munchify
-from retrying import retry
-
 from simplejson import dumps, loads
-
-from .exceptions import InvalidResponse, NoToken
 from requests import Session
 from requests.auth import HTTPBasicAuth
+from retrying import retry
 
 
 logger = logging.getLogger(__name__)
@@ -88,6 +87,29 @@ class APIBaseClient(object):
             method, path, data=payload, json=json, headers=_headers,
             params=params_dict, files=files
         )
+
+        if response.status_code >= 400:
+            if response.status_code == 404:
+                raise ResourceNotFound(response)
+            elif response.status_code == 401:
+                raise Unauthorized(response)
+            elif response.status_code == 403:
+                raise Forbidden(response)
+            elif response.status_code == 410:
+                raise ResourceGone(response)
+            elif response.status_code == 405:
+                raise MethodNotAllowed(response)
+            elif response.status_code == 409:
+                raise Conflict(response)
+            elif response.status_code == 412:
+                raise PreconditionFailed(response)
+            elif response.status_code == 422:
+                raise UnprocessableEntity(response)
+            elif response.status_code == 423:
+                raise Locked(response)
+            else:
+                raise RequestFailed(response)
+
         if 'Set-Cookie' in response.headers:
             self.headers['Cookie'] = response.headers['Set-Cookie']
         return response
@@ -104,14 +126,14 @@ class APIBaseClient(object):
         )
         if response_item.status_code == 201:
             return munchify(loads(response_item.text))
-        raise InvalidResponse
+        raise InvalidResponse(response_item)
 
     def _get_resource_item(self, url, headers={}):
         headers.update(self.headers)
         response_item = self.request('GET', url, headers=headers)
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
-        raise InvalidResponse
+        raise InvalidResponse(response_item)
 
     def _patch_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
@@ -120,24 +142,24 @@ class APIBaseClient(object):
         )
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
-        raise InvalidResponse
+        raise InvalidResponse(response_item)
 
     def _upload_resource_file(self, url, files, headers={}, method='post'):
         file_headers = {}
         file_headers.update(self.headers)
         file_headers.update(headers)
-        response_item = self.request(method,
-            url, headers=file_headers, files=files
+        response_item = self.request(
+            method, url, headers=file_headers, files=files
         )
-        if response_item.status_code in (201, 200, 401, 403, 405, 409, 412, 423):
+        if response_item.status_code in (201, 200):
             return munchify(loads(response_item.text))
-        raise InvalidResponse
+        raise InvalidResponse(response_item)
 
     def _delete_resource_item(self, url, headers={}):
         response_item = self.request('DELETE', url, headers=headers)
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
-        raise InvalidResponse
+        raise InvalidResponse(response_item)
 
 
 class TendersClient(APIBaseClient):
@@ -159,8 +181,8 @@ class TendersClient(APIBaseClient):
         params['feed'] = feed
         self._update_params(params)
         response = self.request('GET',
-            self.prefix_path,
-            params_dict=self.params)
+                                self.prefix_path,
+                                params_dict=self.params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             self._update_params(tender_list.next_page)
@@ -168,7 +190,7 @@ class TendersClient(APIBaseClient):
         elif response.status_code == 404:
             del self.params['offset']
 
-        raise InvalidResponse
+        raise InvalidResponse(response)
 
     def get_latest_tenders(self, date, tender_id):
         iso_dt = parse_date(date)
@@ -185,7 +207,7 @@ class TendersClient(APIBaseClient):
             tender_list = munchify(loads(response.text))
             self._update_params(tender_list.next_page)
             return tender_list.data
-        raise InvalidResponse
+        raise InvalidResponse(response)
 
     def _get_tender_resource_list(self, tender, items_name):
         return self._get_resource_item(
@@ -304,7 +326,7 @@ class TendersClient(APIBaseClient):
             return response_item.text, \
                 response_item.headers['Content-Disposition'] \
                 .split("; filename=")[1].strip('"')
-        raise InvalidResponse
+        raise InvalidResponse(response_item)
 
     def extract_credentials(self, id):
         return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, id))
