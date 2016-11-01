@@ -64,8 +64,7 @@ class APIBaseClient(object):
                  host_url,
                  api_version,
                  resource,
-                 params=None,
-                 **kwargs):
+                 params=None):
 
         self.session = Session()
         self.session.auth = HTTPBasicAuth(key, '')
