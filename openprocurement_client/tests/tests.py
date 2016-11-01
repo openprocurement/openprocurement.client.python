@@ -84,7 +84,7 @@ class TransferandOwnership(unittest.TestCase):
             self.contract = munchify(load(contract))
             self.contract.update({'access':{"token": API_KEY}})
         
-        with open(ROOT + 'change_contract_owner.json') as change_contract:
+        with open(ROOT + 'change_contracts_owner.json') as change_contract:
             self.change_contract = munchify(load(change_contract))
             
         with open(ROOT + 'change_bids_owner.json') as change_bid:
@@ -108,23 +108,23 @@ class TransferandOwnership(unittest.TestCase):
 
     def test_change_tenders_owner(self):
         setup_routing(self.app, routs=["change_tender_owner", "create_transfer"])
-        self.client.change_tender_owner("1234"*8, tender_transfer = "1234"*8)
-        self.client.change_tender_owner(self.tender.data.id, tender_transfer = "1234"*8)
+        self.client.change_tender_owner("1234"*8, transfer = "1234"*8)
+        self.client.change_tender_owner(self.tender.data.id, transfer = "1234"*8)
 
     def test_change_bid_owner(self):
         setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
-        change_bid = self.client.change_bid_owner(self.tender.data.id, "1234"*8,  bid_transfer = "1234"*8)
-        change_bid = self.client.change_bid_owner(self.tender.data.id, TEST_KEYS.bid_id,  bid_transfer = "1234"*8)
+        change_bid = self.client.change_bid_owner(self.tender.data.id, "1234"*8,  transfer = "1234"*8)
+        change_bid = self.client.change_bid_owner(self.tender.data.id, TEST_KEYS.bid_id,  transfer = "1234"*8)
 
     def test_change_complaint_owner(self):
         setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
-        self.client.change_complaint_owner(self.tender.data.id, "1234"*8,  complaint_transfer = "1234"*8)
-        self.client.change_complaint_owner(self.tender.data.id, TEST_KEYS_LIMITED.complaint_id,  complaint_transfer = "1234"*8)
+        self.client.change_complaint_owner(self.tender.data.id, "1234"*8,  transfer = "1234"*8)
+        self.client.change_complaint_owner(self.tender.data.id, TEST_KEYS_LIMITED.complaint_id,  transfer = "1234"*8)
         
     def test_change_contracts_owner(self):
-        setup_routing(self.app, routs=["change_contract_ownership", "create_transfer"])
-        change_contract = self.client.change_contract_owner("1234"*8, self.contract.data.id, {"data":{"id":"1234"*8}})
-        change_contract = self.client.change_contract_owner("1234"*8, self.contract.data.id, self.tender)
+        setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])
+        change_contract = self.client.change_contract_owner("1234"*8, self.contract.data.id, transfer = "1234"*8)
+        change_contract = self.client.change_contract_owner(self.tender.data.id, self.contract.data.id, transfer = "1234"*8)
         self.assertEqual(change_contract, self.change_contract)
 
 class ViewerTenderTestCase(unittest.TestCase):

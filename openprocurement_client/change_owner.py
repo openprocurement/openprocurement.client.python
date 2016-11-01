@@ -9,46 +9,35 @@ class Ownerchange(TendersClient):
                  params=None,
                  resource=''):
         super(Ownerchange, self).__init__(key, host_url, api_version, resource, params)
-        self.prefix_path = '/api/{}'.format(api_version)
-        
-    def change_owner_item(self, url, payload):
-        response_item = self.post(url, payload=dumps(payload))   
+        self.transfer_path = '/api/{}/transfers'.format(api_version)
+        self.prefix_path = '/api/{}/tenders'.format(api_version)
+
+    def _change_ownership(self, transfer, item_id, item_path):
+        tr_data = self.create_transfer()
+        data = { "data": { "transfer": transfer, "id": tr_data.data.id}}
+        url = '{}/{}/ownership'.format(item_path, item_id)
+        response_item = self.post(url, payload=data)   
         if response_item.status_int == 200:
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
-
-    ### Tender and his subpage owner change
-    #
     
     def create_transfer(self):
-        return self._create_resource_item('{}/transfers'.format(self.prefix_path), {"data":{}})
+        return self._create_resource_item(self.transfer_path, {"data":{}})
 
     def get_transfer(self, id):
-        return self._get_resource_item('{}/transfers/{}'.format(self.prefix_path, id))
+        return self._get_resource_item('{}/{}'.format(self.transfer_path, id))
     
-    def change_bid_owner(self, tender_id, bid_id, bid_transfer):
-        tr_data = self.create_transfer()
-        data = { "data": { "transfer": bid_transfer, "id": tr_data.data.id}}
-        url = '{}/tenders/{}/{}/{}/{}'.format(self.prefix_path, tender_id, "bids", bid_id, "ownership")
-        return self.change_owner_item( url, payload=dumps(data))
+    def change_bid_owner(self, tender_id, bid_id, transfer):
+        path = '{}/{}/{}'.format(self.prefix_path, tender_id, "bids")
+        return self._change_ownership(transfer, bid_id, path)
     
-    def change_tender_owner(self, tender_id, tender_transfer):
-        tr_data = self.create_transfer()
-        data = { "data": { "transfer": tender_transfer, "id": tr_data.data.id}}
-        url = '{}/tenders/{}/ownership'.format(self.prefix_path, tender_id)
-        return self.change_owner_item( url, payload=dumps(data))
+    def change_tender_owner(self, tender_id, transfer):
+        return self._change_ownership(transfer, tender_id, self.prefix_path)
     
-    def change_complaint_owner(self, tender_id, complaint_id, complaint_transfer):
-        tr_data = self.create_transfer()
-        data = { "data": { "transfer": complaint_transfer, "id": tr_data.data.id}}
-        url = '{}/tenders/{}/{}/{}/{}'.format(self.prefix_path, tender_id, "complaints", complaint_id, "ownership")
-        return self.change_owner_item( url, payload=dumps(data))
-    
-    ### Others owner change
-    #
-    
-    def change_contract_owner(self, transfer, contract_id, tender):
-        tr_data = self.create_transfer()
-        url = '{}/contracts/{}/ownership'.format(self.prefix_path, contract_id)
-        data = {"data": {"id": tr_data.data.id, 'transfer': transfer}}
-        return self.change_owner_item(url, payload=dumps(data)) 
+    def change_complaint_owner(self, tender_id, complaint_id, transfer):
+        path = '{}/{}/{}'.format(self.prefix_path, tender_id, "complaints")
+        return self._change_ownership(transfer, complaint_id, path)
+
+    def change_contract_owner(self, tender_id, contract_id, transfer):
+        path = '{}/{}/{}'.format(self.prefix_path, tender_id, "contracts")
+        return self._change_ownership(transfer, contract_id, path)

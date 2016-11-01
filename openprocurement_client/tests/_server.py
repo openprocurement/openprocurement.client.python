@@ -82,11 +82,6 @@ def change_subpage_owner(tender_id, subpage_name, subpage_id):
         subpage = load(json)
     return dumps(subpage)
 
-def contract_ownership(contract_id):
-    with open(ROOT + 'change_contract_owner.json') as json:
-        contract_owner = load(json)
-    return dumps(contract_owner)
-
 ### Tender operations
 #
 
@@ -340,7 +335,6 @@ routs_dict = {
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
         #owner change
-        "change_contract_ownership":(CONTRACTS_PATH + "/<contract_id>/ownership", 'POST', contract_ownership),
         "change_tender_owner": (TENDERS_PATH + "/<tender_id>/ownership", 'POST', change_tender_owner),
         "change_subpage_owner": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/ownership", 'POST', change_subpage_owner),
         #for transfer
