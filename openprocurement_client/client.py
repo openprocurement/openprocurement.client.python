@@ -44,8 +44,14 @@ def verify_file(fn):
             file_.name = path.basename(file_.name)
         if hasattr(file_, 'read'):
             # A file-like object must have 'read' method
-            return fn(self, file_, *args, **kwargs)
+            output = fn(self, file_, *args, **kwargs)
+            file_.close()
+            return output
         else:
+            try:
+                file_.close()
+            except AttributeError:
+                pass
             raise TypeError('Expected either a string '
                             'containing a path to file or a '
                             'file-like object, got {}'.format(type(file_)))
