@@ -96,7 +96,8 @@ class TransferandOwnership(unittest.TestCase):
 
     def test_create_transfer(self):
         setup_routing(self.app, routs=["create_transfer"])
-        self.client.create_transfer()
+        data = self.client.create_transfer()
+        print data
 
     def test_get_transfer(self):
         setup_routing(self.app, routs=["get_transfer"])
@@ -109,7 +110,8 @@ class TransferandOwnership(unittest.TestCase):
     def test_change_tenders_owner(self):
         setup_routing(self.app, routs=["change_tender_owner", "create_transfer"])
         self.client.change_tender_owner("1234"*8, transfer = "1234"*8)
-        self.client.change_tender_owner(self.tender.data.id, transfer = "1234"*8)
+        data = self.client.change_tender_owner(self.tender.data.id, transfer = "1234"*8)
+        print data
 
     def test_change_bid_owner(self):
         setup_routing(self.app, routs=["change_subpage_owner", "create_transfer"])

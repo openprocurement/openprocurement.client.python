@@ -14,19 +14,19 @@ class Ownerchange(TendersClient):
 
     def _change_ownership(self, transfer, item_id, item_path):
         tr_data = self.create_transfer()
-        data = { "data": { "transfer": transfer, "id": tr_data.data.id}}
+        data = { "data": { "transfer": transfer, "id": tr_data.access.transfer}}
         url = '{}/{}/ownership'.format(item_path, item_id)
-        response_item = self.post(url, payload=data)   
+        response_item = self.post(url, payload=dumps(data))   
         if response_item.status_int == 200:
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
-    
+
     def create_transfer(self):
         return self._create_resource_item(self.transfer_path, {"data":{}})
 
     def get_transfer(self, id):
         return self._get_resource_item('{}/{}'.format(self.transfer_path, id))
-    
+
     def change_bid_owner(self, tender_id, bid_id, transfer):
         path = '{}/{}/{}'.format(self.prefix_path, tender_id, "bids")
         return self._change_ownership(transfer, bid_id, path)

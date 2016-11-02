@@ -14,6 +14,8 @@ CONTRACTS_PATH = API_PATH.format('0.10', "contracts")
 SPORE_PATH = API_PATH.format('0.10', "spore")
 TRANSFER_PATH = API_PATH.format('0.10', "transfers")
 
+TRANSFER = "a7afc9b1fc795540f2487ba48243ca071c07a823d27"
+
 def setup_routing(app, routs=None):
     if routs is None:
         routs = ['spore']
@@ -46,18 +48,17 @@ def tenders_page_get():
 def create_transfer():
     response.status = 201
     data = {
-        "data": {
-            "date": "2016-07-04T19:00:54.613149+03:00",
-            "id": "a5a9d0af94cdebf91d8ea39b8702410a"
-                }
-        }
+        "data": {},
+        "access": {"transfer": TRANSFER} 
+    }
     return dumps(data)
 
 def get_transfer(transfer_id):
     response.status = 200
-    return {"data": { "date": "2016-07-04T19:00:54.613149+03:00",
-                      "id": transfer_id
-           }}
+    return {"data": {"date": "2016-07-04T19:00:54.613149+03:00",
+                     "id": transfer_id,
+                    }
+           }
 
 def get_used_transfer(transfer_id):
     response.status = 200
@@ -70,17 +71,24 @@ def get_used_transfer(transfer_id):
 #
 
 def change_tender_owner(tender_id):
-    response.status = 200
-    with open(ROOT + 'tendersowner.json') as json:
-        tenders = load(json)
-    return tenders
-
+    if request.json["data"]["id"]== TRANSFER:
+        response.status = 200
+        with open(ROOT + 'tendersowner.json') as json:
+            tenders = load(json)
+        return dumps(tenders)
+    else:
+        response.status = 402
+        return {"data": {}}
 
 def change_subpage_owner(tender_id, subpage_name, subpage_id):
-    response.status = 200
-    with open(ROOT + 'change_' + subpage_name + '_owner.json') as json:
-        subpage = load(json)
-    return dumps(subpage)
+    if request.json["data"]["id"]== TRANSFER:
+        response.status = 200
+        with open(ROOT + 'change_' + subpage_name + '_owner.json') as json:
+            subpage = load(json)
+        return dumps(subpage)
+    else:
+        response.status = 402
+        return {"data": {}}
 
 ### Tender operations
 #
