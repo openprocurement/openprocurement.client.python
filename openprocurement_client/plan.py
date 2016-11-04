@@ -7,14 +7,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class PlansClient(APIBaseClient):
     """client for plans"""
 
-    def __init__(self, key,
-                 host_url="https://api-sandbox.openprocurement.org",
-                 api_version='0.8',
+    api_version = '0.8'
+
+    def __init__(self,
+                 key,
+                 host_url=None,
+                 api_version=None,
                  params=None):
-        super(PlansClient, self).__init__(key, host_url,api_version, "plans", params)
+
+        _api_version = api_version or self.api_version
+        super(PlansClient, self)\
+            .__init__(key, 'plans', host_url, _api_version, params)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -24,7 +31,7 @@ class PlansClient(APIBaseClient):
     def get_plans(self, params={}, feed='changes'):
         params['feed'] = feed
         self._update_params(params)
-        response = self.request("GET", 
+        response = self.request('GET',
             self.prefix_path,
             params_dict=self.params)
         if response.status_code == 200:
@@ -38,8 +45,8 @@ class PlansClient(APIBaseClient):
 
     def get_latest_plans(self, date):
         iso_dt = parse_date(date)
-        dt = iso_dt.strftime("%Y-%m-%d")
-        tm = iso_dt.strftime("%H:%M:%S")
+        dt = iso_dt.strftime('%Y-%m-%d')
+        tm = iso_dt.strftime('%H:%M:%S')
         response = self._get_resource_item(
             '{}?offset={}T{}&opt_fields=plan_id&mode=test'.format(
                 self.prefix_path,
@@ -80,10 +87,11 @@ class PlansClient(APIBaseClient):
     ###########################################################################
 
     def get_plan(self, plan_id):
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, plan_id))
+        return self._get_resource_item('{}/{}'
+                                       .format(self.prefix_path, plan_id))
 
     def _get_plan_resource_item(self, plan, item_id, items_name,
-                                  access_token=""):
+                                access_token=''):
         if access_token:
             headers = {'X-Access-Token': access_token}
         else:
@@ -104,7 +112,8 @@ class PlansClient(APIBaseClient):
     def _patch_plan_resource_item(self, plan, item_obj, items_name):
         return self._patch_resource_item(
             '{}/{}/{}/{}'.format(
-                self.prefix_path, plan.data.id, items_name, item_obj['data']['id']
+                self.prefix_path, plan.data.id,
+                items_name, item_obj['data']['id']
             ),
             payload=item_obj,
             headers={'X-Access-Token':
@@ -113,7 +122,7 @@ class PlansClient(APIBaseClient):
 
     def patch_plan(self, plan):
         return self._patch_resource_item(
-            '{}/{}'.format(self.prefix_path, plan["data"]["id"]),
+            '{}/{}'.format(self.prefix_path, plan['data']['id']),
             payload=plan,
             headers={'X-Access-Token':
                      getattr(getattr(plan, 'access', ''), 'token', '')}

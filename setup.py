@@ -38,6 +38,7 @@ setup(
         'retrying',
         'simplejson',
         'requests',
+        'python-magic'
         # -*- Extra requirements: -*-
     ],
     tests_require=tests_require,
