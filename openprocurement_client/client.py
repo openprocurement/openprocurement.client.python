@@ -334,7 +334,7 @@ class TendersClient(APIBaseClient):
             if response_obj.status_int == 200:
                 return response_obj.body_string(), \
                     response_obj.headers['Content-Disposition'] \
-                    .split(";")[1].split('"')[1]
+                    .split("; filename=")[1].strip('"')
         raise InvalidResponse
 
     def extract_credentials(self, id):
