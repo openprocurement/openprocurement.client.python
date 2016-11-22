@@ -8,10 +8,13 @@ from munch import munchify
 import unittest
 from openprocurement_client import client as tender_client
 from openprocurement_client.contract import ContractingClient
+from openprocurement_client.exceptions import ResourceNotFound
 from openprocurement_client import plan as plan_client
 from openprocurement_client.tests._server import (tender_partition, location_error,
                                                  setup_routing, ROOT)
 
+import logging
+logging.basicConfig()
 
 HOST_URL = "http://localhost:20602"
 API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
@@ -399,7 +402,8 @@ class UserTestCase(unittest.TestCase):
         setup_routing(self.app, routs=["redirect","download"])
         file_name = 'error.txt'
         url = HOST_URL + '/redirect/' + file_name
-        self.assertRaises(tender_client.InvalidResponse, self.client.get_file, self.tender, url, API_KEY)
+        self.assertRaises(ResourceNotFound, self.client.get_file,
+                          self.tender, url, API_KEY)
 
     def test_get_file_no_token(self):
         setup_routing(self.app, routs=["redirect","download"])
