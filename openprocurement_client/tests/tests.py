@@ -6,10 +6,10 @@ from collections import Iterable
 from simplejson import loads, load
 from munch import munchify
 import unittest
-from openprocurement_client import client as tender_client
+from openprocurement_client.client import TendersClient
 from openprocurement_client.contract import ContractingClient
 from openprocurement_client.exceptions import ResourceNotFound
-from openprocurement_client import plan as plan_client
+from openprocurement_client.plan import PlansClient
 from openprocurement_client.tests._server import (tender_partition, location_error,
                                                  setup_routing, ROOT)
 
@@ -70,7 +70,7 @@ class ViewerTenderTestCase(unittest.TestCase):
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
 
-        self.client = tender_client.TendersClient('', host_url=HOST_URL, api_version=API_VERSION)
+        self.client = TendersClient('', host_url=HOST_URL, api_version=API_VERSION)
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
@@ -111,7 +111,7 @@ class ViewerPlanTestCase(unittest.TestCase):
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
 
-        self.client = plan_client.PlansClient('', host_url=HOST_URL, api_version=API_VERSION)
+        self.client = PlansClient('', host_url=HOST_URL, api_version=API_VERSION)
 
         with open(ROOT + 'plans.json') as plans:
             self.plans = munchify(load(plans))
@@ -153,7 +153,7 @@ class UserTestCase(unittest.TestCase):
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
-        self.client = tender_client.TendersClient(API_KEY,  host_url=HOST_URL, api_version=API_VERSION)
+        self.client = TendersClient(API_KEY,  host_url=HOST_URL, api_version=API_VERSION)
 
         with open(ROOT + TEST_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
