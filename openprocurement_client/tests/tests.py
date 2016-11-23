@@ -16,9 +16,12 @@ from openprocurement_client.tests._server import (tender_partition, location_err
 import logging
 logging.basicConfig()
 
-HOST_URL = "http://localhost:20602"
+BASIS_URL = "http://localhost"
 API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
 API_VERSION = '0.10'
+PORT = 20602
+HOST_URL = BASIS_URL + ':' + str(PORT)
+
 
 TEST_KEYS = munchify({
     "tender_id": '823d50b3236247adad28a5a66f74db42',
@@ -64,7 +67,7 @@ class ViewerTenderTestCase(unittest.TestCase):
         #self._testMethodName
         self.app = Bottle()
         setup_routing(self.app)
-        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
 
         self.client = tender_client.TendersClient('', host_url=HOST_URL, api_version=API_VERSION)
@@ -105,7 +108,7 @@ class ViewerPlanTestCase(unittest.TestCase):
     def setUp(self):
         self.app = Bottle()
         setup_routing(self.app)
-        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
 
         self.client = plan_client.PlansClient('', host_url=HOST_URL, api_version=API_VERSION)
@@ -148,7 +151,7 @@ class UserTestCase(unittest.TestCase):
         self.app = Bottle()
 
         setup_routing(self.app)
-        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
         self.client = tender_client.TendersClient(API_KEY,  host_url=HOST_URL, api_version=API_VERSION)
 
@@ -618,7 +621,7 @@ class ContractingUserTestCase(unittest.TestCase):
         self.app = Bottle()
 
         setup_routing(self.app)
-        self.server = WSGIServer(('localhost', 20602), self.app, log=None)
+        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         self.server.start()
         self.client = ContractingClient(API_KEY,  host_url=HOST_URL,
                                         api_version=API_VERSION)
