@@ -61,16 +61,20 @@ TEST_CONTRACT_KEYS = munchify({
     "error_id": 'zzzxxx111'
 })
 
+
+def setting_up(inst, client):
+    inst.app = Bottle()
+    setup_routing(inst.app)
+    inst.server = WSGIServer(('localhost', PORT), inst.app, log=None)
+    inst.server.start()
+    inst.client = client('', host_url=HOST_URL, api_version=API_VERSION)
+
+
 class ViewerTenderTestCase(unittest.TestCase):
     """"""
     def setUp(self):
         #self._testMethodName
-        self.app = Bottle()
-        setup_routing(self.app)
-        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
-        self.server.start()
-
-        self.client = TendersClient('', host_url=HOST_URL, api_version=API_VERSION)
+        setting_up(inst=self, client=TendersClient)
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
@@ -79,7 +83,6 @@ class ViewerTenderTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.server.stop()
-
 
     def test_get_tenders(self):
         setup_routing(self.app, routs=["tenders"])
@@ -103,15 +106,11 @@ class ViewerTenderTestCase(unittest.TestCase):
         self.assertIsInstance(tenders, Iterable)
         self.assertEqual(tenders, self.tenders.data)
 
+
 class ViewerPlanTestCase(unittest.TestCase):
     """"""
     def setUp(self):
-        self.app = Bottle()
-        setup_routing(self.app)
-        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
-        self.server.start()
-
-        self.client = PlansClient('', host_url=HOST_URL, api_version=API_VERSION)
+        setting_up(inst=self, client=PlansClient)
 
         with open(ROOT + 'plans.json') as plans:
             self.plans = munchify(load(plans))
@@ -144,16 +143,12 @@ class ViewerPlanTestCase(unittest.TestCase):
         self.assertIsInstance(plans, Iterable)
         self.assertEqual(plans, self.plans.data)
 
+
 class UserTestCase(unittest.TestCase):
     """"""
     def setUp(self):
         #self._testMethodName
-        self.app = Bottle()
-
-        setup_routing(self.app)
-        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
-        self.server.start()
-        self.client = TendersClient(API_KEY,  host_url=HOST_URL, api_version=API_VERSION)
+        setting_up(inst=self, client=TendersClient)
 
         with open(ROOT + TEST_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
@@ -235,7 +230,6 @@ class UserTestCase(unittest.TestCase):
     ###########################################################################
     #             GET ITEM TEST
     ###########################################################################
-
 
     def test_get_question(self):
         setup_routing(self.app, routs=["tender_subpage_item"])
@@ -530,7 +524,7 @@ class UserTestCase(unittest.TestCase):
 
     def test_upload_document_type_error(self):
         setup_routing(self.app, routs=["tender_document_create"])
-        self.assertRaises(TypeError,self.client.upload_document, (object, self.tender))
+        self.assertRaises(TypeError, self.client.upload_document, (object, self.tender))
 
     def test_update_bid_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_update"])
@@ -618,13 +612,7 @@ class ContractingUserTestCase(unittest.TestCase):
     """"""
     def setUp(self):
         #self._testMethodName
-        self.app = Bottle()
-
-        setup_routing(self.app)
-        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
-        self.server.start()
-        self.client = ContractingClient(API_KEY,  host_url=HOST_URL,
-                                        api_version=API_VERSION)
+        setting_up(inst=self, client=ContractingClient)
 
         with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
             self.contract = munchify(load(contract))
