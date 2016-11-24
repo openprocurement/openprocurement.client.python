@@ -63,23 +63,24 @@ TEST_CONTRACT_KEYS = munchify({
 })
 
 
-def setting_up(inst, client):
-    inst.app = Bottle()
-    setup_routing(inst.app)
-    inst.server = WSGIServer(('localhost', PORT), inst.app, log=None)
-    try:
-        inst.server.start()
-    except Exception as error:
-        print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
-        raise error
-    inst.client = client('', host_url=HOST_URL, api_version=API_VERSION)
+class BaseTestClass(unittest.TestCase):
+
+    def setting_up(self, client):
+        self.app = Bottle()
+        setup_routing(self.app)
+        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
+        try:
+            self.server.start()
+        except Exception as error:
+            print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+            raise error
+        self.client = client('', host_url=HOST_URL, api_version=API_VERSION)
 
 
-class ViewerTenderTestCase(unittest.TestCase):
+class ViewerTenderTestCase(BaseTestClass):
     """"""
     def setUp(self):
-        #self._testMethodName
-        setting_up(inst=self, client=TendersClient)
+        self.setting_up(client=TendersClient)
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
@@ -112,10 +113,10 @@ class ViewerTenderTestCase(unittest.TestCase):
         self.assertEqual(tenders, self.tenders.data)
 
 
-class ViewerPlanTestCase(unittest.TestCase):
+class ViewerPlanTestCase(BaseTestClass):
     """"""
     def setUp(self):
-        setting_up(inst=self, client=PlansClient)
+        self.setting_up(client=PlansClient)
 
         with open(ROOT + 'plans.json') as plans:
             self.plans = munchify(load(plans))
@@ -149,11 +150,11 @@ class ViewerPlanTestCase(unittest.TestCase):
         self.assertEqual(plans, self.plans.data)
 
 
-class UserTestCase(unittest.TestCase):
+class UserTestCase(BaseTestClass):
     """"""
     def setUp(self):
         #self._testMethodName
-        setting_up(inst=self, client=TendersClient)
+        self.setting_up(client=TendersClient)
 
         with open(ROOT + TEST_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
@@ -613,11 +614,11 @@ class UserTestCase(unittest.TestCase):
                          munchify(loads(location_error('lots'))))
 
 
-class ContractingUserTestCase(unittest.TestCase):
+class ContractingUserTestCase(BaseTestClass):
     """"""
     def setUp(self):
         #self._testMethodName
-        setting_up(inst=self, client=ContractingClient)
+        self.setting_up(client=ContractingClient)
 
         with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
             self.contract = munchify(load(contract))
