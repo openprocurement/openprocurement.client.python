@@ -42,7 +42,7 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
     """
     forward = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
     backfard = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
-    Cookie = forward.headers['Cookie'] = backfard.headers['Cookie']
+    Cookie = forward.session.cookies = backfard.session.cookies
     backfard_params = {'descending': True, 'feed': 'changes'}
     backfard_params.update(extra_params)
     forward_params = {'feed': 'changes'}
@@ -155,7 +155,7 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
 def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
     logger.info('Backward: Start worker')
     response = client.sync_tenders(params)
-    if origin_cookie != client.headers['Cookie']:
+    if origin_cookie != client.session.cookies:
         raise Exception('LB Server mismatch')
     while response.data:
         for tender in response.data:
@@ -163,7 +163,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
             queue.put(tender)
         params['offset'] = response.next_page.offset
         response = client.sync_tenders(params)
-        if origin_cookie != client.headers['Cookie']:
+        if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
         logger.info('Backward: pause between requests')
         sleep(requests_sleep)
@@ -174,7 +174,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
 def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait_sleep):
     logger.info('Forward: Start worker')
     response = client.sync_tenders(params)
-    if origin_cookie != client.headers['Cookie']:
+    if origin_cookie != client.session.cookies:
         raise Exception('LB Server mismatch')
     while 1:
         while response.data:
@@ -183,7 +183,7 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
                 queue.put(tender)
             params['offset'] = response.next_page.offset
             response = client.sync_tenders(params)
-            if origin_cookie != client.headers['Cookie']:
+            if origin_cookie != client.session.cookies:
                 raise Exception('LB Server mismatch')
             if len(response.data) != 0:
                 logger.info('Forward: pause between requests')
@@ -194,7 +194,7 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
 
         params['offset'] = response.next_page.offset
         response = client.sync_tenders(params)
-        if origin_cookie != client.headers['Cookie']:
+        if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
 
     return 1

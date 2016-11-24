@@ -59,8 +59,6 @@ class APITemplateClient(object):
             else:
                 raise RequestFailed(response)
 
-        if 'Set-Cookie' in response.headers:
-            self.headers['Cookie'] = response.headers['Set-Cookie']
         return response
 
 
