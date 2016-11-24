@@ -5,6 +5,7 @@ from StringIO import StringIO
 from collections import Iterable
 from simplejson import loads, load
 from munch import munchify
+import sys
 import unittest
 from openprocurement_client.client import TendersClient
 from openprocurement_client.contract import ContractingClient
@@ -66,7 +67,11 @@ def setting_up(inst, client):
     inst.app = Bottle()
     setup_routing(inst.app)
     inst.server = WSGIServer(('localhost', PORT), inst.app, log=None)
-    inst.server.start()
+    try:
+        inst.server.start()
+    except Exception as error:
+        print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+        raise error
     inst.client = client('', host_url=HOST_URL, api_version=API_VERSION)
 
 
