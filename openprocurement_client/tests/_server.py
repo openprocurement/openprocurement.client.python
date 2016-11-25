@@ -4,22 +4,42 @@ from simplejson import dumps, load
 from uuid import uuid4
 import os
 
-
+BASIS_URL = "http://localhost"
+API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
+API_VERSION = '0.10'
+PORT = 20602
+DS_PORT = 20603
+HOST_URL = BASIS_URL + ':' + str(PORT)
+DS_HOST_URL = BASIS_URL + ':' + str(DS_PORT)
+AUTH_DS_FAKE = ['login_ds_fake', 'pass_ds_fake']
 ROOT = os.path.dirname(__file__) + '/data/'
-
 API_PATH = '/api/{0}/{1}'
-TENDERS_PATH = API_PATH.format('0.10', "tenders")
-PLANS_PATH = API_PATH.format('0.10', "plans")
-CONTRACTS_PATH = API_PATH.format('0.10', "contracts")
-SPORE_PATH = API_PATH.format('0.10', "spore")
+TENDERS_PATH = API_PATH.format(API_VERSION, "tenders")
+PLANS_PATH = API_PATH.format(API_VERSION, "plans")
+CONTRACTS_PATH = API_PATH.format(API_VERSION, "contracts")
+SPORE_PATH = API_PATH.format(API_VERSION, "spore")
+
 
 def setup_routing(app, routs=None):
     if routs is None:
         routs = ['spore']
-    routs = routs
     for route in routs:
         path, method, func = routs_dict[route]
         app.route(path, method, func)
+
+
+def setup_routing_ds(app):
+    for route in routs_dict_ds:
+        path, method, func = routs_dict_ds[route]
+        app.route(path, method, func)
+
+
+def get_doc_title_from_request(req):
+    if req.files.file:
+        doc_title = req.files.file.filename
+    else:
+        doc_title = req.json['data']['title']
+    return doc_title
 
 
 ### Base routes
@@ -108,7 +128,7 @@ def tender_patch_credentials(tender_id):
 def tender_document_create(tender_id):
     response.status = 201
     document = tender_partition(tender_id, 'documents')[0]
-    document.title = request.files.file.filename
+    document.title = get_doc_title_from_request(request)
     document.id = '12345678123456781234567812345678'
     return dumps({"data": document})
 
@@ -120,13 +140,13 @@ def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document
     for unit in subpage:
         if unit['id'] == subpage_id:
             document= unit["documents"][0]
-            document.title = request.files.file.filename
+            document.title = get_doc_title_from_request(request)
             document.id = '12345678123456781234567812345678'
             return dumps({"data": document})
     return location_error(subpage_name)
 
 def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document_type, document_id):
-    response.status = 201
+    response.status = 200
     subpage = tender_partition(tender_id, subpage_name)
     if not subpage:
         return location_error("tender")
@@ -134,7 +154,7 @@ def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document
         if unit['id'] == subpage_id:
             for document in unit[document_type]:
                 if document['id'] == document_id:
-                    document.title = request.files.file.filename
+                    document.title = get_doc_title_from_request(request)
                     return dumps({"data": document})
     return location_error(subpage_name)
 
@@ -246,7 +266,7 @@ def contract_patch(contract_id):
 def contract_document_create(contract_id):
     response.status = 201
     document = contract_partition(contract_id, 'documents')[0]
-    document.title = request.files.file.filename
+    document.title = get_doc_title_from_request(request)
     document.id = '12345678123456781234567812345678'
     return dumps({"data": document})
 
@@ -292,3 +312,26 @@ routs_dict = {
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error)
         }
+
+
+download_url_extension = 'some_key_etc'
+
+
+def register_document_upload_inside():
+    json = request.json
+    response.status = 201
+    return munchify(
+        {'upload_url': DS_HOST_URL + '/upload/' + download_url_extension,
+         'data': {'url': DS_HOST_URL + '/get/' + download_url_extension,
+                  'hash': json['data']['hash']}})
+
+
+def document_upload_inside():
+    response.status = 200
+
+
+routs_dict_ds = {
+    'register_document_upload': ('/', 'POST', register_document_upload_inside),
+    'document_upload':
+        ('/upload/' + download_url_extension, 'POST', document_upload_inside)
+}

@@ -9,20 +9,18 @@ import sys
 import unittest
 from openprocurement_client.client import TendersClient
 from openprocurement_client.contract import ContractingClient
+from openprocurement_client.document_service_client \
+    import DocumentServiceClient
 from openprocurement_client.exceptions import ResourceNotFound
 from openprocurement_client.plan import PlansClient
-from openprocurement_client.tests._server import (tender_partition, location_error,
-                                                 setup_routing, ROOT)
+from openprocurement_client.tests._server import \
+    API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
+    HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
+    tender_partition
+
 
 import logging
 logging.basicConfig()
-
-BASIS_URL = "http://localhost"
-API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
-API_VERSION = '0.10'
-PORT = 20602
-HOST_URL = BASIS_URL + ':' + str(PORT)
-
 
 TEST_KEYS = munchify({
     "tender_id": '823d50b3236247adad28a5a66f74db42',
@@ -76,6 +74,33 @@ class BaseTestClass(unittest.TestCase):
             raise error
         self.client = client('', host_url=HOST_URL, api_version=API_VERSION)
 
+    @classmethod
+    def setting_up_ds(cls):
+        cls.app_ds = Bottle()
+        cls.server_ds \
+            = WSGIServer(('localhost', DS_PORT), cls.app_ds, log=None)
+        try:
+            cls.server_ds.start()
+        except Exception as error:
+            print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+            raise error
+
+        # to test units performing file operations outside the DS set
+        # cls.ds_client = None
+        cls.ds_client = DocumentServiceClient(host_url=DS_HOST_URL,
+                                               auth_ds=AUTH_DS_FAKE)
+
+        setup_routing_ds(cls.app_ds)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setting_up_ds()
+
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server_ds.stop()
+
 
 class ViewerTenderTestCase(BaseTestClass):
     """"""
@@ -125,7 +150,6 @@ class ViewerPlanTestCase(BaseTestClass):
 
     def tearDown(self):
         self.server.stop()
-
 
     def test_get_plans(self):
         setup_routing(self.app, routs=["plans"])
@@ -424,16 +448,17 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_document(file_, self.tender)
+        doc = self.client.upload_document(file_, self.tender,
+                                          ds_client=self.ds_client)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_tender_document_path(self):
         setup_routing(self.app, routs=["tender_document_create"])
         file_name = "test_document.txt"
         file_path = ROOT + file_name
-        doc = self.client.upload_document(file_path, self.tender)
+        doc = self.client.upload_document(file_path, self.tender,
+                                          ds_client=self.ds_client)
         self.assertEqual(doc.data.title, file_name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
 
@@ -443,10 +468,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload qualification document text data")
         file_.seek(0)
-        doc = self.client.upload_qualification_document(file_, self.tender, TEST_KEYS.qualification_id)
+        doc = self.client.upload_qualification_document(
+            file_, self.tender, TEST_KEYS.qualification_id,
+            ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_bid_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -454,10 +481,11 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id)
+        doc = self.client.upload_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id, ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_bid_financial_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -466,10 +494,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id, document_type)
+        doc = self.client.upload_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id,
+            document_type, ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_bid_qualification_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -478,10 +508,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id, document_type)
+        doc = self.client.upload_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id,
+            document_type, ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_bid_eligibility_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -490,10 +522,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_bid_document(file_, self.tender, TEST_KEYS.bid_id, document_type)
+        doc = self.client.upload_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id, document_type,
+            ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_cancellation_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -501,10 +535,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_cancellation_document(file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id)
+        doc = self.client.upload_cancellation_document(
+            file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id,
+            self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_complaint_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -512,10 +548,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.upload_complaint_document(file_, self.limited_tender, TEST_KEYS_LIMITED.complaint_id)
+        doc = self.client.upload_complaint_document(
+            file_, self.limited_tender, TEST_KEYS_LIMITED.complaint_id,
+            self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_award_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_create"])
@@ -523,10 +561,11 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_award_document.txt'
         file_.write("test upload award document text data")
         file_.seek(0)
-        doc = self.client.upload_award_document(file_, self.tender, TEST_KEYS.award_id)
+        doc = self.client.upload_award_document(
+            file_, self.tender, TEST_KEYS.award_id, ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.new_document_id)
-        file_.close()
 
     def test_upload_document_type_error(self):
         setup_routing(self.app, routs=["tender_document_create"])
@@ -538,10 +577,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_document_id)
+        doc = self.client.update_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id,
+            TEST_KEYS.bid_document_id, ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.bid_document_id)
-        file_.close()
 
     def test_update_bid_qualification_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_update"])
@@ -550,10 +591,13 @@ class UserTestCase(BaseTestClass):
         file_.write("test upload tender qualification_document text data")
         file_.seek(0)
         document_type = "qualificationDocuments"
-        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_qualification_document_id, document_type)
+        doc = self.client.update_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id,
+            TEST_KEYS.bid_qualification_document_id, document_type,
+            self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.bid_qualification_document_id)
-        file_.close()
 
     def test_update_bid_financial_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_update"])
@@ -562,10 +606,13 @@ class UserTestCase(BaseTestClass):
         file_.write("test upload tender financial_document text data")
         file_.seek(0)
         document_type = "financial_documens"
-        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_financial_document_id, document_type)
+        doc = self.client.update_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id,
+            TEST_KEYS.bid_financial_document_id, document_type,
+            ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.bid_financial_document_id)
-        file_.close()
 
     def test_update_bid_eligibility_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_update"])
@@ -574,10 +621,13 @@ class UserTestCase(BaseTestClass):
         file_.write("test upload tender eligibility_document text data")
         file_.seek(0)
         document_type = "eligibility_documents"
-        doc = self.client.update_bid_document(file_, self.tender, TEST_KEYS.bid_id, TEST_KEYS.bid_eligibility_document_id, document_type)
+        doc = self.client.update_bid_document(
+            file_, self.tender, TEST_KEYS.bid_id,
+            TEST_KEYS.bid_eligibility_document_id, document_type,
+            self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS.bid_eligibility_document_id)
-        file_.close()
 
     def test_update_cancellation_document(self):
         setup_routing(self.app, routs=["tender_subpage_document_update"])
@@ -585,10 +635,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender document text data")
         file_.seek(0)
-        doc = self.client.update_cancellation_document(file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id, TEST_KEYS_LIMITED.cancellation_document_id)
+        doc = self.client.update_cancellation_document(
+            file_, self.limited_tender, TEST_KEYS_LIMITED.cancellation_id,
+            TEST_KEYS_LIMITED.cancellation_document_id, ds_client=self.ds_client
+        )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_KEYS_LIMITED.cancellation_document_id)
-        file_.close()
 
     ###########################################################################
     #             DELETE ITEMS LIST TEST
@@ -646,10 +698,10 @@ class ContractingUserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload contract document text data")
         file_.seek(0)
-        doc = self.client.upload_document(file_, self.contract)
+        doc = self.client.upload_document(file_, self.contract,
+                                          ds_client=self.ds_client)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
-        file_.close()
 
 
 if __name__ == '__main__':
