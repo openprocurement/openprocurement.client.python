@@ -108,8 +108,7 @@ class TendersClient(APIBaseClient):
     def _get_tender_resource_list(self, tender, items_name):
         return self._get_resource_item(
             '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def get_questions(self, tender):
@@ -132,8 +131,7 @@ class TendersClient(APIBaseClient):
         return self._create_resource_item(
             '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
             item_obj,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def create_tender(self, tender):
@@ -165,8 +163,7 @@ class TendersClient(APIBaseClient):
             '{}/{}/{}'.format(self.prefix_path, tender.data.id,
                               'awards/{0}/complaints'.format(award_id)),
             complaint,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def create_thin_document(self, tender, document_data):
@@ -176,8 +173,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id
             ),
             document_data,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     ###########################################################################
@@ -192,8 +188,7 @@ class TendersClient(APIBaseClient):
         if access_token:
             headers = {'X-Access-Token': access_token}
         else:
-            headers = {'X-Access-Token':
-                       getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers = {'X-Access-Token': self._get_access_token(tender)}
         return self._get_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path,
                                  tender.data.id,
@@ -244,16 +239,14 @@ class TendersClient(APIBaseClient):
                 items_name, item_obj['data']['id']
             ),
             payload=item_obj,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_tender(self, tender):
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, tender['data']['id']),
             payload=tender,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_question(self, tender, question):
@@ -268,8 +261,7 @@ class TendersClient(APIBaseClient):
                 self.prefix_path, tender.data.id, 'bids', bid_id, document_id
             ),
             payload=document_data,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_award(self, tender, award):
@@ -289,8 +281,7 @@ class TendersClient(APIBaseClient):
                 cancellation_id, cancellation_doc_id
             ),
             payload=cancellation,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_complaint(self, tender, complaint):
@@ -304,8 +295,7 @@ class TendersClient(APIBaseClient):
                 self.prefix_path, tender.data.id, award_id, complaint.data.id
             ),
             payload=complaint,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_lot(self, tender, lot):
@@ -330,8 +320,7 @@ class TendersClient(APIBaseClient):
                 contract_id, document_id
             ),
             payload=document_data,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_credentials(self, id, access_token):
@@ -353,8 +342,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -369,8 +357,7 @@ class TendersClient(APIBaseClient):
                 doc_type
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -386,8 +373,7 @@ class TendersClient(APIBaseClient):
                 document_id
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             method='put',
             ds_client=ds_client
         )
@@ -402,8 +388,7 @@ class TendersClient(APIBaseClient):
                 cancellation_id
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -418,8 +403,7 @@ class TendersClient(APIBaseClient):
                     document_id
                 ),
                 files=file_,
-                headers={'X-Access-Token':
-                         getattr(getattr(tender, 'access', ''), 'token', '')},
+                headers={'X-Access-Token': self._get_access_token(tender)},
                 method='put',
                 ds_client=ds_client
             )
@@ -433,8 +417,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 complaint_id),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -448,8 +431,7 @@ class TendersClient(APIBaseClient):
                 award_id,
                 complaint_id),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -463,8 +445,7 @@ class TendersClient(APIBaseClient):
                 qualification_id
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -477,8 +458,7 @@ class TendersClient(APIBaseClient):
                 award_id
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -494,8 +474,7 @@ class TendersClient(APIBaseClient):
                 contract_id
             ),
             files=file_,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
+            headers={'X-Access-Token': self._get_access_token(tender)},
             ds_client=ds_client
         )
 
@@ -534,8 +513,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 lot_id
             ),
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
     ###########################################################################
 

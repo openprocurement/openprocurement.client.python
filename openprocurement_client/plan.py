@@ -63,8 +63,7 @@ class PlansClient(APIBaseClient):
     def _get_plan_resource_list(self, plan, items_name):
         return self._get_resource_item(
             '{}/{}/{}'.format(self.prefix_path, plan.data.id, items_name),
-            headers={'X-Access-Token':
-                     getattr(getattr(plan, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(plan)}
         )
 
     ###########################################################################
@@ -75,8 +74,7 @@ class PlansClient(APIBaseClient):
         return self._create_resource_item(
             '{}/{}/{}'.format(self.prefix_path, plan.data.id, items_name),
             item_obj,
-            headers={'X-Access-Token':
-                     getattr(getattr(plan, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(plan)}
         )
 
     def create_plan(self, plan):
@@ -95,8 +93,7 @@ class PlansClient(APIBaseClient):
         if access_token:
             headers = {'X-Access-Token': access_token}
         else:
-            headers = {'X-Access-Token':
-                       getattr(getattr(plan, 'access', ''), 'token', '')}
+            headers = {'X-Access-Token': self._get_access_token(plan)}
         return self._get_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path,
                                  plan.data.id,
@@ -116,14 +113,12 @@ class PlansClient(APIBaseClient):
                 items_name, item_obj['data']['id']
             ),
             payload=item_obj,
-            headers={'X-Access-Token':
-                     getattr(getattr(plan, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(plan)}
         )
 
     def patch_plan(self, plan):
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, plan['data']['id']),
             payload=plan,
-            headers={'X-Access-Token':
-                     getattr(getattr(plan, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(plan)}
         )
