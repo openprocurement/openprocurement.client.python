@@ -17,11 +17,12 @@ class PlansClient(APIBaseClient):
                  key,
                  host_url=None,
                  api_version=None,
-                 params=None):
+                 params=None,
+                 ds_client=None):
 
         _api_version = api_version or self.api_version
         super(PlansClient, self)\
-            .__init__(key, 'plans', host_url, _api_version, params)
+            .__init__(key, 'plans', host_url, _api_version, params, ds_client)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS

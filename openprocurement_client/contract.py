@@ -10,20 +10,20 @@ class ContractingClient(APIBaseClient):
                  key,
                  host_url=None,
                  api_version=None,
-                 params=None):
+                 params=None,
+                 ds_client=None):
         super(ContractingClient, self).__init__(key, 'contracts', host_url,
-                                                api_version, params)
+                                                api_version, params, ds_client)
 
     @verify_file
-    def upload_document(self, file_, contract, ds_client=None):
+    def upload_document(self, file_, contract):
         return self._upload_resource_file(
             '{}/{}/documents'.format(
                 self.prefix_path,
                 contract.data.id
             ),
             files=file_,
-            headers={'X-Access-Token': self._get_access_token(contract)},
-            ds_client=ds_client
+            headers={'X-Access-Token': self._get_access_token(contract)}
         )
 
     def create_contract(self, contract):

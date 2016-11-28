@@ -76,10 +76,13 @@ class APIBaseClient(APITemplateClient):
                  resource,
                  host_url=None,
                  api_version=None,
-                 params=None):
+                 params=None,
+                 ds_client=None):
 
         super(APIBaseClient, self)\
             .__init__(login_pass=(key, ''), headers=self.headers)
+
+        self.ds_client = ds_client
 
         _host_url = host_url or self.host_url
         _api_version = api_version or self.api_version
@@ -138,14 +141,14 @@ class APIBaseClient(APITemplateClient):
         raise InvalidResponse(response_item)
 
     def _upload_resource_file(
-        self, url, files=None, headers=None, method='post', ds_client=None
+        self, url, files=None, headers=None, method='post'
     ):
-        if ds_client:
-            response = ds_client.document_upload_registered(
+        if self.ds_client:
+            response = self.ds_client.document_upload_registered(
                 files=files, headers=headers
             )
 
-            response.update({'format': ds_client.files['mime']})
+            response.update({'format': self.ds_client.files['mime']})
             payload = {'data': response}
             response = self._create_resource_item(
                 url,
