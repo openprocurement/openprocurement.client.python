@@ -24,7 +24,7 @@ IGNORE_PARAMS = ('uri', 'path')
 def verify_file(fn):
     @wraps(fn)
     def wrapper(self, file_, *args, **kwargs):
-        if isinstance(file_, str):
+        if isinstance(file_, basestring):
             # Using FileIO here instead of open()
             # to be able to override the filename
             # which is later used when uploading the file.
@@ -96,7 +96,7 @@ class APIBaseClient(object):
 
     def _create_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
-        response_item = self.request("POST", 
+        response_item = self.request("POST",
             url, headers=headers, payload=dumps(payload)
         )
         if response_item.status_code == 201:
@@ -156,7 +156,7 @@ class TendersClient(APIBaseClient):
     def get_tenders(self, params={}, feed='changes'):
         params['feed'] = feed
         self._update_params(params)
-        response = self.request("GET", 
+        response = self.request("GET",
             self.prefix_path,
             params_dict=self.params)
         if response.status_code == 200:
@@ -245,6 +245,17 @@ class TendersClient(APIBaseClient):
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
 
+    def create_thin_document(self, tender, document_data):
+        return self._create_resource_item(
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id
+            ),
+            document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
@@ -291,7 +302,7 @@ class TendersClient(APIBaseClient):
         if response_item.status_code == 200:
             return response_item.text, \
                 response_item.headers['Content-Disposition'] \
-                .split(";")[1].split('"')[1]
+                .split("; filename=")[1].strip('"')
         raise InvalidResponse
 
     def extract_credentials(self, id):
@@ -375,6 +386,16 @@ class TendersClient(APIBaseClient):
 
     def patch_contract(self, tender, contract):
         return self._patch_tender_resource_item(tender, contract, "contracts")
+
+    def patch_contract_document(self, tender, document_data, contract_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, "contracts", contract_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     def patch_credentials(self, id, access_token):
         return self._patch_resource_item('{}/{}/credentials'.format(self.prefix_path, id),
@@ -501,6 +522,20 @@ class TendersClient(APIBaseClient):
                 award_id
             ),
             files={"file": (file_.name, file_)},
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    @verify_file
+    def upload_contract_document(self, file_, tender, contract_id, doc_type="documents"):
+        return self._upload_resource_file(
+            '{}/{}/contracts/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                contract_id,
+                doc_type
+            ),
+            data={"file": file_},
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
