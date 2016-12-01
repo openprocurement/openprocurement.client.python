@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
-               key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS, retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
+               key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
+               retrievers_params=DEFAULT_RETRIEVERS_PARAMS, resource='tenders'):
     """
     Start retrieving from Openprocurement API.
 
@@ -39,8 +40,8 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
         backfard_worker: Greenlet of backfard worker
 
     """
-    forward = TendersClientSync(key, host, version)
-    backfard = TendersClientSync(key, host, version)
+    forward = TendersClientSync(key, host, version, resource=resource,)
+    backfard = TendersClientSync(key, host, version, resource=resource,)
     Cookie = forward.headers['Cookie'] = backfard.headers['Cookie']
     backfard_params = {'descending': True, 'feed': 'changes'}
     backfard_params.update(extra_params)
@@ -57,15 +58,20 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
     forward_params['offset'] = response.prev_page.offset
 
     backfard_worker = spawn(retriever_backward, queue,
-                            backfard, Cookie, backfard_params, retrievers_params['down_requests_sleep'])
+                            backfard, Cookie, backfard_params,
+                            retrievers_params['down_requests_sleep'])
     forward_worker = spawn(retriever_forward, queue,
-                           forward, Cookie, forward_params, retrievers_params['up_requests_sleep'], retrievers_params['up_wait_sleep'])
+                           forward, Cookie, forward_params,
+                           retrievers_params['up_requests_sleep'],
+                           retrievers_params['up_wait_sleep'])
 
     return queue, forward_worker, backfard_worker
 
 
-def restart_sync(up_worker, down_worker,
-                 host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS, retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
+def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
+                 version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY,
+                 extra_params=DEFAULT_API_EXTRA_PARAMS,
+                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, resource='tenders'):
     """
     Restart retrieving from Openprocurement API.
 
@@ -89,10 +95,13 @@ def restart_sync(up_worker, down_worker,
     logger.info('Restart workers')
     up_worker.kill()
     down_worker.kill()
-    return start_sync(host=host, version=version, key=key, extra_params=extra_params)
+    return start_sync(host=host, version=version, key=key, resource=resource,
+                      extra_params=extra_params)
 
 
-def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS, retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
+def get_resource_items(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
+              key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
+              retrievers_params=DEFAULT_RETRIEVERS_PARAMS, resource='tenders'):
     """
     Prepare iterator for retrieving from Openprocurement API.
 
@@ -108,7 +117,8 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_
     """
 
     queue, up_worker, down_worker = start_sync(
-        host=host, version=version, key=key, extra_params=extra_params, retrievers_params=retrievers_params)
+        host=host, version=version, key=key, extra_params=extra_params,
+        retrievers_params=retrievers_params, resource=resource)
     check_down_worker = True
     while 1:
         if check_down_worker and down_worker.ready():
@@ -117,11 +127,13 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_
                 check_down_worker = False
             else:
                 queue, up_worker, down_worker = restart_sync(up_worker, down_worker,
-                                                             host=host, version=version, key=key, extra_params=extra_params, retrievers_params=retrievers_params)
+                    resource=resource, host=host, version=version, key=key,
+                    extra_params=extra_params, retrievers_params=retrievers_params)
                 check_down_worker = True
         if up_worker.ready():
             queue, up_worker, down_worker = restart_sync(up_worker, down_worker,
-                                                         host=host, version=version, key=key, extra_params=extra_params, retrievers_params=retrievers_params)
+                resource=resource, host=host, version=version, key=key,
+                extra_params=extra_params, retrievers_params=retrievers_params)
             check_down_worker = True
         while not queue.empty():
             yield queue.get()
@@ -129,6 +141,15 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION, key=DEFAULT_
             queue.peek(block=True, timeout=5)
         except Empty:
             pass
+
+
+def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
+                key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
+                retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
+    get_resource_items(host=host, version=version, key=key, resource='tenders',
+                       extra_params=extra_params,
+                       retrievers_params=retrievers_params)
+
 
 
 def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
