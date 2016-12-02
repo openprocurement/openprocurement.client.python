@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from .exceptions import Conflict, Forbidden, InvalidResponse, Locked, \
     MethodNotAllowed, PreconditionFailed, ResourceGone, RequestFailed, \
@@ -19,11 +20,17 @@ class APITemplateClient(object):
     @staticmethod
     def auth(login, passwd): return HTTPBasicAuth(login, passwd)
 
-    def __init__(self, login_pass=None, headers=None):
+    def __init__(self, login_pass=None, headers=None, user_agent=None):
         self.headers = headers or {}
         self.session = Session()
         if login_pass is not None:
             self.session.auth = self.auth(*login_pass)
+
+        if user_agent is None:
+            self.session.headers['User-Agent'] = 'op.client/' + \
+                                                 uuid.uuid4().hex
+        else:
+            self.session.headers['User-Agent'] = user_agent
 
     def request(self, method, path=None, payload=None, json=None,
                 headers=None, params_dict=None, files=None):
@@ -75,10 +82,12 @@ class APIBaseClient(APITemplateClient):
                  host_url=None,
                  api_version=None,
                  params=None,
-                 ds_client=None):
+                 ds_client=None,
+                 user_agent=None):
 
         super(APIBaseClient, self)\
-            .__init__(login_pass=(key, ''), headers=self.headers)
+            .__init__(login_pass=(key, ''), headers=self.headers,
+                      user_agent=user_agent)
 
         self.ds_client = ds_client
 
