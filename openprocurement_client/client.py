@@ -1,4 +1,5 @@
 import logging
+import uuid
 from functools import wraps
 from io import FileIO
 from os import path
@@ -59,9 +60,13 @@ class APIBaseClient(object):
                  api_version,
                  resource,
                  params=None,
+                 user_agent=None,
                  **kwargs):
-
         self.session = Session()
+        if user_agent is None:
+            self.session.headers['User-Agent'] = 'op.client/'+uuid.uuid4().hex
+        else:
+            self.session.headers['User-Agent'] = user_agent
         self.session.auth = HTTPBasicAuth(key, '')
         self.host_url = host_url
         self.prefix_path = '{}/api/{}/{}'.format(host_url, api_version, resource)
@@ -96,7 +101,7 @@ class APIBaseClient(object):
 
     def _create_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
-        response_item = self.request("POST", 
+        response_item = self.request("POST",
             url, headers=headers, payload=dumps(payload)
         )
         if response_item.status_code == 201:
@@ -144,9 +149,11 @@ class TendersClient(APIBaseClient):
     def __init__(self, key,
                  host_url="https://api-sandbox.openprocurement.org",
                  api_version='2.0',
+                 user_agent=None,
                  params=None,
                  resource='tenders'):
-        super(TendersClient, self).__init__(key, host_url, api_version, resource, params)
+        super(TendersClient, self).__init__(key, host_url, api_version,
+                                            resource, params, user_agent)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -156,7 +163,7 @@ class TendersClient(APIBaseClient):
     def get_tenders(self, params={}, feed='changes'):
         params['feed'] = feed
         self._update_params(params)
-        response = self.request("GET", 
+        response = self.request("GET",
             self.prefix_path,
             params_dict=self.params)
         if response.status_code == 200:

@@ -40,8 +40,8 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
         backfard_worker: Greenlet of backfard worker
 
     """
-    forward = TendersClientSync(key, host, version, resource=resource,)
-    backfard = TendersClientSync(key, host, version, resource=resource,)
+    forward = TendersClientSync(key, host, version, resource=resource)
+    backfard = TendersClientSync(key, host, version, resource=resource)
     Cookie = forward.headers['Cookie'] = backfard.headers['Cookie']
     backfard_params = {'descending': True, 'feed': 'changes'}
     backfard_params.update(extra_params)
