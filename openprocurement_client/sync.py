@@ -146,7 +146,7 @@ def get_resource_items(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
 def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                 key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
-    get_resource_items(host=host, version=version, key=key, resource='tenders',
+    return get_resource_items(host=host, version=version, key=key, resource='tenders',
                        extra_params=extra_params,
                        retrievers_params=retrievers_params)
 
