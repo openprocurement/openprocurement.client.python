@@ -67,8 +67,8 @@ class APITemplateClient(object):
             self.session.auth = self.auth(*login_pass)
 
         if user_agent is None:
-            self.session.headers['User-Agent'] = 'op.client/' + \
-                                                 uuid.uuid4().hex
+            self.session.headers['User-Agent'] \
+                = 'op.client/{}'.format(uuid.uuid4().hex)
         else:
             self.session.headers['User-Agent'] = user_agent
 
@@ -249,3 +249,6 @@ class APIBaseClient(APITemplateClient):
             files=file_,
             headers={'X-Access-Token': self._get_access_token(obj)}
         )
+
+    def get_resource_item(self, id):
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
