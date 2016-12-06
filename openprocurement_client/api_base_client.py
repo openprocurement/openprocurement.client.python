@@ -5,13 +5,53 @@ from .exceptions import Conflict, Forbidden, InvalidResponse, Locked, \
     MethodNotAllowed, PreconditionFailed, ResourceGone, RequestFailed, \
     ResourceNotFound, Unauthorized, UnprocessableEntity
 
+from functools import wraps
+from io import FileIO
 from munch import munchify
+from os import path
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from simplejson import dumps, loads
 
 logger = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')
+
+
+def verify_file(fn):
+    @wraps(fn)
+    def wrapper(self, file_, *args, **kwargs):
+        if isinstance(file_, basestring):
+            # Using FileIO here instead of open()
+            # to be able to override the filename
+            # which is later used when uploading the file.
+            #
+            # Explanation:
+            #
+            # 1) requests reads the filename
+            # from "name" attribute of a file-like object,
+            # there is no other way to specify a filename;
+            #
+            # 2) The attribute may contain the full path to file,
+            # which does not work well as a filename;
+            #
+            # 3) The attribute is readonly when using open(),
+            # unlike FileIO object.
+            file_ = FileIO(file_, 'rb')
+            file_.name = path.basename(file_.name)
+        if hasattr(file_, 'read'):
+            # A file-like object must have 'read' method
+            output = fn(self, file_, *args, **kwargs)
+            file_.close()
+            return output
+        else:
+            try:
+                file_.close()
+            except AttributeError:
+                pass
+            raise TypeError('Expected either a string '
+                            'containing a path to file or a '
+                            'file-like object, got {}'.format(type(file_)))
+    return wrapper
 
 
 class APITemplateClient(object):
@@ -185,3 +225,27 @@ class APIBaseClient(APITemplateClient):
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
+
+    def _patch_obj_resource_item(self, patched_obj, item_obj, items_name):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}'.format(
+                self.prefix_path, patched_obj.data.id,
+                items_name, item_obj['data']['id']
+            ),
+            payload=item_obj,
+            headers={'X-Access-Token': self._get_access_token(patched_obj)}
+        )
+
+    def patch_document(self, obj, document):
+        return self._patch_obj_resource_item(obj, document, 'documents')
+
+    @verify_file
+    def upload_document(self, file_, obj):
+        return self._upload_resource_file(
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                obj.data.id
+            ),
+            files=file_,
+            headers={'X-Access-Token': self._get_access_token(obj)}
+        )

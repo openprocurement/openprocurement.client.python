@@ -1,57 +1,17 @@
 import logging
 
-from .api_base_client import APIBaseClient
+from .api_base_client import APIBaseClient, verify_file
 from .exceptions import InvalidResponse
 
-from functools import wraps
-from io import FileIO
 from iso8601 import parse_date
 from munch import munchify
-from os import path
 from retrying import retry
-from simplejson import dumps, loads
+from simplejson import loads
 
 
 logger = logging.getLogger(__name__)
 
 IGNORE_PARAMS = ('uri', 'path')
-
-
-def verify_file(fn):
-    @wraps(fn)
-    def wrapper(self, file_, *args, **kwargs):
-        if isinstance(file_, basestring):
-            # Using FileIO here instead of open()
-            # to be able to override the filename
-            # which is later used when uploading the file.
-            #
-            # Explanation:
-            #
-            # 1) requests reads the filename
-            # from "name" attribute of a file-like object,
-            # there is no other way to specify a filename;
-            #
-            # 2) The attribute may contain the full path to file,
-            # which does not work well as a filename;
-            #
-            # 3) The attribute is readonly when using open(),
-            # unlike FileIO object.
-            file_ = FileIO(file_, 'rb')
-            file_.name = path.basename(file_.name)
-        if hasattr(file_, 'read'):
-            # A file-like object must have 'read' method
-            output = fn(self, file_, *args, **kwargs)
-            file_.close()
-            return output
-        else:
-            try:
-                file_.close()
-            except AttributeError:
-                pass
-            raise TypeError('Expected either a string '
-                            'containing a path to file or a '
-                            'file-like object, got {}'.format(type(file_)))
-    return wrapper
 
 
 class TendersClient(APIBaseClient):
@@ -235,16 +195,6 @@ class TendersClient(APIBaseClient):
     #             PATCH ITEM API METHODS
     ###########################################################################
 
-    def _patch_tender_resource_item(self, tender, item_obj, items_name):
-        return self._patch_resource_item(
-            '{}/{}/{}/{}'.format(
-                self.prefix_path, tender.data.id,
-                items_name, item_obj['data']['id']
-            ),
-            payload=item_obj,
-            headers={'X-Access-Token': self._get_access_token(tender)}
-        )
-
     def patch_tender(self, tender):
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, tender['data']['id']),
@@ -253,10 +203,10 @@ class TendersClient(APIBaseClient):
         )
 
     def patch_question(self, tender, question):
-        return self._patch_tender_resource_item(tender, question, 'questions')
+        return self._patch_obj_resource_item(tender, question, 'questions')
 
     def patch_bid(self, tender, bid):
-        return self._patch_tender_resource_item(tender, bid, 'bids')
+        return self._patch_obj_resource_item(tender, bid, 'bids')
 
     def patch_bid_document(self, tender, document_data, bid_id, document_id):
         return self._patch_resource_item(
@@ -268,10 +218,10 @@ class TendersClient(APIBaseClient):
         )
 
     def patch_award(self, tender, award):
-        return self._patch_tender_resource_item(tender, award, 'awards')
+        return self._patch_obj_resource_item(tender, award, 'awards')
 
     def patch_cancellation(self, tender, cancellation):
-        return self._patch_tender_resource_item(
+        return self._patch_obj_resource_item(
             tender, cancellation, 'cancellations'
         )
 
@@ -288,7 +238,7 @@ class TendersClient(APIBaseClient):
         )
 
     def patch_complaint(self, tender, complaint):
-        return self._patch_tender_resource_item(
+        return self._patch_obj_resource_item(
             tender, complaint, 'complaints'
         )
 
@@ -302,18 +252,15 @@ class TendersClient(APIBaseClient):
         )
 
     def patch_lot(self, tender, lot):
-        return self._patch_tender_resource_item(tender, lot, 'lots')
-
-    def patch_document(self, tender, document):
-        return self._patch_tender_resource_item(tender, document, 'documents')
+        return self._patch_obj_resource_item(tender, lot, 'lots')
 
     def patch_qualification(self, tender, qualification):
-        return self._patch_tender_resource_item(
+        return self._patch_obj_resource_item(
             tender, qualification, 'qualifications'
         )
 
     def patch_contract(self, tender, contract):
-        return self._patch_tender_resource_item(tender, contract, 'contracts')
+        return self._patch_obj_resource_item(tender, contract, 'contracts')
 
     def patch_contract_document(self, tender, document_data,
                                 contract_id, document_id):
@@ -336,17 +283,6 @@ class TendersClient(APIBaseClient):
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
-
-    @verify_file
-    def upload_document(self, file_, tender):
-        return self._upload_resource_file(
-            '{}/{}/documents'.format(
-                self.prefix_path,
-                tender.data.id
-            ),
-            files=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
-        )
 
     @verify_file
     def upload_bid_document(self, file_, tender, bid_id, doc_type='documents'):
