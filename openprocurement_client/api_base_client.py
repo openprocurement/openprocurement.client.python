@@ -140,9 +140,10 @@ class APIBaseClient(APITemplateClient):
         # To perform some operations (e.g. create a tender)
         # we first need to obtain a cookie. For that reason,
         # here we send a HEAD request to a neutral URL.
-        self.session.request('HEAD',
-                             '{}/api/{}/spore'
-                             .format(_host_url, _api_version))
+        response = self.session.request(
+            'HEAD', '{}/api/{}/spore'.format(_host_url, _api_version)
+        )
+        response.raise_for_status()
 
         self.prefix_path = '{}/api/{}/{}'\
             .format(_host_url, _api_version, resource)
