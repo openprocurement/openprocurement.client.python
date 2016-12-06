@@ -64,7 +64,7 @@ class APIBaseClient(object):
                  **kwargs):
         self.session = Session()
         if user_agent is None:
-            self.session.headers['User-Agent'] = 'op.client/'+uuid.uuid4().hex
+            self.session.headers['User-Agent'] = 'op.client/{}'.format(uuid.uuid4().hex)
         else:
             self.session.headers['User-Agent'] = user_agent
         self.session.auth = HTTPBasicAuth(key, '')
@@ -141,6 +141,9 @@ class APIBaseClient(object):
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
         raise InvalidResponse
+
+    def get_resource_item(self, id):
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
 
 class TendersClient(APIBaseClient):
