@@ -73,15 +73,15 @@ class APITemplateClient(object):
             self.session.headers['User-Agent'] = user_agent
 
     def request(self, method, path=None, payload=None, json=None,
-                headers=None, params_dict=None, files=None):
+                headers=None, params_dict=None, file_=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
-        if files:
+        if file_:
             _headers.pop('Content-Type', None)
 
         response = self.session.request(
             method, path, data=payload, json=json, headers=_headers,
-            params=params_dict, files=files
+            params=params_dict, files=file_
         )
 
         if response.status_code >= 400:
@@ -189,11 +189,11 @@ class APIBaseClient(APITemplateClient):
         raise InvalidResponse(response_item)
 
     def _upload_resource_file(
-        self, url, files=None, headers=None, method='post'
+        self, url, file_=None, headers=None, method='post'
     ):
         if self.ds_client:
             response = self.ds_client.document_upload_registered(
-                files=files, headers=headers
+                file_=file_, headers=headers
             )
 
             response.update({'format': self.ds_client.files['mime']})
@@ -210,7 +210,7 @@ class APIBaseClient(APITemplateClient):
                 'is deprecated'
             )
             response = self.request(
-                method, url, headers=headers, files={'file': files}
+                method, url, headers=headers, file_={'file': file_}
             )
             if response.status_code in (201, 200):
                 response = munchify(loads(response.content))
@@ -247,7 +247,7 @@ class APIBaseClient(APITemplateClient):
                 self.prefix_path,
                 obj.data.id
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(obj)}
         )
 

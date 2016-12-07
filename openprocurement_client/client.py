@@ -293,7 +293,7 @@ class TendersClient(APIBaseClient):
                 bid_id,
                 doc_type
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
@@ -308,7 +308,7 @@ class TendersClient(APIBaseClient):
                 doc_type,
                 document_id
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)},
             method='put'
         )
@@ -321,7 +321,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 cancellation_id
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
@@ -335,7 +335,7 @@ class TendersClient(APIBaseClient):
                     cancellation_id,
                     document_id
                 ),
-                files=file_,
+                file_=file_,
                 headers={'X-Access-Token': self._get_access_token(tender)},
                 method='put'
             )
@@ -347,7 +347,7 @@ class TendersClient(APIBaseClient):
                 self.prefix_path,
                 tender.data.id,
                 complaint_id),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
@@ -360,7 +360,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 award_id,
                 complaint_id),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
@@ -372,7 +372,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 qualification_id
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
@@ -384,7 +384,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 award_id
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
@@ -399,7 +399,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 contract_id
             ),
-            files=file_,
+            file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
