@@ -285,7 +285,8 @@ class TendersClient(APIBaseClient):
     ###########################################################################
 
     @verify_file
-    def upload_bid_document(self, file_, tender, bid_id, doc_type='documents'):
+    def upload_bid_document(self, file_, tender, bid_id, doc_type='documents',
+                            use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/bids/{}/{}'.format(
                 self.prefix_path,
@@ -294,12 +295,15 @@ class TendersClient(APIBaseClient):
                 doc_type
             ),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
     def update_bid_document(self, file_, tender, bid_id, document_id,
-                            doc_type='documents'):
+                            doc_type='documents', use_ds_client=True,
+                            doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/bids/{}/{}/{}'.format(
                 self.prefix_path,
@@ -310,24 +314,31 @@ class TendersClient(APIBaseClient):
             ),
             file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)},
-            method='put'
+            method='put',
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_cancellation_document(self, file_, tender, cancellation_id):
+    def upload_cancellation_document(self, file_, tender, cancellation_id,
+                                     use_ds_client=True,
+                                     doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/cancellations/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
-                cancellation_id
+                cancellation_id,
             ),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
     def update_cancellation_document(self, file_, tender, cancellation_id,
-                                     document_id):
+                                     document_id, use_ds_client=True,
+                                     doc_registration=True):
             return self._upload_resource_file(
                 '{}/{}/cancellations/{}/documents/{}'.format(
                     self.prefix_path,
@@ -337,23 +348,29 @@ class TendersClient(APIBaseClient):
                 ),
                 file_=file_,
                 headers={'X-Access-Token': self._get_access_token(tender)},
-                method='put'
+                method='put',
+                use_ds_client=use_ds_client,
+                doc_registration=doc_registration
             )
 
     @verify_file
-    def upload_complaint_document(self, file_, tender, complaint_id):
+    def upload_complaint_document(self, file_, tender, complaint_id,
+                                  use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/complaints/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
                 complaint_id),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
     def upload_award_complaint_document(self, file_, tender, award_id,
-                                        complaint_id):
+                                        complaint_id, use_ds_client=True,
+                                        doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/awards/{}/complaints/{}/documents'.format(
                 self.prefix_path,
@@ -361,11 +378,15 @@ class TendersClient(APIBaseClient):
                 award_id,
                 complaint_id),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_qualification_document(self, file_, tender, qualification_id):
+    def upload_qualification_document(self, file_, tender, qualification_id,
+                                      use_ds_client=True,
+                                      doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/qualifications/{}/documents'.format(
                 self.prefix_path,
@@ -373,11 +394,14 @@ class TendersClient(APIBaseClient):
                 qualification_id
             ),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_award_document(self, file_, tender, award_id):
+    def upload_award_document(self, file_, tender, award_id,
+                              use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/awards/{}/documents'.format(
                 self.prefix_path,
@@ -385,12 +409,15 @@ class TendersClient(APIBaseClient):
                 award_id
             ),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
     def upload_contract_document(self, file_, tender, contract_id,
-                                 doc_type='documents'):
+                                 doc_type='documents', use_ds_client=True,
+                                 doc_registration=True):
         # TODO: find out what actually depends on the doc_type parameter.
         # TODO: is it necessary to pass it here?
         return self._upload_resource_file(
@@ -400,7 +427,9 @@ class TendersClient(APIBaseClient):
                 contract_id
             ),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     ###########################################################################

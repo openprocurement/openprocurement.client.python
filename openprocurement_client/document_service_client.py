@@ -15,6 +15,7 @@ class DocumentServiceClient(APITemplateClient):
     """base class for API"""
 
     host_url = 'https://upload.docs-sandbox.openprocurement.org/register'
+    host_url_upload = 'https://upload.docs-sandbox.openprocurement.org/upload'
 
     def __init__(self,
                  host_url,
@@ -78,6 +79,14 @@ class DocumentServiceClient(APITemplateClient):
         )
         return self._document_upload(
             url=response_reg.upload_url,
+            file_={'file': file_},
+            headers=headers
+        )
+
+    def document_upload_not_registered(self, file_, headers):
+
+        return self._document_upload(
+            url=self.host_url_upload,
             file_={'file': file_},
             headers=headers
         )

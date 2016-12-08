@@ -189,13 +189,18 @@ class APIBaseClient(APITemplateClient):
         raise InvalidResponse(response_item)
 
     def _upload_resource_file(
-        self, url, file_=None, headers=None, method='post'
+        self, url, file_=None, headers=None, method='post',
+        use_ds_client=True, doc_registration=True
     ):
-        if self.ds_client:
-            response = self.ds_client.document_upload_registered(
-                file_=file_, headers=headers
-            )
-
+        if use_ds_client and self.ds_client:
+            if doc_registration:
+                response = self.ds_client.document_upload_registered(
+                    file_=file_, headers=headers
+                )
+            else:
+                response = self.ds_client.document_upload_not_registered(
+                    file_=file_, headers=headers
+                )
             payload = {'data': response['data']}
             response = self._create_resource_item(
                 url,
@@ -204,6 +209,10 @@ class APIBaseClient(APITemplateClient):
                 method=method
             )
         else:
+            if use_ds_client:
+                logger.warning('use_ds_client parameter is True while '
+                               'DS-client is not passed to the client '
+                               'constructor.')
             logger.warning(
                 'File upload/download/delete outside of the Document Service '
                 'is deprecated'
@@ -240,14 +249,17 @@ class APIBaseClient(APITemplateClient):
         return self._patch_obj_resource_item(obj, document, 'documents')
 
     @verify_file
-    def upload_document(self, file_, obj):
+    def upload_document(self, file_, obj, use_ds_client=True,
+                        doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/documents'.format(
                 self.prefix_path,
                 obj.data.id
             ),
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(obj)}
+            headers={'X-Access-Token': self._get_access_token(obj)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     def get_resource_item(self, id):
