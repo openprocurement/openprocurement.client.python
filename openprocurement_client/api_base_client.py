@@ -196,8 +196,7 @@ class APIBaseClient(APITemplateClient):
                 file_=file_, headers=headers
             )
 
-            response.update({'format': self.ds_client.files['mime']})
-            payload = {'data': response}
+            payload = {'data': response['data']}
             response = self._create_resource_item(
                 url,
                 headers=headers,
