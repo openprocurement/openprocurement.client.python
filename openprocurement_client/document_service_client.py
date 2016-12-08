@@ -14,8 +14,9 @@ IGNORE_PARAMS = ('uri', 'path')
 class DocumentServiceClient(APITemplateClient):
     """base class for API"""
 
-    host_url = 'https://upload.docs-sandbox.openprocurement.org/register'
-    host_url_upload = 'https://upload.docs-sandbox.openprocurement.org/upload'
+    host_url = 'https://upload.docs-sandbox.openprocurement.org'
+    url_register_part = 'register'
+    url_upload_part = 'upload'
 
     def __init__(self,
                  host_url,
@@ -25,7 +26,9 @@ class DocumentServiceClient(APITemplateClient):
         super(DocumentServiceClient, self)\
             .__init__(login_pass=auth_ds, headers=headers)
 
-        self.prefix_path = host_url or self.host_url
+        self.host_url = host_url or self.host_url
+        self.host_url_register = self.host_url + '/' + self.url_register_part
+        self.host_url_upload = self.host_url + '/' + self.url_upload_part
 
     @staticmethod
     def __hashfile(afile, hasher=None, blocksize=65536):
@@ -51,7 +54,7 @@ class DocumentServiceClient(APITemplateClient):
 
     def register_document_upload(self, hash_value, headers=None):
         response_item = self.request(
-            'POST', path=self.prefix_path,
+            'POST', path=self.host_url_register,
             json={'data': {'hash': hash_value}}, headers=headers
         )
         if response_item.status_code != 201:

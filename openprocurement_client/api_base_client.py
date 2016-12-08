@@ -79,6 +79,7 @@ class APITemplateClient(object):
         if file_:
             _headers.pop('Content-Type', None)
 
+        print(path)
         response = self.session.request(
             method, path, data=payload, json=json, headers=_headers,
             params=params_dict, files=file_
