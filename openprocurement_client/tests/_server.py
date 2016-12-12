@@ -1,7 +1,10 @@
 from bottle import request, response, redirect, static_file
 from munch import munchify
 from simplejson import dumps, load
+from openprocurement_client.document_service_client \
+    import DocumentServiceClient
 from uuid import uuid4
+import magic
 import os
 
 BASIS_URL = "http://localhost"
@@ -18,6 +21,7 @@ TENDERS_PATH = API_PATH.format(API_VERSION, "tenders")
 PLANS_PATH = API_PATH.format(API_VERSION, "plans")
 CONTRACTS_PATH = API_PATH.format(API_VERSION, "contracts")
 SPORE_PATH = API_PATH.format(API_VERSION, "spore")
+DOWNLOAD_URL_EXTENSION = 'some_key_etc'
 
 
 def setup_routing(app, routs=None):
@@ -264,10 +268,11 @@ def contract_patch(contract_id):
     return dumps({"data": contract})
 
 def contract_document_create(contract_id):
+    from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
     response.status = 201
     document = contract_partition(contract_id, 'documents')[0]
     document.title = get_doc_title_from_request(request)
-    document.id = '12345678123456781234567812345678'
+    document.id = TEST_CONTRACT_KEYS.new_document_id
     return dumps({"data": document})
 
 def contract_partition(contract_id, part="contract"):
@@ -314,24 +319,39 @@ routs_dict = {
         }
 
 
-download_url_extension = 'some_key_etc'
+def file_info(file_):
+    file_info_dict = {}
+    file_info_dict['hash'] = 'md5:' + DocumentServiceClient._hashfile(file_)
+    file_info_dict['mime'] \
+        = magic.from_buffer(file_.read(1024), mime=True)
+    file_.seek(0, 0)
 
+    return file_info_dict
 
 def register_document_upload_inside():
-    json = request.json
+    req_json = request.json
     response.status = 201
-    return munchify(
-        {'upload_url': DS_HOST_URL + '/upload/' + download_url_extension,
-         'data': {'url': DS_HOST_URL + '/get/' + download_url_extension,
-                  'hash': json['data']['hash']}})
+    return dumps(
+        {'upload_url': DS_HOST_URL + '/upload/' + DOWNLOAD_URL_EXTENSION,
+         'data': {'url': DS_HOST_URL + '/get/' + DOWNLOAD_URL_EXTENSION,
+                  'hash': req_json['data']['hash']}})
 
 
 def document_upload_inside():
+    file_ = request.files.file
+    file_info_dict = file_info(file_.file)
     response.status = 200
+    return dumps(
+        {'get_url': DS_HOST_URL + '/get/' + DOWNLOAD_URL_EXTENSION,
+         'data': {'url': DS_HOST_URL + '/get/' + DOWNLOAD_URL_EXTENSION,
+                  'format': file_info_dict['mime'],
+                  'hash': file_info_dict['hash'],
+                  'title': file_.filename}}
+    )
 
 
 routs_dict_ds = {
-    'register_document_upload': ('/', 'POST', register_document_upload_inside),
+    'register_document_upload': ('/register', 'POST', register_document_upload_inside),
     'document_upload':
-        ('/upload/' + download_url_extension, 'POST', document_upload_inside)
+        ('/upload/' + DOWNLOAD_URL_EXTENSION, 'POST', document_upload_inside)
 }

@@ -56,9 +56,17 @@ TEST_PLAN_KEYS = munchify({
 
 TEST_CONTRACT_KEYS = munchify({
     "contract_id": '3c0bf3eed3fc4b189103e62b828c599d',
-    "new_document_id": '12345678123456781234567812345678',
+    "new_document_id": 'newid678123456781234567812345678',
     "error_id": 'zzzxxx111'
 })
+
+
+def generate_file_obj(file_name, content):
+    file_ = StringIO()
+    file_.name = file_name
+    file_.write(content)
+    file_.seek(0)
+    return munchify(file_)
 
 
 class BaseTestClass(unittest.TestCase):
@@ -686,11 +694,9 @@ class ContractingUserTestCase(BaseTestClass):
     ###########################################################################
 
     def test_upload_contract_document(self):
-        setup_routing(self.app, routs=["contract_document_create"])
-        file_ = StringIO()
-        file_.name = 'test_document.txt'
-        file_.write("test upload contract document text data")
-        file_.seek(0)
+        setup_routing(self.app, routs=['contract_document_create'])
+        file_ = generate_file_obj('test_document.txt',
+                                  'test upload contract document text data')
         doc = self.client.upload_document(file_, self.contract)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)

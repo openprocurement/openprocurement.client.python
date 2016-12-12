@@ -79,7 +79,6 @@ class APITemplateClient(object):
         if file_:
             _headers.pop('Content-Type', None)
 
-        print(path)
         response = self.session.request(
             method, path, data=payload, json=json, headers=_headers,
             params=params_dict, files=file_
@@ -222,7 +221,7 @@ class APIBaseClient(APITemplateClient):
                 method, url, headers=headers, file_={'file': file_}
             )
             if response.status_code in (201, 200):
-                response = munchify(loads(response.content))
+                response = munchify(loads(response.text))
             else:
                 raise InvalidResponse(response)
 
