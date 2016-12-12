@@ -37,35 +37,35 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
     :returns:
         queue: Queue which containing objects derived from the list of tenders
         forward_worker: Greenlet of forward worker
-        backfard_worker: Greenlet of backfard worker
+        backward_worker: Greenlet of backward worker
 
     """
     forward = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
-    backfard = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
-    Cookie = forward.session.cookies = backfard.session.cookies
-    backfard_params = {'descending': True, 'feed': 'changes'}
-    backfard_params.update(extra_params)
+    backward = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
+    Cookie = forward.session.cookies = backward.session.cookies
+    backward_params = {'descending': True, 'feed': 'changes'}
+    backward_params.update(extra_params)
     forward_params = {'feed': 'changes'}
     forward_params.update(extra_params)
 
-    response = backfard.sync_tenders(backfard_params)
+    response = backward.sync_tenders(backward_params)
 
     queue = Queue(maxsize=retrievers_params['queue_size'])
     for tender in response.data:
         idle()
         queue.put(tender)
-    backfard_params['offset'] = response.next_page.offset
+    backward_params['offset'] = response.next_page.offset
     forward_params['offset'] = response.prev_page.offset
 
-    backfard_worker = spawn(retriever_backward, queue,
-                            backfard, Cookie, backfard_params,
+    backward_worker = spawn(retriever_backward, queue,
+                            backward, Cookie, backward_params,
                             retrievers_params['down_requests_sleep'])
     forward_worker = spawn(retriever_forward, queue,
                            forward, Cookie, forward_params,
                            retrievers_params['up_requests_sleep'],
                            retrievers_params['up_wait_sleep'])
 
-    return queue, forward_worker, backfard_worker
+    return queue, forward_worker, backward_worker
 
 
 def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
@@ -77,7 +77,7 @@ def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
 
     Args:
         forward_worker: Greenlet of forward worker
-        backfard_worker: Greenlet of backfard worker
+        backward_worker: Greenlet of backward worker
 
     :param:
         host (str): Url of Openprocurement API. Defaults is DEFAULT_API_HOST
@@ -88,7 +88,7 @@ def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
     :returns:
         queue: Queue which containing objects derived from the list of tenders
         forward_worker: Greenlet of forward worker
-        backfard_worker: Greenlet of backfard worker
+        backward_worker: Greenlet of backward worker
 
     """
 

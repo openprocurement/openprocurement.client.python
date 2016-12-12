@@ -24,17 +24,17 @@ SPORE_PATH = API_PATH.format(API_VERSION, "spore")
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
 
 
-def setup_routing(app, routs=None):
-    if routs is None:
-        routs = ['spore']
-    for route in routs:
-        path, method, func = routs_dict[route]
+def setup_routing(app, routes=None):
+    if routes is None:
+        routes = ['spore']
+    for route in routes:
+        path, method, func = routes_dict[route]
         app.route(path, method, func)
 
 
 def setup_routing_ds(app):
-    for route in routs_dict_ds:
-        path, method, func = routs_dict_ds[route]
+    for route in routes_dict_ds:
+        path, method, func = routes_dict_ds[route]
         app.route(path, method, func)
 
 
@@ -56,7 +56,7 @@ def spore():
 
 def offset_error():
     response.status = 404
-    setup_routing(request.app, routs=["tenders"])
+    setup_routing(request.app, routes=["tenders"])
 
 def tenders_page_get():
     with open(ROOT + 'tenders.json') as json:
@@ -130,13 +130,15 @@ def tender_patch_credentials(tender_id):
 #
 
 def tender_document_create(tender_id):
+    from openprocurement_client.tests.tests import TEST_TENDER_KEYS
     response.status = 201
     document = tender_partition(tender_id, 'documents')[0]
     document.title = get_doc_title_from_request(request)
-    document.id = '12345678123456781234567812345678'
+    document.id = TEST_TENDER_KEYS.new_document_id
     return dumps({"data": document})
 
 def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document_type):
+    from openprocurement_client.tests.tests import TEST_TENDER_KEYS
     response.status = 201
     subpage = tender_partition(tender_id, subpage_name)
     if not subpage:
@@ -145,7 +147,7 @@ def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document
         if unit['id'] == subpage_id:
             document= unit["documents"][0]
             document.title = get_doc_title_from_request(request)
-            document.id = '12345678123456781234567812345678'
+            document.id = TEST_TENDER_KEYS.new_document_id
             return dumps({"data": document})
     return location_error(subpage_name)
 
@@ -203,7 +205,7 @@ def location_error(name):
 
 def plan_offset_error():
     response.status = 404
-    setup_routing(request.app, routs=["plans"])
+    setup_routing(request.app, routes=["plans"])
 
 def plans_page_get():
     with open(ROOT + 'plans.json') as json:
@@ -243,7 +245,7 @@ def plan_partition(plan_id, part="plan"):
 
 def contract_offset_error():
     response.status = 404
-    setup_routing(request.app, routs=["contracts"])
+    setup_routing(request.app, routes=["contracts"])
 
 def contracts_page_get():
     with open(ROOT + 'contracts.json') as json:
@@ -286,9 +288,9 @@ def contract_partition(contract_id, part="contract"):
     except (KeyError, IOError):
         return []
 
-#### Routs
+#### Routes
 
-routs_dict = {
+routes_dict = {
         "spore": (SPORE_PATH, 'HEAD', spore),
         "offset_error": (TENDERS_PATH, 'GET', offset_error),
         "tenders": (TENDERS_PATH, 'GET', tenders_page_get),
@@ -350,7 +352,7 @@ def document_upload_inside():
     )
 
 
-routs_dict_ds = {
+routes_dict_ds = {
     'register_document_upload': ('/register', 'POST', register_document_upload_inside),
     'document_upload':
         ('/upload/' + DOWNLOAD_URL_EXTENSION, 'POST', document_upload_inside)
