@@ -1,20 +1,12 @@
 import logging
-import uuid
-from functools import wraps
-from io import FileIO
-from os import path
-from urlparse import parse_qs, urlparse
+
+from .api_base_client import APIBaseClient, verify_file
+from .exceptions import InvalidResponse
 
 from iso8601 import parse_date
-
 from munch import munchify
 from retrying import retry
-
-from simplejson import dumps, loads
-
-from .exceptions import InvalidResponse, NoToken
-from requests import Session
-from requests.auth import HTTPBasicAuth
+from simplejson import loads
 
 
 logger = logging.getLogger(__name__)
@@ -22,143 +14,22 @@ logger = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')
 
 
-def verify_file(fn):
-    @wraps(fn)
-    def wrapper(self, file_, *args, **kwargs):
-        if isinstance(file_, str):
-            # Using FileIO here instead of open()
-            # to be able to override the filename
-            # which is later used when uploading the file.
-            #
-            # Explanation:
-            #
-            # 1) Restkit reads the filename
-            # from "name" attribute of a file-like object,
-            # there is no other way to specify a filename;
-            #
-            # 2) The attribute may contain the full path to file,
-            # which does not work well as a filename;
-            #
-            # 3) The attribute is readonly when using open(),
-            # unlike FileIO object.
-            file_ = FileIO(file_, 'rb')
-            file_.name = path.basename(file_.name)
-        if hasattr(file_, 'read'):
-            # A file-like object must have 'read' method
-            return fn(self, file_, *args, **kwargs)
-        else:
-            raise TypeError('Expected either a string '
-                            'containing a path to file or a '
-                            'file-like object, got {}'.format(type(file_)))
-    return wrapper
-
-
-class APIBaseClient(object):
-    """base class for API"""
-    def __init__(self, key,
-                 host_url,
-                 api_version,
-                 resource,
-                 params=None,
-                 user_agent=None,
-                 **kwargs):
-        self.session = Session()
-        if user_agent is None:
-            self.session.headers['User-Agent'] = 'op.client/{}'.format(uuid.uuid4().hex)
-        else:
-            self.session.headers['User-Agent'] = user_agent
-        self.session.auth = HTTPBasicAuth(key, '')
-        self.host_url = host_url
-        self.prefix_path = '{}/api/{}/{}'.format(host_url, api_version, resource)
-        if not isinstance(params, dict):
-            params = {"mode": "_all_"}
-        self.params = params
-        self.headers = {"Content-Type": "application/json"}
-        # To perform some operations (e.g. create a tender)
-        # we first need to obtain a cookie. For that reason,
-        # here we send a HEAD request to a neutral URL.
-        response = self.request('HEAD', '{}/api/{}/spore'.format(host_url, api_version))
-        if response.ok is False:
-            response.raise_for_status()
-
-    def request(self, method, path=None, payload=None, headers=None,
-                params_dict=None, files=None, **params):
-        _headers = dict(self.headers)
-        _headers.update(headers or {})
-        if files:
-            del _headers["Content-Type"]
-        response = self.session.request(
-            method, path, data=payload, headers=_headers,
-            params=params_dict, files=files
-        )
-        if 'Set-Cookie' in response.headers:
-            self.headers['Cookie'] = response.headers['Set-Cookie']
-        return response
-
-
-    def _update_params(self, params):
-        for key in params:
-            if key not in IGNORE_PARAMS:
-                self.params[key] = params[key]
-
-    def _create_resource_item(self, url, payload, headers={}):
-        headers.update(self.headers)
-        response_item = self.request("POST",
-            url, headers=headers, payload=dumps(payload)
-        )
-        if response_item.status_code == 201:
-            return munchify(loads(response_item.text))
-        raise InvalidResponse
-
-    def _get_resource_item(self, url, headers={}):
-        headers.update(self.headers)
-        response_item = self.request("GET", url, headers=headers)
-        if response_item.status_code == 200:
-            return munchify(loads(response_item.text))
-        raise InvalidResponse
-
-    def _patch_resource_item(self, url, payload, headers={}):
-        headers.update(self.headers)
-        response_item = self.request('PATCH',
-            url, headers=headers, payload=dumps(payload)
-        )
-        if response_item.status_code == 200:
-            return munchify(loads(response_item.text))
-        raise InvalidResponse
-
-    def _upload_resource_file(self, url, files, headers={}, method='post'):
-        file_headers = {}
-        file_headers.update(self.headers)
-        file_headers.update(headers)
-        # file_headers['Content-Type'] = "multipart/form-data"
-        response_item = self.request(method,
-            url, headers=file_headers, files=files
-        )
-        if response_item.status_code in (201, 200, 401, 403, 405, 409, 412, 423):
-            return munchify(loads(response_item.text))
-        raise InvalidResponse
-
-    def _delete_resource_item(self, url, headers={}):
-        response_item = self.request('DELETE', url, headers=headers)
-        if response_item.status_code == 200:
-            return munchify(loads(response_item.text))
-        raise InvalidResponse
-
-    def get_resource_item(self, id):
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
-
-
 class TendersClient(APIBaseClient):
     """client for tenders"""
 
-    def __init__(self, key,
-                 host_url="https://api-sandbox.openprocurement.org",
-                 api_version='2.0',
-                 user_agent=None,
+    def __init__(self,
+                 key,
+                 resource='tenders',  # another possible value is 'auctions'
+                 host_url=None,
+                 api_version=None,
                  params=None,
-                 resource='tenders'):
-        super(TendersClient, self).__init__(key, host_url, api_version,
-                                            resource, params, user_agent)
+                 ds_client=None,
+                 user_agent=None):
+        super(TendersClient, self).__init__(
+            key, resource, host_url, api_version, params, ds_client,
+            user_agent
+        )
+        self.headers = {'Content-Type': 'application/json'}
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -168,9 +39,9 @@ class TendersClient(APIBaseClient):
     def get_tenders(self, params={}, feed='changes'):
         params['feed'] = feed
         self._update_params(params)
-        response = self.request("GET",
-            self.prefix_path,
-            params_dict=self.params)
+        response = self.request('GET',
+                                self.prefix_path,
+                                params_dict=self.params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             self._update_params(tender_list.next_page)
@@ -178,12 +49,12 @@ class TendersClient(APIBaseClient):
         elif response.status_code == 404:
             del self.params['offset']
 
-        raise InvalidResponse
+        raise InvalidResponse(response)
 
     def get_latest_tenders(self, date, tender_id):
         iso_dt = parse_date(date)
-        dt = iso_dt.strftime("%Y-%m-%d")
-        tm = iso_dt.strftime("%H:%M:%S")
+        dt = iso_dt.strftime('%Y-%m-%d')
+        tm = iso_dt.strftime('%H:%M:%S')
         response = self._get_resource_item(
             '{}?offset={}T{}&opt_fields=tender_id&mode=test'.format(
                 self.prefix_path,
@@ -195,26 +66,25 @@ class TendersClient(APIBaseClient):
             tender_list = munchify(loads(response.text))
             self._update_params(tender_list.next_page)
             return tender_list.data
-        raise InvalidResponse
+        raise InvalidResponse(response)
 
     def _get_tender_resource_list(self, tender, items_name):
         return self._get_resource_item(
             '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
-    def get_questions(self, tender, params={}):
-        return self._get_tender_resource_list(tender, "questions")
+    def get_questions(self, tender):
+        return self._get_tender_resource_list(tender, 'questions')
 
-    def get_documents(self, tender, params={}):
-        return self._get_tender_resource_list(tender, "documents")
+    def get_documents(self, tender):
+        return self._get_tender_resource_list(tender, 'documents')
 
-    def get_awards(self, tender, params={}):
-        return self._get_tender_resource_list(tender, "awards")
+    def get_awards(self, tender):
+        return self._get_tender_resource_list(tender, 'awards')
 
-    def get_lots(self, tender, params={}):
-        return self._get_tender_resource_list(tender, "lots")
+    def get_lots(self, tender):
+        return self._get_tender_resource_list(tender, 'lots')
 
     ###########################################################################
     #             CREATE ITEM API METHODS
@@ -224,37 +94,49 @@ class TendersClient(APIBaseClient):
         return self._create_resource_item(
             '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
             item_obj,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def create_tender(self, tender):
         return self._create_resource_item(self.prefix_path, tender)
 
     def create_question(self, tender, question):
-        return self._create_tender_resource_item(tender, question, "questions")
+        return self._create_tender_resource_item(tender, question, 'questions')
 
     def create_bid(self, tender, bid):
-        return self._create_tender_resource_item(tender, bid, "bids")
+        return self._create_tender_resource_item(tender, bid, 'bids')
 
     def create_lot(self, tender, lot):
-        return self._create_tender_resource_item(tender, lot, "lots")
+        return self._create_tender_resource_item(tender, lot, 'lots')
 
     def create_award(self, tender, award):
-        return self._create_tender_resource_item(tender, award, "awards")
+        return self._create_tender_resource_item(tender, award, 'awards')
 
     def create_cancellation(self, tender, cancellation):
-        return self._create_tender_resource_item(tender, cancellation, "cancellations")
+        return self._create_tender_resource_item(
+            tender, cancellation, 'cancellations'
+        )
 
     def create_complaint(self, tender, complaint):
-        return self._create_tender_resource_item(tender, complaint, "complaints")
+        return self\
+            ._create_tender_resource_item(tender, complaint, 'complaints')
 
     def create_award_complaint(self, tender, complaint, award_id):
         return self._create_resource_item(
-            '{}/{}/{}'.format(self.prefix_path, tender.data.id, "awards/{0}/complaints".format(award_id)),
+            '{}/{}/{}'.format(self.prefix_path, tender.data.id,
+                              'awards/{0}/complaints'.format(award_id)),
             complaint,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
+        )
+
+    def create_thin_document(self, tender, document_data):
+        return self._create_resource_item(
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id
+            ),
+            document_data,
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     ###########################################################################
@@ -265,12 +147,11 @@ class TendersClient(APIBaseClient):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
     def _get_tender_resource_item(self, tender, item_id, items_name,
-                                  access_token=""):
+                                  access_token=''):
         if access_token:
             headers = {'X-Access-Token': access_token}
         else:
-            headers = {'X-Access-Token':
-                       getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers = {'X-Access-Token': self._get_access_token(tender)}
         return self._get_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path,
                                  tender.data.id,
@@ -280,14 +161,14 @@ class TendersClient(APIBaseClient):
         )
 
     def get_question(self, tender, question_id):
-        return self._get_tender_resource_item(tender, question_id, "questions")
+        return self._get_tender_resource_item(tender, question_id, 'questions')
 
     def get_bid(self, tender, bid_id, access_token):
-        return self._get_tender_resource_item(tender, bid_id, "bids",
+        return self._get_tender_resource_item(tender, bid_id, 'bids',
                                               access_token)
 
     def get_lot(self, tender, lot_id):
-        return self._get_tender_resource_item(tender, lot_id, "lots")
+        return self._get_tender_resource_item(tender, lot_id, 'lots')
 
     def get_file(self, tender, url, access_token=None):
         headers = {}
@@ -295,76 +176,71 @@ class TendersClient(APIBaseClient):
             headers = {'X-Access-Token': access_token}
 
         headers.update(self.headers)
-        response_item = self.request("GET",
-            url, headers=headers)
+        response_item = self.request('GET', url, headers=headers)
 
         # if response_item.status_code == 302:
         #     response_obj = request(response_item.headers['location'])
         if response_item.status_code == 200:
             return response_item.text, \
                 response_item.headers['Content-Disposition'] \
-                .split(";")[1].split('"')[1]
-        raise InvalidResponse
+                .split("; filename=")[1].strip('"')
+        raise InvalidResponse(response_item)
 
     def extract_credentials(self, id):
-        return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, id))
+        return self._get_resource_item(
+            '{}/{}/extract_credentials'.format(self.prefix_path, id)
+        )
 
     ###########################################################################
     #             PATCH ITEM API METHODS
     ###########################################################################
 
-    def _patch_tender_resource_item(self, tender, item_obj, items_name):
-        return self._patch_resource_item(
-            '{}/{}/{}/{}'.format(
-                self.prefix_path, tender.data.id, items_name, item_obj['data']['id']
-            ),
-            payload=item_obj,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
-        )
-
     def patch_tender(self, tender):
         return self._patch_resource_item(
-            '{}/{}'.format(self.prefix_path, tender["data"]["id"]),
+            '{}/{}'.format(self.prefix_path, tender['data']['id']),
             payload=tender,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_question(self, tender, question):
-        return self._patch_tender_resource_item(tender, question, "questions")
+        return self._patch_obj_resource_item(tender, question, 'questions')
 
     def patch_bid(self, tender, bid):
-        return self._patch_tender_resource_item(tender, bid, "bids")
+        return self._patch_obj_resource_item(tender, bid, 'bids')
 
     def patch_bid_document(self, tender, document_data, bid_id, document_id):
         return self._patch_resource_item(
             '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, "bids", bid_id, document_id
+                self.prefix_path, tender.data.id, 'bids', bid_id, document_id
             ),
             payload=document_data,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_award(self, tender, award):
-        return self._patch_tender_resource_item(tender, award, "awards")
+        return self._patch_obj_resource_item(tender, award, 'awards')
 
     def patch_cancellation(self, tender, cancellation):
-        return self._patch_tender_resource_item(tender, cancellation, "cancellations")
+        return self._patch_obj_resource_item(
+            tender, cancellation, 'cancellations'
+        )
 
-    def patch_cancellation_document(self, tender, cancellation, cancellation_id, cancellation_doc_id):
+    def patch_cancellation_document(
+            self, tender, cancellation, cancellation_id, cancellation_doc_id
+    ):
         return self._patch_resource_item(
             '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, "cancellations", cancellation_id, cancellation_doc_id
+                self.prefix_path, tender.data.id, 'cancellations',
+                cancellation_id, cancellation_doc_id
             ),
             payload=cancellation,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_complaint(self, tender, complaint):
-        return self._patch_tender_resource_item(tender, complaint, "complaints")
+        return self._patch_obj_resource_item(
+            tender, complaint, 'complaints'
+        )
 
     def patch_award_complaint(self, tender, complaint, award_id):
         return self._patch_resource_item(
@@ -372,44 +248,45 @@ class TendersClient(APIBaseClient):
                 self.prefix_path, tender.data.id, award_id, complaint.data.id
             ),
             payload=complaint,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
     def patch_lot(self, tender, lot):
-        return self._patch_tender_resource_item(tender, lot, "lots")
-
-    def patch_document(self, tender, document):
-        return self._patch_tender_resource_item(tender, document, "documents")
+        return self._patch_obj_resource_item(tender, lot, 'lots')
 
     def patch_qualification(self, tender, qualification):
-        return self._patch_tender_resource_item(tender, qualification, "qualifications")
+        return self._patch_obj_resource_item(
+            tender, qualification, 'qualifications'
+        )
 
     def patch_contract(self, tender, contract):
-        return self._patch_tender_resource_item(tender, contract, "contracts")
+        return self._patch_obj_resource_item(tender, contract, 'contracts')
+
+    def patch_contract_document(self, tender, document_data,
+                                contract_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, 'contracts',
+                contract_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token': self._get_access_token(tender)}
+        )
 
     def patch_credentials(self, id, access_token):
-        return self._patch_resource_item('{}/{}/credentials'.format(self.prefix_path, id),
-                                         payload={},
-                                         headers={'X-Access-Token': access_token})
+        return self._patch_resource_item(
+            '{}/{}/credentials'.format(self.prefix_path, id),
+            payload={},
+            headers={'X-Access-Token': access_token}
+        )
 
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
 
     @verify_file
-    def upload_document(self, file_, tender):
-        return self._upload_resource_file(
-            '{}/{}/documents'.format(
-                self.prefix_path,
-                tender.data.id
-            ),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token': getattr(getattr(tender, 'access', ''), 'token', '')}
-        )
-
-    @verify_file
-    def upload_bid_document(self, file_, tender, bid_id, doc_type="documents"):
+    def upload_bid_document(self, file_, tender, bid_id, doc_type='documents',
+                            use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/bids/{}/{}'.format(
                 self.prefix_path,
@@ -417,13 +294,16 @@ class TendersClient(APIBaseClient):
                 bid_id,
                 doc_type
             ),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def update_bid_document(self, file_, tender, bid_id, document_id, doc_type="documents"):
+    def update_bid_document(self, file_, tender, bid_id, document_id,
+                            doc_type='documents', use_ds_client=True,
+                            doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/bids/{}/{}/{}'.format(
                 self.prefix_path,
@@ -432,27 +312,33 @@ class TendersClient(APIBaseClient):
                 doc_type,
                 document_id
             ),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')},
-            method='put'
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            method='put',
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_cancellation_document(self, file_, tender, cancellation_id):
+    def upload_cancellation_document(self, file_, tender, cancellation_id,
+                                     use_ds_client=True,
+                                     doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/cancellations/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
-                cancellation_id
+                cancellation_id,
             ),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def update_cancellation_document(self, file_, tender, cancellation_id, document_id):
+    def update_cancellation_document(self, file_, tender, cancellation_id,
+                                     document_id, use_ds_client=True,
+                                     doc_registration=True):
             return self._upload_resource_file(
                 '{}/{}/cancellations/{}/documents/{}'.format(
                     self.prefix_path,
@@ -460,61 +346,90 @@ class TendersClient(APIBaseClient):
                     cancellation_id,
                     document_id
                 ),
-                files={"file": (file_.name, file_)},
-                headers={'X-Access-Token':
-                         getattr(getattr(tender, 'access', ''), 'token', '')},
-                method='put'
+                file_=file_,
+                headers={'X-Access-Token': self._get_access_token(tender)},
+                method='put',
+                use_ds_client=use_ds_client,
+                doc_registration=doc_registration
             )
 
     @verify_file
-    def upload_complaint_document(self, file_, tender, complaint_id):
+    def upload_complaint_document(self, file_, tender, complaint_id,
+                                  use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/complaints/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
                 complaint_id),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_award_complaint_document(self, file_, tender, award_id, complaint_id):
+    def upload_award_complaint_document(self, file_, tender, award_id,
+                                        complaint_id, use_ds_client=True,
+                                        doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/awards/{}/complaints/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
                 award_id,
                 complaint_id),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_qualification_document(self, file_, tender, qualification_id):
+    def upload_qualification_document(self, file_, tender, qualification_id,
+                                      use_ds_client=True,
+                                      doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/qualifications/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
                 qualification_id
             ),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     @verify_file
-    def upload_award_document(self, file_, tender, award_id):
+    def upload_award_document(self, file_, tender, award_id,
+                              use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/awards/{}/documents'.format(
                 self.prefix_path,
                 tender.data.id,
                 award_id
             ),
-            files={"file": (file_.name, file_)},
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
+        )
+
+    @verify_file
+    def upload_contract_document(self, file_, tender, contract_id,
+                                 doc_type='documents', use_ds_client=True,
+                                 doc_registration=True):
+        # TODO: find out what actually depends on the doc_type parameter.
+        # TODO: is it necessary to pass it here?
+        return self._upload_resource_file(
+            '{}/{}/contracts/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                contract_id
+            ),
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     ###########################################################################
@@ -522,7 +437,8 @@ class TendersClient(APIBaseClient):
     ###########################################################################
 
     def delete_bid(self, tender, bid, access_token=None):
-        logger.info("delete_lot is deprecated. In next update this function will takes bid_id and access_token instead bid.")
+        logger.info('delete_lot is deprecated. In next update this function '
+                    'will takes bid_id and access_token instead bid.')
         if isinstance(bid, basestring):
             bid_id = bid
             access_token = access_token
@@ -539,7 +455,8 @@ class TendersClient(APIBaseClient):
         )
 
     def delete_lot(self, tender, lot):
-        logger.info("delete_lot is deprecated. In next update this function will takes lot_id instead lot.")
+        logger.info('delete_lot is deprecated. In next update this function '
+                    'will takes lot_id instead lot.')
         if isinstance(lot, basestring):
             lot_id = lot
         else:
@@ -550,8 +467,7 @@ class TendersClient(APIBaseClient):
                 tender.data.id,
                 lot_id
             ),
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+            headers={'X-Access-Token': self._get_access_token(tender)}
         )
     ###########################################################################
 
@@ -566,7 +482,7 @@ class TendersClientSync(TendersClient):
         params['feed'] = 'changes'
         self.headers.update(extra_headers)
 
-        response = self.request("GET", self.prefix_path, params_dict=params)
+        response = self.request('GET', self.prefix_path, params_dict=params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             return tender_list

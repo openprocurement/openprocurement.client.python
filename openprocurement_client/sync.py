@@ -37,35 +37,35 @@ def start_sync(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
     :returns:
         queue: Queue which containing objects derived from the list of tenders
         forward_worker: Greenlet of forward worker
-        backfard_worker: Greenlet of backfard worker
+        backward_worker: Greenlet of backward worker
 
     """
-    forward = TendersClientSync(key, host, version, resource=resource)
-    backfard = TendersClientSync(key, host, version, resource=resource)
-    Cookie = forward.headers['Cookie'] = backfard.headers['Cookie']
-    backfard_params = {'descending': True, 'feed': 'changes'}
-    backfard_params.update(extra_params)
+    forward = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
+    backward = TendersClientSync(key, resource=resource, host_url=host, api_version=version)
+    Cookie = forward.session.cookies = backward.session.cookies
+    backward_params = {'descending': True, 'feed': 'changes'}
+    backward_params.update(extra_params)
     forward_params = {'feed': 'changes'}
     forward_params.update(extra_params)
 
-    response = backfard.sync_tenders(backfard_params)
+    response = backward.sync_tenders(backward_params)
 
     queue = Queue(maxsize=retrievers_params['queue_size'])
     for tender in response.data:
         idle()
         queue.put(tender)
-    backfard_params['offset'] = response.next_page.offset
+    backward_params['offset'] = response.next_page.offset
     forward_params['offset'] = response.prev_page.offset
 
-    backfard_worker = spawn(retriever_backward, queue,
-                            backfard, Cookie, backfard_params,
+    backward_worker = spawn(retriever_backward, queue,
+                            backward, Cookie, backward_params,
                             retrievers_params['down_requests_sleep'])
     forward_worker = spawn(retriever_forward, queue,
                            forward, Cookie, forward_params,
                            retrievers_params['up_requests_sleep'],
                            retrievers_params['up_wait_sleep'])
 
-    return queue, forward_worker, backfard_worker
+    return queue, forward_worker, backward_worker
 
 
 def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
@@ -77,7 +77,7 @@ def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
 
     Args:
         forward_worker: Greenlet of forward worker
-        backfard_worker: Greenlet of backfard worker
+        backward_worker: Greenlet of backward worker
 
     :param:
         host (str): Url of Openprocurement API. Defaults is DEFAULT_API_HOST
@@ -88,7 +88,7 @@ def restart_sync(up_worker, down_worker, host=DEFAULT_API_HOST,
     :returns:
         queue: Queue which containing objects derived from the list of tenders
         forward_worker: Greenlet of forward worker
-        backfard_worker: Greenlet of backfard worker
+        backward_worker: Greenlet of backward worker
 
     """
 
@@ -146,16 +146,16 @@ def get_resource_items(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
 def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                 key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
-    return get_resource_items(host=host, version=version, key=key, resource='tenders',
-                       extra_params=extra_params,
-                       retrievers_params=retrievers_params)
+    return get_resource_items(host=host, version=version, key=key,
+                              resource='tenders', extra_params=extra_params,
+                              retrievers_params=retrievers_params)
 
 
 
 def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
     logger.info('Backward: Start worker')
     response = client.sync_tenders(params)
-    if origin_cookie != client.headers['Cookie']:
+    if origin_cookie != client.session.cookies:
         raise Exception('LB Server mismatch')
     while response.data:
         for tender in response.data:
@@ -163,7 +163,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
             queue.put(tender)
         params['offset'] = response.next_page.offset
         response = client.sync_tenders(params)
-        if origin_cookie != client.headers['Cookie']:
+        if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
         logger.info('Backward: pause between requests')
         sleep(requests_sleep)
@@ -174,7 +174,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
 def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait_sleep):
     logger.info('Forward: Start worker')
     response = client.sync_tenders(params)
-    if origin_cookie != client.headers['Cookie']:
+    if origin_cookie != client.session.cookies:
         raise Exception('LB Server mismatch')
     while 1:
         while response.data:
@@ -183,7 +183,7 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
                 queue.put(tender)
             params['offset'] = response.next_page.offset
             response = client.sync_tenders(params)
-            if origin_cookie != client.headers['Cookie']:
+            if origin_cookie != client.session.cookies:
                 raise Exception('LB Server mismatch')
             if len(response.data) != 0:
                 logger.info('Forward: pause between requests')
@@ -194,7 +194,7 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
 
         params['offset'] = response.next_page.offset
         response = client.sync_tenders(params)
-        if origin_cookie != client.headers['Cookie']:
+        if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
 
     return 1
