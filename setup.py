@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import os
 
-version = '2.0b3'
+version = '2.0a1'
 
 tests_require = {
     'test': 'bottle'

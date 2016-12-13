@@ -5,6 +5,8 @@ import logging
 from .client import TendersClientSync
 from gevent import spawn, sleep, idle
 from gevent.queue import Queue, Empty
+from requests.exceptions import ConnectionError
+from openprocurement_client.exceptions import RequestFailed
 
 DEFAULT_RETRIEVERS_PARAMS = {
     'down_requests_sleep': 5,
@@ -150,11 +152,43 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                               resource='tenders', extra_params=extra_params,
                               retrievers_params=retrievers_params)
 
+def get_response(client, params):
+    response_fail = True
+    sleep_interval = 0.2
+    while response_fail:
+        try:
+            response = client.sync_tenders(params)
+            response_fail = False
+        except ConnectionError as e:
+            logger.error('ConnectionError: {}'.format(e.message))
+            if sleep_interval > 300:
+                raise e
+            sleep_interval = sleep_interval * 2
+            sleep(sleep_interval)
+            continue
+        except RequestFailed as e:
+            logger.error('Request failed. Status code: {}'.format(
+                e.status_code))
+            if e.status_code == 429:
+                if sleep_interval > 120:
+                    raise e
+                sleep_interval = sleep_interval * 2
+                sleep(sleep_interval)
+                continue
+        except Exception as e:
+            logger.error('Exception: {}'.format(e.message))
+            if sleep_interval > 300:
+                raise e
+            sleep_interval = sleep_interval * 2
+            sleep(sleep_interval)
+            continue
+    return response
+
 
 
 def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
     logger.info('Backward: Start worker')
-    response = client.sync_tenders(params)
+    response = get_response(client, params)
     if origin_cookie != client.session.cookies:
         raise Exception('LB Server mismatch')
     while response.data:
@@ -162,7 +196,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
             idle()
             queue.put(tender)
         params['offset'] = response.next_page.offset
-        response = client.sync_tenders(params)
+        response = get_response(client, params)
         if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
         logger.info('Backward: pause between requests')
@@ -173,7 +207,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
 
 def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait_sleep):
     logger.info('Forward: Start worker')
-    response = client.sync_tenders(params)
+    response = get_response(client, params)
     if origin_cookie != client.session.cookies:
         raise Exception('LB Server mismatch')
     while 1:
@@ -182,7 +216,7 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
                 idle()
                 queue.put(tender)
             params['offset'] = response.next_page.offset
-            response = client.sync_tenders(params)
+            response = get_response(client, params)
             if origin_cookie != client.session.cookies:
                 raise Exception('LB Server mismatch')
             if len(response.data) != 0:
@@ -193,7 +227,7 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
         sleep(wait_sleep)
 
         params['offset'] = response.next_page.offset
-        response = client.sync_tenders(params)
+        response = get_response(client, params)
         if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
 
