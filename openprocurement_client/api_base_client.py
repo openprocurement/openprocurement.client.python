@@ -1,9 +1,7 @@
 import logging
 import uuid
 
-from .exceptions import Conflict, Forbidden, InvalidResponse, Locked, \
-    MethodNotAllowed, PreconditionFailed, ResourceGone, RequestFailed, \
-    ResourceNotFound, Unauthorized, UnprocessableEntity
+from .exceptions import http_exceptions_dict, InvalidResponse, RequestFailed
 
 from functools import wraps
 from io import FileIO
@@ -82,26 +80,8 @@ class APITemplateClient(object):
         )
 
         if response.status_code >= 400:
-            if response.status_code == 404:
-                raise ResourceNotFound(response)
-            elif response.status_code == 401:
-                raise Unauthorized(response)
-            elif response.status_code == 403:
-                raise Forbidden(response)
-            elif response.status_code == 410:
-                raise ResourceGone(response)
-            elif response.status_code == 405:
-                raise MethodNotAllowed(response)
-            elif response.status_code == 409:
-                raise Conflict(response)
-            elif response.status_code == 412:
-                raise PreconditionFailed(response)
-            elif response.status_code == 422:
-                raise UnprocessableEntity(response)
-            elif response.status_code == 423:
-                raise Locked(response)
-            else:
-                raise RequestFailed(response)
+            raise http_exceptions_dict\
+                .get(response.status_code, RequestFailed)(response)
 
         return response
 

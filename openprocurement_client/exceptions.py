@@ -105,6 +105,9 @@ class Forbidden(ResourceError):
 
 
 class InvalidResponse(ResourceError):
+    """Exception raised when a response (usually response.status_code) doesn't
+    match an expected one.
+    """
     pass
 
 
@@ -114,3 +117,16 @@ class NoToken(ResourceError):
 
 class IdNotFound(ResourceError):
     pass
+
+
+http_exceptions_dict = {
+    405: MethodNotAllowed,
+    409: Conflict,
+    412: PreconditionFailed,
+    422: UnprocessableEntity,
+    423: Locked,
+    404: ResourceNotFound,
+    410: ResourceGone,
+    401: Unauthorized,
+    403: Forbidden
+}
