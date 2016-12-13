@@ -9,7 +9,7 @@ from munch import munchify
 from os import path
 from requests import Session
 from requests.auth import HTTPBasicAuth as BasicAuth
-from simplejson import dumps, loads
+from simplejson import loads
 
 logger = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')
@@ -159,7 +159,7 @@ class APIBaseClient(APITemplateClient):
         _headers = self.headers.copy()
         _headers.update(headers or {})
         response_item = self.request(
-            'PATCH', url, headers=_headers, payload=dumps(payload)
+            'PATCH', url, headers=_headers, json=payload
         )
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
@@ -239,5 +239,6 @@ class APIBaseClient(APITemplateClient):
             doc_registration=doc_registration
         )
 
-    def get_resource_item(self, id):
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
+    def get_resource_item(self, id, headers=None):
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, id),
+                                       headers=headers)

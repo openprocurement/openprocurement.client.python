@@ -11,7 +11,7 @@ IGNORE_PARAMS = ('uri', 'path')
 
 
 class DocumentServiceClient(APITemplateClient):
-    """base class for API"""
+    """class for work with Document Service"""
 
     host_url = 'https://upload.docs-sandbox.openprocurement.org'
     url_register_part = 'register'
@@ -65,12 +65,12 @@ class DocumentServiceClient(APITemplateClient):
 
         file_hash = 'md5:' + self._hashfile(file_)
 
-        response_reg = self.register_document_upload(
+        response = self.register_document_upload(
             hash_value=file_hash,
             headers=headers
         )
         return self._document_upload(
-            url=response_reg.upload_url,
+            url=response.upload_url,
             file_={'file': file_},
             headers=headers
         )

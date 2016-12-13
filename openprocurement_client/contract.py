@@ -1,6 +1,6 @@
-from json import loads
+from simplejson import loads
 from munch import munchify
-from client import APIBaseClient, verify_file
+from client import APIBaseClient
 
 
 class ContractingClient(APIBaseClient):

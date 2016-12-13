@@ -64,7 +64,7 @@ def generate_file_obj(file_name, content):
     file_.name = file_name
     file_.write(content)
     file_.seek(0)
-    return munchify(file_)
+    return file_
 
 
 class BaseTestClass(unittest.TestCase):

@@ -2,7 +2,7 @@ from client import APIBaseClient, InvalidResponse
 from iso8601 import parse_date
 from munch import munchify
 from retrying import retry
-from simplejson import dumps, loads
+from simplejson import loads
 import logging
 
 logger = logging.getLogger(__name__)
