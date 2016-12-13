@@ -10,7 +10,7 @@ from io import FileIO
 from munch import munchify
 from os import path
 from requests import Session
-from requests.auth import HTTPBasicAuth
+from requests.auth import HTTPBasicAuth as BasicAuth
 from simplejson import dumps, loads
 
 logger = logging.getLogger(__name__)
@@ -57,14 +57,11 @@ def verify_file(fn):
 class APITemplateClient(object):
     """base class for API"""
 
-    @staticmethod
-    def auth(login, passwd): return HTTPBasicAuth(login, passwd)
-
     def __init__(self, login_pass=None, headers=None, user_agent=None):
         self.headers = headers or {}
         self.session = Session()
         if login_pass is not None:
-            self.session.auth = self.auth(*login_pass)
+            self.session.auth = BasicAuth(*login_pass)
 
         if user_agent is None:
             self.session.headers['User-Agent'] \
