@@ -17,7 +17,7 @@ from openprocurement_client.plan import PlansClient
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
     HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
-    tender_partition
+    procurement_entity_partition
 
 
 TEST_TENDER_KEYS = munchify({
@@ -54,6 +54,7 @@ TEST_PLAN_KEYS = munchify({
 
 TEST_CONTRACT_KEYS = munchify({
     "contract_id": '3c0bf3eed3fc4b189103e62b828c599d',
+    "document_id": '9c8b66120d4c415cb334bbad33f94ba9',
     "new_document_id": 'newid678123456781234567812345678',
     "error_id": 'zzzxxx111'
 })
@@ -122,7 +123,7 @@ class ViewerTenderTestCase(BaseTestClass):
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
-        with open(ROOT + TEST_TENDER_KEYS.tender_id + '.json') as tender:
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
 
     def tearDown(self):
@@ -193,15 +194,15 @@ class UserTestCase(BaseTestClass):
         #self._testMethodName
         self.setting_up(client=TendersClient)
 
-        with open(ROOT + TEST_TENDER_KEYS.tender_id + '.json') as tender:
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
-            self.tender.update({'access':{"token": API_KEY}})
-        with open(ROOT + TEST_TENDER_KEYS.empty_tender + '.json') as tender:
+            self.tender.update({'access': {'token': API_KEY}})
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.empty_tender + '.json') as tender:
             self.empty_tender = munchify(load(tender))
-            self.empty_tender.update({'access':{"token": API_KEY}})
-        with open(ROOT + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
+            self.empty_tender.update({'access': {'token': API_KEY}})
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
             self.limited_tender = munchify(load(tender))
-            self.limited_tender.update({'access':{"token": API_KEY}})
+            self.limited_tender.update({'access': {'token': API_KEY}})
 
     def tearDown(self):
         self.server.stop()
@@ -276,7 +277,7 @@ class UserTestCase(BaseTestClass):
 
     def test_get_question(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        questions = tender_partition(TEST_TENDER_KEYS.tender_id, part="questions")
+        questions = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="questions")
         for question in questions:
             if question['id'] == TEST_TENDER_KEYS.question_id:
                 question_ = munchify({"data": question})
@@ -286,7 +287,7 @@ class UserTestCase(BaseTestClass):
 
     def test_get_lot(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        lots = tender_partition(TEST_TENDER_KEYS.tender_id, part="lots")
+        lots = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="lots")
         for lot in lots:
             if lot['id'] == TEST_TENDER_KEYS.lot_id:
                 lot_ = munchify({"data": lot})
@@ -296,13 +297,13 @@ class UserTestCase(BaseTestClass):
 
     def test_get_bid(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        bids = tender_partition(TEST_TENDER_KEYS.tender_id, part="bids")
+        bids = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="bids")
         for bid in bids:
             if bid['id'] == TEST_TENDER_KEYS.bid_id:
                 bid_ = munchify({"data": bid})
                 break
         bid = self.client.get_bid(self.tender, bid_id=TEST_TENDER_KEYS.bid_id, access_token=API_KEY)
-        self.assertEqual(bid , bid_)
+        self.assertEqual(bid, bid_)
 
     def test_get_location_error(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
@@ -652,13 +653,13 @@ class UserTestCase(BaseTestClass):
 
     def test_delete_bid(self):
         setup_routing(self.app, routes=["tender_subpage_item_delete"])
-        bid_id = tender_partition(TEST_TENDER_KEYS.tender_id, part="bids")[0]['id']
+        bid_id = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="bids")[0]['id']
         deleted_bid = self.client.delete_bid(self.tender, bid_id, API_KEY)
         self.assertFalse(deleted_bid)
 
     def test_delete_lot(self):
         setup_routing(self.app, routes=["tender_subpage_item_delete"])
-        lot_id = tender_partition(TEST_TENDER_KEYS.tender_id, part="lots")[0]['id']
+        lot_id = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="lots")[0]['id']
         deleted_lot = self.client.delete_lot(self.tender, lot_id)
         self.assertFalse(deleted_lot)
 
@@ -703,6 +704,13 @@ class ContractingUserTestCase(BaseTestClass):
         doc = self.client.upload_document(file_, self.contract)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
+
+    def test_patch_document(self):
+        setup_routing(self.app, routes=['contract_subpage_item_patch'])
+        document = munchify({'data': {'id': TEST_CONTRACT_KEYS.document_id, 'title': 'test_patch_document.txt'}})
+        patched_document = self.client.patch_document(self.contract, document)
+        self.assertEqual(patched_document.data.id, document.data.id)
+        self.assertEqual(patched_document.data.title, document.data.title)
 
 
 if __name__ == '__main__':
