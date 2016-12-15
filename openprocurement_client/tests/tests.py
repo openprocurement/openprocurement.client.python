@@ -238,8 +238,8 @@ class UserTestCase(BaseTestClass):
 
     def test_create_tender(self):
         setup_routing(self.app, routes=["tender_create"])
-        tender = munchify({'data': 'tender'})
-        self.client.create_tender(self.tender)
+        tender = self.client.create_tender(self.tender)
+        assert tender  # check that it is not None
 
     def test_create_question(self):
         setup_routing(self.app, routes=["tender_subpage_item_create"])
