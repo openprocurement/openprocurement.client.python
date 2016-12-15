@@ -92,8 +92,10 @@ def tender_subpage(tender_id, subpage_name):
 
 def tender_subpage_item_create(tender_id, subpage_name):
     response.status = 201
-    if not procurement_entity_partition(tender_id, part=subpage_name):
-        return location_error(subpage_name)
+    return request.json
+
+def procurement_entity_subpage_item_create(procurement_entity_id, subpage_name):
+    response.status = 201
     return request.json
 
 def tender_subpage_item(tender_id, subpage_name, subpage_id):
@@ -275,7 +277,6 @@ def contract_patch(contract_id):
 def contract_document_create(contract_id):
     from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
     response.status = 201
-    # document = contract_partition(contract_id, 'documents')[0]
     document = procurement_entity_partition(contract_id,
                                             procur_entity_sublink='contracts',
                                             part='documents')[0]
@@ -283,16 +284,6 @@ def contract_document_create(contract_id):
     document.id = TEST_CONTRACT_KEYS.new_document_id
     return dumps({"data": document})
 
-# def contract_partition(contract_id, part="contract"):
-#     try:
-#         with open(ROOT + 'contract_' + contract_id + '.json') as json:
-#             contract = load(json)
-#             if part=="contract":
-#                 return contract
-#             else:
-#                 return munchify(contract['data'][part])
-#     except (KeyError, IOError):
-#         return []
 
 #### Routes
 
@@ -305,7 +296,7 @@ routes_dict = {
         "tender_patch": (TENDERS_PATH + "/<tender_id>", 'PATCH', tender_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
-        "tender_subpage_item_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'POST', tender_subpage_item_create),
+        "tender_subpage_item_create": (TENDERS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
         "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
         "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
@@ -323,6 +314,7 @@ routes_dict = {
         "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
+        "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
         "contract_subpage_item_patch": (API_PATH.format('<procur_entity_sublink:re:contracts>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch),
         }

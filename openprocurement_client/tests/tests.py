@@ -699,6 +699,12 @@ class ContractingUserTestCase(BaseTestClass):
         contract = munchify({'data': 'contract'})
         self.client.create_contract(contract)
 
+    def test_create_change(self):
+        setup_routing(self.app, routes=['contract_subpage_item_create'])
+        change = munchify({'data': 'change'})
+        self.assertEqual(self.client.create_change(self.contract, change),
+                         change)
+
     ###########################################################################
     #             DOCUMENTS FILE TEST
     ###########################################################################
