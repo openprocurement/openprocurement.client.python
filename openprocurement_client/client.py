@@ -314,7 +314,7 @@ class TendersClient(APIBaseClient):
             ),
             file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)},
-            method='put',
+            method='PUT',
             use_ds_client=use_ds_client,
             doc_registration=doc_registration
         )
@@ -348,7 +348,7 @@ class TendersClient(APIBaseClient):
                 ),
                 file_=file_,
                 headers={'X-Access-Token': self._get_access_token(tender)},
-                method='put',
+                method='PUT',
                 use_ds_client=use_ds_client,
                 doc_registration=doc_registration
             )

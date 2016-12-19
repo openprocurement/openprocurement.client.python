@@ -201,4 +201,4 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
 
 if __name__ == '__main__':
     for tender_item in get_tenders():
-        print 'Tender {0[id]}'.format(tender_item)
+        print('Tender {0[id]}'.format(tender_item))

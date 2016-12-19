@@ -134,16 +134,16 @@ class APIBaseClient(APITemplateClient):
             if key not in IGNORE_PARAMS:
                 self.params[key] = params[key]
 
-    def _create_resource_item(self, url, payload, headers=None, method='post'):
+    def _create_resource_item(self, url, payload, headers=None, method='POST'):
         _headers = self.headers.copy()
         _headers.update(headers or {})
 
         response_item = self.request(
             method, url, headers=headers, json=payload
         )
-        if (response_item.status_code == 201 and method == 'post') \
+        if (response_item.status_code == 201 and method == 'POST') \
                 or (response_item.status_code in (200, 204)
-                    and method in ('put', 'delete')):
+                    and method in ('PUT', 'DELETE')):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
@@ -166,7 +166,7 @@ class APIBaseClient(APITemplateClient):
         raise InvalidResponse(response_item)
 
     def _upload_resource_file(
-        self, url, file_=None, headers=None, method='post',
+        self, url, file_=None, headers=None, method='POST',
         use_ds_client=True, doc_registration=True
     ):
         if use_ds_client and self.ds_client:
