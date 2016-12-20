@@ -190,12 +190,14 @@ def download_file(filename):
 ####
 
 
-def procurement_entity_partition(entity_id, procur_entity_sublink='tenders', part='all'):
-    procur_entity_dict = {'tenders': 'tender', 'contracts': 'contract'}
+def procurement_entity_partition(entity_id, procur_entity_sublink='tenders',
+                                 part='all'):
+    procur_entity_dict = \
+        {'tenders': 'tender', 'contracts': 'contract', 'changes': 'change'}
     procur_entity = procur_entity_dict[procur_entity_sublink]
     try:
         with open(ROOT + procur_entity + '_' + entity_id + '.json') as json:
-            obj = load(json)
+            obj = munchify(load(json))
             if part == 'all':
                 return obj
             else:
@@ -285,6 +287,14 @@ def contract_document_create(contract_id):
     return dumps({"data": document})
 
 
+def contract_change_patch(contract_id, change_id):
+    from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
+    response.status = 200
+    change = procurement_entity_partition(change_id,
+                                          procur_entity_sublink='changes')
+    change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
+    return dumps(change)
+
 #### Routes
 
 routes_dict = {
@@ -316,7 +326,8 @@ routes_dict = {
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
         "contract_subpage_item_patch": (API_PATH.format('<procur_entity_sublink:re:contracts>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
-        "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch),
+        "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
+        "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch)
         }
 
 # tender_subpage_item_patch

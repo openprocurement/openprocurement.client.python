@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -
 from __future__ import print_function
 from gevent import monkey; monkey.patch_all()
 from gevent.pywsgi import WSGIServer
@@ -59,7 +60,9 @@ TEST_CONTRACT_KEYS = munchify({
     "document_id": '9c8b66120d4c415cb334bbad33f94ba9',
     "new_document_id": 'newid678123456781234567812345678',
     "error_id": 'zzzxxx111',
-    "contract_token": '0fc58c83963d42a692db4987df86640a'
+    "contract_token": '0fc58c83963d42a692db4987df86640a',
+    "change_id": '3ba8592459904c73bf05d7bc48e7083c',
+    "patch_change_rationale": u'Друга і третя поставка має бути розфасована'
 })
 
 
@@ -436,7 +439,7 @@ class UserTestCase(BaseTestClass):
         with open(ROOT + file_name) as local_file:
             test_file_data = local_file.read()
         url = HOST_URL + '/redirect/' + file_name
-        doc = self.client.get_file(self.tender, url, API_KEY)
+        doc = self.client.get_file(url, API_KEY)
         self.assertEqual(test_file_data, doc[0])
         self.assertEqual(file_name, doc[1])
 
@@ -444,8 +447,7 @@ class UserTestCase(BaseTestClass):
         setup_routing(self.app, routes=["redirect", "download"])
         file_name = 'error.txt'
         url = HOST_URL + '/redirect/' + file_name
-        self.assertRaises(ResourceNotFound, self.client.get_file,
-                          self.tender, url, API_KEY)
+        self.assertRaises(ResourceNotFound, self.client.get_file, url, API_KEY)
 
     def test_get_file_no_token(self):
         setup_routing(self.app, routes=["redirect", "download"])
@@ -453,7 +455,7 @@ class UserTestCase(BaseTestClass):
         with open(ROOT + file_name) as local_file:
             test_file_data = local_file.read()
         url = HOST_URL + '/redirect/' + file_name
-        doc = self.client.get_file(self.tender, url)
+        doc = self.client.get_file(url)
         self.assertEqual(test_file_data, doc[0])
         self.assertEqual(file_name, doc[1])
 
@@ -687,6 +689,10 @@ class ContractingUserTestCase(BaseTestClass):
         with open(ROOT + 'contracts.json') as contracts:
             self.contracts = munchify(load(contracts))
 
+        with open(ROOT + 'change_' + TEST_CONTRACT_KEYS.change_id +
+                  '.json') as change:
+            self.change = munchify(load(change))
+
     def tearDown(self):
         self.server.stop()
 
@@ -695,15 +701,14 @@ class ContractingUserTestCase(BaseTestClass):
     ###########################################################################
 
     def test_create_contract(self):
-        setup_routing(self.app, routes=["contract_create"])
-        contract = munchify({'data': 'contract'})
-        self.client.create_contract(contract)
+        setup_routing(self.app, routes=['contract_create'])
+        contract = self.client.create_contract(self.contract)
+        self.assertEqual(contract, self.contract)
 
     def test_create_change(self):
         setup_routing(self.app, routes=['contract_subpage_item_create'])
-        change = munchify({'data': 'change'})
-        self.assertEqual(self.client.create_change(self.contract, change),
-                         change)
+        change = self.client.create_change(self.contract, self.change)
+        self.assertEqual(change, self.change)
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
@@ -717,6 +722,10 @@ class ContractingUserTestCase(BaseTestClass):
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
 
+    ###########################################################################
+    #             PATCH ITEM TEST
+    ###########################################################################
+
     def test_patch_document(self):
         setup_routing(self.app, routes=['contract_subpage_item_patch'])
         document = munchify({'data': {'id': TEST_CONTRACT_KEYS.document_id,
@@ -724,6 +733,22 @@ class ContractingUserTestCase(BaseTestClass):
         patched_document = self.client.patch_document(self.contract, document)
         self.assertEqual(patched_document.data.id, document.data.id)
         self.assertEqual(patched_document.data.title, document.data.title)
+
+    def test_patch_change(self):
+        setup_routing(self.app, routes=['contract_change_patch'])
+        patch_change_data = \
+            {'data': {'rationale':
+                          TEST_CONTRACT_KEYS['patch_change_rationale']}}
+        patched_change = self.change.copy()
+        patched_change['data'].update(patch_change_data['data'])
+        patched_change = munchify(patched_change)
+
+        response_change = self.client.patch_change(
+            self.contract, self.change.data.id,
+            data=patch_change_data
+        )
+
+        self.assertEqual(response_change, patched_change)
 
     ###########################################################################
 

@@ -147,11 +147,9 @@ class TendersClient(APIBaseClient):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
     def _get_tender_resource_item(self, tender, item_id, items_name,
-                                  access_token=''):
-        if access_token:
-            headers = {'X-Access-Token': access_token}
-        else:
-            headers = {'X-Access-Token': self._get_access_token(tender)}
+                                  access_token=None):
+        access_token = access_token or self._get_access_token(tender)
+        headers = {'X-Access-Token': access_token}
         return self._get_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path,
                                  tender.data.id,
@@ -170,10 +168,8 @@ class TendersClient(APIBaseClient):
     def get_lot(self, tender, lot_id):
         return self._get_tender_resource_item(tender, lot_id, 'lots')
 
-    def get_file(self, tender, url, access_token=None):
-        headers = {}
-        if access_token:
-            headers = {'X-Access-Token': access_token}
+    def get_file(self, url, access_token=None):
+        headers = {'X-Access-Token': access_token} if access_token else {}
 
         headers.update(self.headers)
         response_item = self.request('GET', url, headers=headers)
