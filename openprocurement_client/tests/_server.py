@@ -79,7 +79,8 @@ def tenders_page_get():
 ### Tender operations
 #
 
-def tender_create():
+
+def procurement_entity_create():
     response.status = 201
     return request.json
 
@@ -232,9 +233,6 @@ def plans_page_get():
         plans = load(json)
     return dumps(plans)
 
-def plan_create():
-    response.status = 201
-    return request.json
 
 def plan_page(plan_id):
     plan = plan_partition(plan_id)
@@ -269,9 +267,6 @@ def contracts_page_get():
         contracts = load(json)
     return dumps(contracts)
 
-def contract_create():
-    response.status = 201
-    return request.json
 
 def contract_page(contract_id):
     contract = procurement_entity_partition(contract_id,
@@ -312,7 +307,7 @@ routes_dict = {
         "spore": (SPORE_PATH, 'HEAD', spore),
         "offset_error": (TENDERS_PATH, 'GET', offset_error),
         "tenders": (TENDERS_PATH, 'GET', tenders_page_get),
-        "tender_create": (TENDERS_PATH, 'POST', tender_create),
+        "tender_create": (TENDERS_PATH, 'POST', procurement_entity_create),
         "tender": (TENDERS_PATH + "/<tender_id>", 'GET', tender_page),
         "tender_patch": (TENDERS_PATH + "/<tender_id>", 'PATCH', tender_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
@@ -328,11 +323,11 @@ routes_dict = {
         "redirect": ('/redirect/<filename:path>', 'GET', get_file),
         "download": ('/download/<filename:path>', 'GET', download_file),
         "plans": (PLANS_PATH, 'GET', plans_page_get),
-        "plan_create": (PLANS_PATH, 'POST', plan_create),
+        "plan_create": (PLANS_PATH, 'POST', procurement_entity_create),
         "plan": (PLANS_PATH + "/<plan_id>", 'GET', plan_page),
         "plan_offset_error": (PLANS_PATH, 'GET', plan_offset_error),
         "contracts": (CONTRACTS_PATH, 'GET', contracts_page_get),
-        "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
+        "contract_create": (CONTRACTS_PATH, 'POST', procurement_entity_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
