@@ -3,6 +3,8 @@ from munch import munchify
 from simplejson import dumps, load
 from openprocurement_client.document_service_client \
     import DocumentServiceClient
+from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
+    TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
 from uuid import uuid4
 import magic
 import os
@@ -122,7 +124,6 @@ def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
     return location_error(subpage_name)
 
 def tender_patch_credentials(tender_id):
-    from tests import TEST_TENDER_KEYS
     tender = procurement_entity_partition(tender_id)
     if not tender:
         return location_error("tender")
@@ -133,7 +134,6 @@ def tender_patch_credentials(tender_id):
 #
 
 def tender_document_create(tender_id):
-    from openprocurement_client.tests.tests import TEST_TENDER_KEYS
     response.status = 201
     document = procurement_entity_partition(tender_id, part='documents')[0]
     document.title = get_doc_title_from_request(request)
@@ -141,7 +141,6 @@ def tender_document_create(tender_id):
     return dumps({"data": document})
 
 def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document_type):
-    from openprocurement_client.tests.tests import TEST_TENDER_KEYS
     response.status = 201
     subpage = procurement_entity_partition(tender_id, part=subpage_name)
     if not subpage:
@@ -277,7 +276,6 @@ def contract_patch(contract_id):
     return dumps({"data": contract})
 
 def contract_document_create(contract_id):
-    from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
     response.status = 201
     document = procurement_entity_partition(contract_id,
                                             procur_entity_sublink='contracts',
@@ -288,7 +286,6 @@ def contract_document_create(contract_id):
 
 
 def contract_change_patch(contract_id, change_id):
-    from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
     response.status = 200
     change = procurement_entity_partition(change_id,
                                           procur_entity_sublink='changes')
