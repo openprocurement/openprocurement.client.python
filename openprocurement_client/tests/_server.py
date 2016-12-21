@@ -90,12 +90,15 @@ def tender_page(tender_id):
         return location_error("tender")
     return dumps(tender)
 
-def tender_patch(tender_id):
-    tender = procurement_entity_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    tender.update(request.json['data'])
-    return dumps({"data": tender})
+
+def procur_entity_patch(procur_entity_name, procur_entity_id):
+    procur_entity = procurement_entity_partition(procur_entity_id,
+                                                 procur_entity_name)
+    if not procur_entity:
+        return location_error(procur_entity_name)
+    procur_entity.update(request.json['data'])
+    return dumps({'data': procur_entity})
+
 
 ### Subpage operations
 #
@@ -275,13 +278,6 @@ def contract_page(contract_id):
         return location_error("contract")
     return dumps(contract)
 
-def contract_patch(contract_id):
-    contract = procurement_entity_partition(contract_id,
-                                            procur_entity_name='contract')
-    if not contract:
-        return location_error("contract")
-    contract.update(request.json['data'])
-    return dumps({"data": contract})
 
 def contract_document_create(contract_id):
     response.status = 201
@@ -309,7 +305,7 @@ routes_dict = {
         "tenders": (TENDERS_PATH, 'GET', tenders_page_get),
         "tender_create": (TENDERS_PATH, 'POST', procurement_entity_create),
         "tender": (TENDERS_PATH + "/<tender_id>", 'GET', tender_page),
-        "tender_patch": (TENDERS_PATH + "/<tender_id>", 'PATCH', tender_patch),
+        "tender_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + "/<procur_entity_id>", 'PATCH', procur_entity_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
         "tender_subpage_item_create": (TENDERS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
@@ -333,7 +329,7 @@ routes_dict = {
         "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
         "contract_subpage_item_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
-        "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch),
+        "contract_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + "/<procur_entity_id>", 'PATCH', procur_entity_patch),
         "contract_patch_credentials": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<procurement_entity_id>/credentials', 'PATCH', patch_credentials),
         }
 
