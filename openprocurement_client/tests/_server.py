@@ -84,11 +84,13 @@ def procurement_entity_create():
     response.status = 201
     return request.json
 
-def tender_page(tender_id):
-    tender = procurement_entity_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    return dumps(tender)
+
+def procur_entity_page(procur_entity_name, procur_entity_id):
+    procur_entity = procurement_entity_partition(procur_entity_id,
+                                                 procur_entity_name)
+    if not procur_entity:
+        return location_error(procur_entity_name)
+    return dumps(procur_entity)
 
 
 def procur_entity_patch(procur_entity_name, procur_entity_id):
@@ -237,12 +239,6 @@ def plans_page_get():
     return dumps(plans)
 
 
-def plan_page(plan_id):
-    plan = plan_partition(plan_id)
-    if not plan:
-        return location_error("plan")
-    return dumps(plan)
-
 def plan_patch(plan_id):
     plan = plan_partition(plan_id)
     if not plan:
@@ -270,15 +266,6 @@ def contracts_page_get():
         contracts = load(json)
     return dumps(contracts)
 
-
-def contract_page(contract_id):
-    contract = procurement_entity_partition(contract_id,
-                                            procur_entity_name='contract')
-    if not contract:
-        return location_error("contract")
-    return dumps(contract)
-
-
 def contract_document_create(contract_id):
     response.status = 201
     document = procurement_entity_partition(contract_id,
@@ -304,7 +291,7 @@ routes_dict = {
         "offset_error": (TENDERS_PATH, 'GET', offset_error),
         "tenders": (TENDERS_PATH, 'GET', tenders_page_get),
         "tender_create": (TENDERS_PATH, 'POST', procurement_entity_create),
-        "tender": (TENDERS_PATH + "/<tender_id>", 'GET', tender_page),
+        "tender": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + '/<procur_entity_id>', 'GET', procur_entity_page),
         "tender_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + "/<procur_entity_id>", 'PATCH', procur_entity_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
@@ -320,12 +307,12 @@ routes_dict = {
         "download": ('/download/<filename:path>', 'GET', download_file),
         "plans": (PLANS_PATH, 'GET', plans_page_get),
         "plan_create": (PLANS_PATH, 'POST', procurement_entity_create),
-        "plan": (PLANS_PATH + "/<plan_id>", 'GET', plan_page),
+        "plan": (API_PATH.format('<procur_entity_name:procur_entity_filter:plan>') + '/<procur_entity_id>', 'GET', procur_entity_page),
         "plan_offset_error": (PLANS_PATH, 'GET', plan_offset_error),
         "contracts": (CONTRACTS_PATH, 'GET', contracts_page_get),
         "contract_create": (CONTRACTS_PATH, 'POST', procurement_entity_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
-        "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
+        "contract": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<procur_entity_id>', 'GET', procur_entity_page),
         "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
         "contract_subpage_item_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
