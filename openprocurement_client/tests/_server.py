@@ -24,11 +24,22 @@ PLANS_PATH = API_PATH.format('plans')
 CONTRACTS_PATH = API_PATH.format('contracts')
 SPORE_PATH = API_PATH.format('spore')
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
+PROCUR_ENTITY_DICT = \
+    {'tender':   {'sublink': 'tenders',   'data': TEST_TENDER_KEYS},
+     'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
+     'plan':     {'sublink': 'plans',     'data': TEST_PLAN_KEYS}}
+
+
+def procur_entity_filter(procur_entity_name):
+    regexp = r'{}'.format(PROCUR_ENTITY_DICT[procur_entity_name]['sublink'])
+    return regexp, lambda x: procur_entity_name, lambda x: None
 
 
 def setup_routing(app, routes=None):
     if routes is None:
         routes = ['spore']
+    else:
+        app.router.add_filter('procur_entity_filter', procur_entity_filter)
     for route in routes:
         path, method, func = routes_dict[route]
         app.route(path, method, func)
@@ -107,8 +118,8 @@ def tender_subpage_item(tender_id, subpage_name, subpage_id):
             return dumps({'data': unit})
     return location_error(subpage_name)
 
-def object_subpage_item_patch(obj_id, subpage_name, subpage_id, procur_entity_sublink):
-    subpage = procurement_entity_partition(obj_id, procur_entity_sublink, subpage_name)
+def object_subpage_item_patch(obj_id, subpage_name, subpage_id, procur_entity_name):
+    subpage = procurement_entity_partition(obj_id, procur_entity_name, subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
             unit.update(request.json['data'])
@@ -123,12 +134,16 @@ def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
             return {}
     return location_error(subpage_name)
 
-def tender_patch_credentials(tender_id):
-    tender = procurement_entity_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    tender['access'] = {'token': TEST_TENDER_KEYS['new_tender_token']}
-    return tender
+
+def patch_credentials(procur_entity_name, procurement_entity_id):
+    procur_entity = procurement_entity_partition(procurement_entity_id,
+                                                 procur_entity_name)
+    if not procur_entity:
+        return location_error(
+            PROCUR_ENTITY_DICT[procur_entity_name]['sublink'])
+    procur_entity['access'] = \
+        {'token': PROCUR_ENTITY_DICT[procur_entity_name]['data']['new_token']}
+    return procur_entity
 
 ### Document and file operations
 #
@@ -189,13 +204,11 @@ def download_file(filename):
 ####
 
 
-def procurement_entity_partition(entity_id, procur_entity_sublink='tenders',
+def procurement_entity_partition(entity_id, procur_entity_name='tender',
                                  part='all'):
-    procur_entity_dict = \
-        {'tenders': 'tender', 'contracts': 'contract', 'changes': 'change'}
-    procur_entity = procur_entity_dict[procur_entity_sublink]
     try:
-        with open(ROOT + procur_entity + '_' + entity_id + '.json') as json:
+        with open(ROOT + procur_entity_name + '_' + entity_id + '.json') \
+                as json:
             obj = munchify(load(json))
             if part == 'all':
                 return obj
@@ -262,14 +275,14 @@ def contract_create():
 
 def contract_page(contract_id):
     contract = procurement_entity_partition(contract_id,
-                                            procur_entity_sublink='contracts')
+                                            procur_entity_name='contract')
     if not contract:
         return location_error("contract")
     return dumps(contract)
 
 def contract_patch(contract_id):
     contract = procurement_entity_partition(contract_id,
-                                            procur_entity_sublink='contracts')
+                                            procur_entity_name='contract')
     if not contract:
         return location_error("contract")
     contract.update(request.json['data'])
@@ -278,7 +291,7 @@ def contract_patch(contract_id):
 def contract_document_create(contract_id):
     response.status = 201
     document = procurement_entity_partition(contract_id,
-                                            procur_entity_sublink='contracts',
+                                            procur_entity_name='contract',
                                             part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_CONTRACT_KEYS.new_document_id
@@ -288,11 +301,12 @@ def contract_document_create(contract_id):
 def contract_change_patch(contract_id, change_id):
     response.status = 200
     change = procurement_entity_partition(change_id,
-                                          procur_entity_sublink='changes')
+                                          procur_entity_name='change')
     change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
     return dumps(change)
 
 #### Routes
+
 
 routes_dict = {
         "spore": (SPORE_PATH, 'HEAD', spore),
@@ -308,9 +322,9 @@ routes_dict = {
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
         "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
         "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
-        "tender_subpage_item_patch": (API_PATH.format('<procur_entity_sublink:re:tenders>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+        "tender_subpage_item_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
-        "tender_patch_credentials": (TENDERS_PATH + "/<tender_id>/credentials", 'PATCH', tender_patch_credentials),
+        "tender_patch_credentials": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + '/<procurement_entity_id>/credentials', 'PATCH', patch_credentials),
         "redirect": ('/redirect/<filename:path>', 'GET', get_file),
         "download": ('/download/<filename:path>', 'GET', download_file),
         "plans": (PLANS_PATH, 'GET', plans_page_get),
@@ -322,9 +336,10 @@ routes_dict = {
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
         "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
-        "contract_subpage_item_patch": (API_PATH.format('<procur_entity_sublink:re:contracts>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+        "contract_subpage_item_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
-        "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch)
+        "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch),
+        "contract_patch_credentials": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<procurement_entity_id>/credentials', 'PATCH', patch_credentials),
         }
 
 # tender_subpage_item_patch

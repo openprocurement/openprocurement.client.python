@@ -242,3 +242,10 @@ class APIBaseClient(APITemplateClient):
     def get_resource_item(self, id, headers=None):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id),
                                        headers=headers)
+
+    def patch_credentials(self, id, access_token):
+        return self._patch_resource_item(
+            '{}/{}/credentials'.format(self.prefix_path, id),
+            payload={},
+            headers={'X-Access-Token': access_token}
+        )

@@ -269,13 +269,6 @@ class TendersClient(APIBaseClient):
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
-    def patch_credentials(self, id, access_token):
-        return self._patch_resource_item(
-            '{}/{}/credentials'.format(self.prefix_path, id),
-            payload={},
-            headers={'X-Access-Token': access_token}
-        )
-
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################

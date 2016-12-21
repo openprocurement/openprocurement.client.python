@@ -157,7 +157,7 @@ class UserTestCase(BaseTestClass):
 
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
-            self.tender.update({'access': {'token': TEST_TENDER_KEYS['tender_token']}})
+            self.tender.update({'access': {'token': TEST_TENDER_KEYS['token']}})
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS.empty_tender + '.json') as tender:
             self.empty_tender = munchify(load(tender))
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
@@ -383,7 +383,7 @@ class UserTestCase(BaseTestClass):
         patched_credentials = self.client.patch_credentials(self.tender.data.id, self.tender.access['token'])
         self.assertEqual(patched_credentials.data.id, self.tender.data.id)
         self.assertNotEqual(patched_credentials.access.token, self.tender.access['token'])
-        self.assertEqual(patched_credentials.access.token, TEST_TENDER_KEYS['new_tender_token'])
+        self.assertEqual(patched_credentials.access.token, TEST_TENDER_KEYS['new_token'])
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
@@ -705,6 +705,16 @@ class ContractingUserTestCase(BaseTestClass):
         )
 
         self.assertEqual(response_change, patched_change)
+
+    def test_get_contract_credentials(self):
+        setup_routing(self.app, routes=['contract_patch_credentials'])
+        patched_credentials = self.client.patch_credentials(
+            self.contract.data.id, self.contract.access['token'])
+        self.assertEqual(patched_credentials.data.id, self.contract.data.id)
+        self.assertNotEqual(patched_credentials.access.token,
+                            self.contract.access['token'])
+        self.assertEqual(patched_credentials.access.token,
+                         TEST_CONTRACT_KEYS['new_token'])
 
     ###########################################################################
 

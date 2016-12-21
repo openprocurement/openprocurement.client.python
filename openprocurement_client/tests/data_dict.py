@@ -16,8 +16,8 @@ TEST_TENDER_KEYS = munchify({
     "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
     "new_document_id": 'jh8LjkJ477kJ6lovWER8HRT839jDs82h',
     "error_id": '111a11a1111111aaa11111a1a1a111a1',
-    "tender_token": 'tender0token1234123412341234',  # uuid4().hex
-    "new_tender_token": 'new0tender0token123412341234'
+    "token": 'tender0token1234123412341234',  # uuid4().hex
+    "new_token": 'new0tender0token123412341234'
 })
 
 TEST_TENDER_KEYS_LIMITED = munchify({
@@ -42,5 +42,6 @@ TEST_CONTRACT_KEYS = munchify({
     "error_id": 'zzzxxx111',
     "contract_token": '0fc58c83963d42a692db4987df86640a',
     "change_id": '3ba8592459904c73bf05d7bc48e7083c',
-    "patch_change_rationale": u'Друга і третя поставка має бути розфасована'
+    "patch_change_rationale": u'Друга і третя поставка має бути розфасована',
+    "new_token": 'new0contract0token123412341234'
 })
