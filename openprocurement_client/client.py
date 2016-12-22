@@ -405,10 +405,7 @@ class TendersClient(APIBaseClient):
 
     @verify_file
     def upload_contract_document(self, file_, tender, contract_id,
-                                 doc_type='documents', use_ds_client=True,
-                                 doc_registration=True):
-        # TODO: find out what actually depends on the doc_type parameter.
-        # TODO: is it necessary to pass it here?
+                                 use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/contracts/{}/documents'.format(
                 self.prefix_path,
