@@ -26,8 +26,9 @@ class DocumentServiceClient(APITemplateClient):
             .__init__(login_pass=auth_ds, headers=headers)
 
         self.host_url = host_url or self.host_url
-        self.host_url_register = self.host_url + '/' + self.url_register_part
-        self.host_url_upload = self.host_url + '/' + self.url_upload_part
+        self.host_url_register = \
+            '/'.join((self.host_url, self.url_register_part))
+        self.host_url_upload = '/'.join((self.host_url, self.url_upload_part))
 
     @staticmethod
     def _hashfile(file_, hasher=None, blocksize=65536):
