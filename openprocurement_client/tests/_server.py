@@ -38,8 +38,6 @@ def procur_entity_filter(procur_entity_name):
 def setup_routing(app, routes=None):
     if routes is None:
         routes = ['spore']
-    else:
-        app.router.add_filter('procur_entity_filter', procur_entity_filter)
     for route in routes:
         path, method, func = routes_dict[route]
         app.route(path, method, func)

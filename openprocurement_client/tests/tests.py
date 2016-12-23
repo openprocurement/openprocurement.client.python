@@ -19,7 +19,7 @@ from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
     HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
-    procurement_entity_partition
+    procurement_entity_partition, procur_entity_filter
 
 
 def generate_file_obj(file_name, content):
@@ -34,6 +34,8 @@ class BaseTestClass(unittest.TestCase):
 
     def setting_up(self, client):
         self.app = Bottle()
+        self.app.router.add_filter('procur_entity_filter',
+                                   procur_entity_filter)
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         try:
