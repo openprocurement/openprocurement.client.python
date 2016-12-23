@@ -19,7 +19,7 @@ from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
     HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
-    procurement_entity_partition, procur_entity_filter
+    resource_partition, resource_filter
 
 
 def generate_file_obj(file_name, content):
@@ -34,8 +34,8 @@ class BaseTestClass(unittest.TestCase):
 
     def setting_up(self, client):
         self.app = Bottle()
-        self.app.router.add_filter('procur_entity_filter',
-                                   procur_entity_filter)
+        self.app.router.add_filter('resource_filter',
+                                   resource_filter)
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         try:
@@ -238,17 +238,20 @@ class UserTestCase(BaseTestClass):
 
     def test_get_question(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        questions = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="questions")
+        questions = resource_partition(TEST_TENDER_KEYS.tender_id,
+                                       part="questions")
         for question in questions:
             if question['id'] == TEST_TENDER_KEYS.question_id:
                 question_ = munchify({"data": question})
                 break
-        question = self.client.get_question(self.tender, question_id=TEST_TENDER_KEYS.question_id)
+        question = self.client.get_question(
+            self.tender, question_id=TEST_TENDER_KEYS.question_id
+        )
         self.assertEqual(question, question_)
 
     def test_get_lot(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        lots = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="lots")
+        lots = resource_partition(TEST_TENDER_KEYS.tender_id, part="lots")
         for lot in lots:
             if lot['id'] == TEST_TENDER_KEYS.lot_id:
                 lot_ = munchify({"data": lot})
@@ -258,7 +261,7 @@ class UserTestCase(BaseTestClass):
 
     def test_get_bid(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        bids = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="bids")
+        bids = resource_partition(TEST_TENDER_KEYS.tender_id, part="bids")
         for bid in bids:
             if bid['id'] == TEST_TENDER_KEYS.bid_id:
                 bid_ = munchify({"data": bid})
@@ -614,13 +617,13 @@ class UserTestCase(BaseTestClass):
 
     def test_delete_bid(self):
         setup_routing(self.app, routes=["tender_subpage_item_delete"])
-        bid_id = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="bids")[0]['id']
+        bid_id = resource_partition(TEST_TENDER_KEYS.tender_id, part="bids")[0]['id']
         deleted_bid = self.client.delete_bid(self.tender, bid_id, API_KEY)
         self.assertFalse(deleted_bid)
 
     def test_delete_lot(self):
         setup_routing(self.app, routes=["tender_subpage_item_delete"])
-        lot_id = procurement_entity_partition(TEST_TENDER_KEYS.tender_id, part="lots")[0]['id']
+        lot_id = resource_partition(TEST_TENDER_KEYS.tender_id, part="lots")[0]['id']
         deleted_lot = self.client.delete_lot(self.tender, lot_id)
         self.assertFalse(deleted_lot)
 

@@ -24,15 +24,15 @@ PLANS_PATH = API_PATH.format('plans')
 CONTRACTS_PATH = API_PATH.format('contracts')
 SPORE_PATH = API_PATH.format('spore')
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
-PROCUR_ENTITY_DICT = \
+RESOURCE_DICT = \
     {'tender':   {'sublink': 'tenders',   'data': TEST_TENDER_KEYS},
      'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
      'plan':     {'sublink': 'plans',     'data': TEST_PLAN_KEYS}}
 
 
-def procur_entity_filter(procur_entity_name):
-    regexp = r'{}'.format(PROCUR_ENTITY_DICT[procur_entity_name]['sublink'])
-    return regexp, lambda x: procur_entity_name, lambda x: None
+def resource_filter(resource_name):
+    regexp = r'{}'.format(RESOURCE_DICT[resource_name]['sublink'])
+    return regexp, lambda x: resource_name, lambda x: None
 
 
 def setup_routing(app, routes=None):
@@ -66,69 +66,67 @@ def spore():
                                       "96a11693fa8bd38623e4daee121f60b4301aef012c"))
 
 
-def offset_error(procur_entity_name):
+def offset_error(resource_name):
     response.status = 404
     setup_routing(request.app,
-                  routes=[PROCUR_ENTITY_DICT[procur_entity_name]['sublink']])
+                  routes=[RESOURCE_DICT[resource_name]['sublink']])
 
 
-def procur_entity_page_get(procur_entity_name):
+def resource_page_get(resource_name):
     with open(ROOT + '{}.json'.format(
-            PROCUR_ENTITY_DICT[procur_entity_name]['sublink'])) as json:
-        procur_entities = load(json)
-    return dumps(procur_entities)
+            RESOURCE_DICT[resource_name]['sublink'])) as json:
+        resources = load(json)
+    return dumps(resources)
 
 
 ### Tender operations
 #
 
 
-def procurement_entity_create():
+def resource_create():
     response.status = 201
     return request.json
 
 
-def procur_entity_page(procur_entity_name, procur_entity_id):
-    procur_entity = procurement_entity_partition(procur_entity_id,
-                                                 procur_entity_name)
-    if not procur_entity:
-        return location_error(procur_entity_name)
-    return dumps(procur_entity)
+def resource_page(resource_name, resource_id):
+    resource = resource_partition(resource_id, resource_name)
+    if not resource:
+        return location_error(resource_name)
+    return dumps(resource)
 
 
-def procur_entity_patch(procur_entity_name, procur_entity_id):
-    procur_entity = procurement_entity_partition(procur_entity_id,
-                                                 procur_entity_name)
-    if not procur_entity:
-        return location_error(procur_entity_name)
-    procur_entity.update(request.json['data'])
-    return dumps({'data': procur_entity})
+def resource_patch(resource_name, resource_id):
+    resource = resource_partition(resource_id, resource_name)
+    if not resource:
+        return location_error(resource_name)
+    resource.update(request.json['data'])
+    return dumps({'data': resource})
 
 
 ### Subpage operations
 #
 
 def tender_subpage(tender_id, subpage_name):
-    subpage = procurement_entity_partition(tender_id, part=subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     return dumps({"data": subpage})
 
 def tender_subpage_item_create(tender_id, subpage_name):
     response.status = 201
     return request.json
 
-def procurement_entity_subpage_item_create(procurement_entity_id, subpage_name):
+def resource_subpage_item_create(resource_id, subpage_name):
     response.status = 201
     return request.json
 
 def tender_subpage_item(tender_id, subpage_name, subpage_id):
-    subpage = procurement_entity_partition(tender_id, part=subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
             return dumps({'data': unit})
     return location_error(subpage_name)
 
-def object_subpage_item_patch(obj_id, subpage_name, subpage_id, procur_entity_name):
-    subpage = procurement_entity_partition(obj_id, procur_entity_name, subpage_name)
+def object_subpage_item_patch(obj_id, subpage_name, subpage_id, resource_name):
+    subpage = resource_partition(obj_id, resource_name, subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
             unit.update(request.json['data'])
@@ -136,7 +134,7 @@ def object_subpage_item_patch(obj_id, subpage_name, subpage_id, procur_entity_na
     return location_error(subpage_name)
 
 def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
-    subpage = procurement_entity_partition(tender_id, part=subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
             response.status_int = 200
@@ -144,29 +142,29 @@ def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
     return location_error(subpage_name)
 
 
-def patch_credentials(procur_entity_name, procurement_entity_id):
-    procur_entity = procurement_entity_partition(procurement_entity_id,
-                                                 procur_entity_name)
-    if not procur_entity:
+def patch_credentials(resource_name, resource_id):
+    resource = resource_partition(resource_id,
+                                                 resource_name)
+    if not resource:
         return location_error(
-            PROCUR_ENTITY_DICT[procur_entity_name]['sublink'])
-    procur_entity['access'] = \
-        {'token': PROCUR_ENTITY_DICT[procur_entity_name]['data']['new_token']}
-    return procur_entity
+            RESOURCE_DICT[resource_name]['sublink'])
+    resource['access'] = \
+        {'token': RESOURCE_DICT[resource_name]['data']['new_token']}
+    return resource
 
 ### Document and file operations
 #
 
 def tender_document_create(tender_id):
     response.status = 201
-    document = procurement_entity_partition(tender_id, part='documents')[0]
+    document = resource_partition(tender_id, part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_TENDER_KEYS.new_document_id
     return dumps({"data": document})
 
 def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document_type):
     response.status = 201
-    subpage = procurement_entity_partition(tender_id, part=subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
@@ -179,7 +177,7 @@ def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document
 
 def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
-    subpage = procurement_entity_partition(tender_id, part=subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
@@ -193,7 +191,7 @@ def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document
 
 def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
-    subpage = procurement_entity_partition(tender_id, part=subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
@@ -213,10 +211,9 @@ def download_file(filename):
 ####
 
 
-def procurement_entity_partition(entity_id, procur_entity_name='tender',
-                                 part='all'):
+def resource_partition(resource_id, resource_name='tender', part='all'):
     try:
-        with open(ROOT + procur_entity_name + '_' + entity_id + '.json') \
+        with open(ROOT + resource_name + '_' + resource_id + '.json') \
                 as json:
             obj = munchify(load(json))
             if part == 'all':
@@ -257,8 +254,8 @@ def plan_partition(plan_id, part="plan"):
 
 def contract_document_create(contract_id):
     response.status = 201
-    document = procurement_entity_partition(contract_id,
-                                            procur_entity_name='contract',
+    document = resource_partition(contract_id,
+                                            resource_name='contract',
                                             part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_CONTRACT_KEYS.new_document_id
@@ -267,8 +264,8 @@ def contract_document_create(contract_id):
 
 def contract_change_patch(contract_id, change_id):
     response.status = 200
-    change = procurement_entity_partition(change_id,
-                                          procur_entity_name='change')
+    change = resource_partition(change_id,
+                                          resource_name='change')
     change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
     return dumps(change)
 
@@ -277,36 +274,36 @@ def contract_change_patch(contract_id, change_id):
 
 routes_dict = {
         "spore": (SPORE_PATH, 'HEAD', spore),
-        "offset_error": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>'), 'GET', offset_error),
-        "tenders": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>'), 'GET', procur_entity_page_get),
-        "tender_create": (TENDERS_PATH, 'POST', procurement_entity_create),
-        "tender": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + '/<procur_entity_id>', 'GET', procur_entity_page),
-        "tender_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + "/<procur_entity_id>", 'PATCH', procur_entity_patch),
+        "offset_error": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', offset_error),
+        "tenders": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', resource_page_get),
+        "tender_create": (TENDERS_PATH, 'POST', resource_create),
+        "tender": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>', 'GET', resource_page),
+        "tender_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + "/<resource_id>", 'PATCH', resource_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
-        "tender_subpage_item_create": (TENDERS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
+        "tender_subpage_item_create": (TENDERS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
         "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
         "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
         "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
-        "tender_subpage_item_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+        "tender_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
-        "tender_patch_credentials": (API_PATH.format('<procur_entity_name:procur_entity_filter:tender>') + '/<procurement_entity_id>/credentials', 'PATCH', patch_credentials),
+        "tender_patch_credentials": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
         "redirect": ('/redirect/<filename:path>', 'GET', get_file),
         "download": ('/download/<filename:path>', 'GET', download_file),
-        "plans": (API_PATH.format('<procur_entity_name:procur_entity_filter:plan>'), 'GET', procur_entity_page_get),
-        "plan_create": (PLANS_PATH, 'POST', procurement_entity_create),
-        "plan": (API_PATH.format('<procur_entity_name:procur_entity_filter:plan>') + '/<procur_entity_id>', 'GET', procur_entity_page),
-        "plan_offset_error": (API_PATH.format('<procur_entity_name:procur_entity_filter:plan>'), 'GET', offset_error),
-        "contracts": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>'), 'GET', procur_entity_page_get),
-        "contract_create": (CONTRACTS_PATH, 'POST', procurement_entity_create),
+        "plans": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', resource_page_get),
+        "plan_create": (PLANS_PATH, 'POST', resource_create),
+        "plan": (API_PATH.format('<resource_name:resource_filter:plan>') + '/<resource_id>', 'GET', resource_page),
+        "plan_offset_error": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', offset_error),
+        "contracts": (API_PATH.format('<resource_name:resource_filter:contract>'), 'GET', resource_page_get),
+        "contract_create": (CONTRACTS_PATH, 'POST', resource_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
-        "contract": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<procur_entity_id>', 'GET', procur_entity_page),
-        "contract_subpage_item_create": (CONTRACTS_PATH + "/<procurement_entity_id>/<subpage_name>", 'POST', procurement_entity_subpage_item_create),
-        "contract_subpage_item_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+        "contract": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>', 'GET', resource_page),
+        "contract_subpage_item_create": (CONTRACTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
+        "contract_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
-        "contract_patch": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + "/<procur_entity_id>", 'PATCH', procur_entity_patch),
-        "contract_patch_credentials": (API_PATH.format('<procur_entity_name:procur_entity_filter:contract>') + '/<procurement_entity_id>/credentials', 'PATCH', patch_credentials),
+        "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
+        "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
         }
 
 # tender_subpage_item_patch
