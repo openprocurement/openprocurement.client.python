@@ -120,10 +120,11 @@ def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
     return location_error(subpage_name)
 
 def tender_patch_credentials(tender_id):
+    from tests import TEST_TENDER_KEYS
     tender = procurement_entity_partition(tender_id)
     if not tender:
         return location_error("tender")
-    tender['access'] = {'token': uuid4().hex}
+    tender['access'] = {'token': TEST_TENDER_KEYS['new_tender_token']}
     return tender
 
 ### Document and file operations
@@ -246,9 +247,6 @@ def plan_partition(plan_id, part="plan"):
 ### Contract operations
 #
 
-def contract_offset_error():
-    response.status = 404
-    setup_routing(request.app, routes=["contracts"])
 
 def contracts_page_get():
     with open(ROOT + 'contracts.json') as json:
@@ -260,13 +258,15 @@ def contract_create():
     return request.json
 
 def contract_page(contract_id):
-    contract = contract_partition(contract_id)
+    contract = procurement_entity_partition(contract_id,
+                                            procur_entity_sublink='contracts')
     if not contract:
         return location_error("contract")
     return dumps(contract)
 
 def contract_patch(contract_id):
-    contract = contract_partition(contract_id)
+    contract = procurement_entity_partition(contract_id,
+                                            procur_entity_sublink='contracts')
     if not contract:
         return location_error("contract")
     contract.update(request.json['data'])
@@ -275,21 +275,24 @@ def contract_patch(contract_id):
 def contract_document_create(contract_id):
     from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
     response.status = 201
-    document = contract_partition(contract_id, 'documents')[0]
+    # document = contract_partition(contract_id, 'documents')[0]
+    document = procurement_entity_partition(contract_id,
+                                            procur_entity_sublink='contracts',
+                                            part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_CONTRACT_KEYS.new_document_id
     return dumps({"data": document})
 
-def contract_partition(contract_id, part="contract"):
-    try:
-        with open(ROOT + 'contract_' + contract_id + '.json') as json:
-            contract = load(json)
-            if part=="contract":
-                return contract
-            else:
-                return munchify(contract['data'][part])
-    except (KeyError, IOError):
-        return []
+# def contract_partition(contract_id, part="contract"):
+#     try:
+#         with open(ROOT + 'contract_' + contract_id + '.json') as json:
+#             contract = load(json)
+#             if part=="contract":
+#                 return contract
+#             else:
+#                 return munchify(contract['data'][part])
+#     except (KeyError, IOError):
+#         return []
 
 #### Routes
 
@@ -320,8 +323,8 @@ routes_dict = {
         "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
         "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
-        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error),
         "contract_subpage_item_patch": (API_PATH.format('<procur_entity_sublink:re:contracts>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+        "contract_patch": (CONTRACTS_PATH + "/<contract_id>", 'PATCH', contract_patch),
         }
 
 # tender_subpage_item_patch

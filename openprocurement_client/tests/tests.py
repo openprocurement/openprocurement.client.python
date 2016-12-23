@@ -34,7 +34,9 @@ TEST_TENDER_KEYS = munchify({
     "qualification_id": "cec4b82d2708465291fb4af79f8a3e52",
     "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
     "new_document_id": 'jh8LjkJ477kJ6lovWER8HRT839jDs82h',
-    "error_id": '111a11a1111111aaa11111a1a1a111a1'
+    "error_id": '111a11a1111111aaa11111a1a1a111a1',
+    "tender_token": 'tender0token1234123412341234',  # uuid4().hex
+    "new_tender_token": 'new0tender0token123412341234'
 })
 
 TEST_TENDER_KEYS_LIMITED = munchify({
@@ -56,7 +58,8 @@ TEST_CONTRACT_KEYS = munchify({
     "contract_id": '3c0bf3eed3fc4b189103e62b828c599d',
     "document_id": '9c8b66120d4c415cb334bbad33f94ba9',
     "new_document_id": 'newid678123456781234567812345678',
-    "error_id": 'zzzxxx111'
+    "error_id": 'zzzxxx111',
+    "contract_token": '0fc58c83963d42a692db4987df86640a'
 })
 
 
@@ -191,18 +194,15 @@ class ViewerPlanTestCase(BaseTestClass):
 class UserTestCase(BaseTestClass):
     """"""
     def setUp(self):
-        #self._testMethodName
         self.setting_up(client=TendersClient)
 
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
-            self.tender.update({'access': {'token': API_KEY}})
+            self.tender.update({'access': {'token': TEST_TENDER_KEYS['tender_token']}})
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS.empty_tender + '.json') as tender:
             self.empty_tender = munchify(load(tender))
-            self.empty_tender.update({'access': {'token': API_KEY}})
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
             self.limited_tender = munchify(load(tender))
-            self.limited_tender.update({'access': {'token': API_KEY}})
 
     def tearDown(self):
         self.server.stop()
@@ -424,6 +424,7 @@ class UserTestCase(BaseTestClass):
         patched_credentials = self.client.patch_credentials(self.tender.data.id, self.tender.access['token'])
         self.assertEqual(patched_credentials.data.id, self.tender.data.id)
         self.assertNotEqual(patched_credentials.access.token, self.tender.access['token'])
+        self.assertEqual(patched_credentials.access.token, TEST_TENDER_KEYS['new_tender_token'])
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
@@ -674,12 +675,17 @@ class UserTestCase(BaseTestClass):
 class ContractingUserTestCase(BaseTestClass):
     """"""
     def setUp(self):
-        #self._testMethodName
         self.setting_up(client=ContractingClient)
 
-        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
+        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id +
+                  '.json') as contract:
             self.contract = munchify(load(contract))
-            self.contract.update({'access':{"token": API_KEY}})
+            self.contract.update(
+                {'access': {'token': TEST_CONTRACT_KEYS.contract_token}}
+            )
+
+        with open(ROOT + 'contracts.json') as contracts:
+            self.contracts = munchify(load(contracts))
 
     def tearDown(self):
         self.server.stop()
@@ -707,11 +713,36 @@ class ContractingUserTestCase(BaseTestClass):
 
     def test_patch_document(self):
         setup_routing(self.app, routes=['contract_subpage_item_patch'])
-        document = munchify({'data': {'id': TEST_CONTRACT_KEYS.document_id, 'title': 'test_patch_document.txt'}})
+        document = munchify({'data': {'id': TEST_CONTRACT_KEYS.document_id,
+                                      'title': 'test_patch_document.txt'}})
         patched_document = self.client.patch_document(self.contract, document)
         self.assertEqual(patched_document.data.id, document.data.id)
         self.assertEqual(patched_document.data.title, document.data.title)
 
+    ###########################################################################
+
+    def test_get_contracts(self):
+        setup_routing(self.app, routes=["contracts"])
+        contracts = self.client.get_contracts()
+        self.assertIsInstance(contracts, Iterable)
+        self.assertEqual(contracts, self.contracts.data)
+
+    def test_get_contract(self):
+        setup_routing(self.app, routes=["contract"])
+        contract = self.client.get_contract(TEST_CONTRACT_KEYS.contract_id)
+        self.assertEqual(contract, self.contract)
+
+    def test_get_contract_location_error(self):
+        setup_routing(self.app, routes=["contract"])
+        contract = self.client.get_contract(TEST_CONTRACT_KEYS.error_id)
+        self.assertEqual(contract, munchify(loads(location_error('contract'))))
+
+    def test_patch_contract(self):
+        setup_routing(self.app, routes=["contract_patch"])
+        self.contract.data.description = 'test_patch_contract'
+        patched_contract = self.client.patch_contract(self.contract)
+        self.assertEqual(patched_contract.data.id, self.contract.data.id)
+        self.assertEqual(patched_contract.data.description, self.contract.data.description)
 
 if __name__ == '__main__':
     unittest.main()
