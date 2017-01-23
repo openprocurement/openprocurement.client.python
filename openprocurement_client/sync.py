@@ -2,11 +2,16 @@ from gevent import monkey
 monkey.patch_all()
 
 import logging
+import json
 from .client import TendersClientSync
 from gevent import spawn, sleep, idle
 from gevent.queue import Queue, Empty
 from requests.exceptions import ConnectionError
-from openprocurement_client.exceptions import RequestFailed
+from openprocurement_client.exceptions import (
+    RequestFailed,
+    PreconditionFailed,
+    ResourceNotFound
+)
 
 DEFAULT_RETRIEVERS_PARAMS = {
     'down_requests_sleep': 5,
@@ -175,6 +180,25 @@ def get_response(client, params):
                 sleep_interval = sleep_interval * 2
                 sleep(sleep_interval)
                 continue
+        except ResourceNotFound as e:
+            logger.error('Resource not found: {}'.format(e.message))
+            error_message = json.loads(e.message)
+            not_found = False
+            for error in error_message['errors']:
+                if error['description'] == 'Offset expired/invalid':
+                    client.session.cookies.clear()
+                    not_found = False
+                    break
+                else:
+                    not_found = True
+            if not_found:
+                raise e
+            else:
+                continue
+        except PreconditionFailed:
+            logger.error('Precondition failed')
+            client.session.cookies.clear()
+            continue
         except Exception as e:
             logger.error('Exception: {}'.format(e.message))
             if sleep_interval > 300:
@@ -183,7 +207,6 @@ def get_response(client, params):
             sleep(sleep_interval)
             continue
     return response
-
 
 
 def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
