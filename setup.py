@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import os
 
-version = '1.0b3'
+version = '2.0a1'
 
 tests_require = {
     'test': 'bottle'
@@ -35,9 +35,10 @@ setup(
         'gevent',
         'iso8601',
         'munch',
-        'restkit',
         'retrying',
-        'simplejson'
+        'simplejson',
+        'requests',
+        'python-magic'
         # -*- Extra requirements: -*-
     ],
     tests_require=tests_require,
