@@ -2,11 +2,16 @@ from gevent import monkey
 monkey.patch_all()
 
 import logging
+import json
 from .client import TendersClientSync
 from gevent import spawn, sleep, idle
 from gevent.queue import Queue, Empty
 from requests.exceptions import ConnectionError
-from openprocurement_client.exceptions import RequestFailed
+from openprocurement_client.exceptions import (
+    RequestFailed,
+    PreconditionFailed,
+    ResourceNotFound
+)
 
 DEFAULT_RETRIEVERS_PARAMS = {
     'down_requests_sleep': 5,
@@ -152,6 +157,17 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                               resource='tenders', extra_params=extra_params,
                               retrievers_params=retrievers_params)
 
+
+def log_retriever_state(name, client, params):
+    logger.debug('{}: offset {}'.format(name, params['offset']))
+    logger.debug('{}: AWSELB {}'.format(
+        name, client.session.cookies['AWSELB']))
+    logger.debug('{}: SERVER_ID {}'.format(
+        name, client.session.cookies['SERVER_ID']))
+    logger.debug('{}: limit {}'.format(name, params['limit']))
+
+
+
 def get_response(client, params):
     response_fail = True
     sleep_interval = 0.2
@@ -175,6 +191,10 @@ def get_response(client, params):
                 sleep_interval = sleep_interval * 2
                 sleep(sleep_interval)
                 continue
+        except ResourceNotFound as e:
+            logger.error('Resource not found: {}'.format(e.message))
+            del params['offset']
+            continue
         except Exception as e:
             logger.error('Exception: {}'.format(e.message))
             if sleep_interval > 300:
@@ -183,7 +203,6 @@ def get_response(client, params):
             sleep(sleep_interval)
             continue
     return response
-
 
 
 def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
@@ -196,6 +215,7 @@ def retriever_backward(queue, client, origin_cookie, params, requests_sleep):
             idle()
             queue.put(tender)
         params['offset'] = response.next_page.offset
+        log_retriever_state('Backward', client, params)
         response = get_response(client, params)
         if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
@@ -216,17 +236,17 @@ def retriever_forward(queue, client, origin_cookie, params, requests_sleep, wait
                 idle()
                 queue.put(tender)
             params['offset'] = response.next_page.offset
+            log_retriever_state('Forward', client, params)
             response = get_response(client, params)
             if origin_cookie != client.session.cookies:
                 raise Exception('LB Server mismatch')
             if len(response.data) != 0:
                 logger.info('Forward: pause between requests')
                 sleep(requests_sleep)
-
         logger.info('Forward: pause after empty response')
         sleep(wait_sleep)
-
         params['offset'] = response.next_page.offset
+        log_retriever_state('Forward', client, params)
         response = get_response(client, params)
         if origin_cookie != client.session.cookies:
             raise Exception('LB Server mismatch')
