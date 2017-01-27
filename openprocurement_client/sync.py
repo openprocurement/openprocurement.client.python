@@ -159,12 +159,12 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
 
 
 def log_retriever_state(name, client, params):
-    logger.debug('{}: offset {}'.format(name, params['offset']))
+    logger.debug('{}: offset {}'.format(name, params.get('offset', '')))
     logger.debug('{}: AWSELB {}'.format(
-        name, client.session.cookies['AWSELB']))
+        name, client.session.cookies.get('AWSELB', '')))
     logger.debug('{}: SERVER_ID {}'.format(
-        name, client.session.cookies['SERVER_ID']))
-    logger.debug('{}: limit {}'.format(name, params['limit']))
+        name, client.session.cookies.get('SERVER_ID', '')))
+    logger.debug('{}: limit {}'.format(name, params.ge('limit', '')))
 
 
 
