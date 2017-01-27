@@ -164,7 +164,7 @@ def log_retriever_state(name, client, params):
         name, client.session.cookies.get('AWSELB', '')))
     logger.debug('{}: SERVER_ID {}'.format(
         name, client.session.cookies.get('SERVER_ID', '')))
-    logger.debug('{}: limit {}'.format(name, params.ge('limit', '')))
+    logger.debug('{}: limit {}'.format(name, params.get ('limit', '')))
 
 
 
