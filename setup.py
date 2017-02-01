@@ -10,7 +10,7 @@ setup(
     name='openprocurement_client',
     version=version,
     description="",
-    long_description="{0}\n{1}".format(
+    long_description="{0}\n".format(
         open("README.rst").read()
     ),
 
