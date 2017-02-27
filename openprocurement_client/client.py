@@ -381,6 +381,16 @@ class TendersClient(APIBaseClient):
     def patch_award(self, tender, award):
         return self._patch_tender_resource_item(tender, award, "awards")
 
+    def patch_award_document(self, tender, document_data, award_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, "awards", award_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def patch_cancellation(self, tender, cancellation):
         return self._patch_tender_resource_item(tender, cancellation, "cancellations")
 
@@ -547,12 +557,13 @@ class TendersClient(APIBaseClient):
         )
 
     @verify_file
-    def upload_award_document(self, file_, tender, award_id):
+    def upload_award_document(self, file_, tender, award_id, doc_type="documents"):
         return self._upload_resource_file(
-            '{}/{}/awards/{}/documents'.format(
+            '{}/{}/awards/{}/{}'.format(
                 self.prefix_path,
                 tender.data.id,
-                award_id
+                award_id,
+                doc_type
             ),
             data={"file": file_},
             headers={'X-Access-Token':
