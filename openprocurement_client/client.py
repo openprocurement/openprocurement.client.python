@@ -481,7 +481,6 @@ class TendersClientSync(TendersClient):
     def sync_tenders(self, params={}, extra_headers={}):
         params['feed'] = 'changes'
         self.headers.update(extra_headers)
-
         response = self.request('GET', self.prefix_path, params_dict=params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
