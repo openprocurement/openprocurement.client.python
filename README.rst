@@ -5,7 +5,6 @@ openprocurement.client.python
 
 Reference implementation of a client for OpenProcurement API.
 
-This product may contain traces of nuts.
 
 .. |Build Status| image:: https://travis-ci.org/openprocurement/openprocurement.client.python.svg?branch=master
    :target: https://travis-ci.org/openprocurement/openprocurement.client.python

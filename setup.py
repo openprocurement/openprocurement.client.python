@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import os
 
-version = '2.0a1'
+version = '2.0b5'
 
 tests_require = {
     'test': 'bottle'
@@ -10,9 +10,8 @@ setup(
     name='openprocurement_client',
     version=version,
     description="",
-    long_description="{0}\n{1}".format(
-        open("README.rst").read(),
-        open(os.path.join("docs", "HISTORY.txt")).read()
+    long_description="{0}\n".format(
+        open("README.rst").read()
     ),
 
     # Get more strings from
