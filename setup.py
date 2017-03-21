@@ -4,7 +4,7 @@ import os
 version = '2.0b5'
 
 tests_require = {
-    'test': 'bottle'
+    'test': ['bottle', 'mock']
 }
 setup(
     name='openprocurement_client',

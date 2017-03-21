@@ -705,5 +705,14 @@ class ContractingUserTestCase(BaseTestClass):
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
 
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(ViewerTenderTestCase))
+    suite.addTest(unittest.makeSuite(ViewerPlanTestCase))
+    suite.addTest(unittest.makeSuite(UserTestCase))
+    suite.addTest(unittest.makeSuite(ContractingUserTestCase))
+    return suite
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(defaultTest='suite')
