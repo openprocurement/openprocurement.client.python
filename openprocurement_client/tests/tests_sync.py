@@ -67,7 +67,6 @@ class GetResponseTestCase(unittest.TestCase):
         response = get_response(mock_client, {})
         log_strings = self.log_capture_string.getvalue().split('\n')
         self.assertEqual(log_strings[0], 'PreconditionFailed: Not described error yet.')
-        self.assertEqual(log_strings[1], '')
         self.assertEqual(response, 'success')
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
@@ -79,7 +78,6 @@ class GetResponseTestCase(unittest.TestCase):
         log_strings = self.log_capture_string.getvalue().split('\n')
         self.assertEqual(log_strings[0], 'ConnectionError: connection error')
         self.assertEqual(log_strings[1], 'ConnectionError: connection error')
-        self.assertEqual(log_strings[2], '')
         self.assertEqual(response, 'success')
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
@@ -92,7 +90,6 @@ class GetResponseTestCase(unittest.TestCase):
         log_strings = self.log_capture_string.getvalue().split('\n')
         self.assertEqual(log_strings[0], 'Request failed. Status code: 429')
         self.assertEqual(log_strings[1], 'Request failed. Status code: 404')
-        self.assertEqual(log_strings[2], '')
         self.assertEqual(response, 'success')
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
@@ -105,7 +102,6 @@ class GetResponseTestCase(unittest.TestCase):
         response = get_response(mock_client, params)
         log_strings = self.log_capture_string.getvalue().split('\n')
         self.assertEqual(log_strings[0], 'Resource not found: Not described error yet.')
-        self.assertEqual(log_strings[1], '')
         self.assertEqual(mock_client.session.cookies.clear.call_count, 1)
         self.assertEqual(params, {'some_data': 'data'})
         self.assertEqual(response, 'success')
@@ -118,7 +114,6 @@ class GetResponseTestCase(unittest.TestCase):
         log_strings = self.log_capture_string.getvalue().split('\n')
         self.assertEqual(log_strings[0], 'Exception: invalid header')
         self.assertEqual(log_strings[1], 'Exception: exception message')
-        self.assertEqual(log_strings[2], '')
         self.assertEqual(response, 'success')
 
 
@@ -226,43 +221,34 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.resource_feeder.restart_sync()
         self.assertEqual(mock_spawn.return_value.kill.call_count, 2)
 
-    # TODO: write tests for get_resource_items and feeder methods
+    @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
+    @mock.patch('openprocurement_client.sync.spawn')
+    def test_get_resource_items(self, mock_spawn, mock_sync_tenders):
+        mock_sync_tenders.side_effect = [self.response, munchify(
+            {'data': {}, 'next_page': {'offset': 'next_page'}, 'prev_page': {'offset': 'next_page'}}
+        )]
+        mock_spawn.return_value = mock.MagicMock()
+        mock_spawn.return_value.value = 0
+        self.resource_feeder = ResourceFeeder()
+        mock_spawn.return_value.ready.return_value = True
+        with mock.patch('__builtin__.True', AlmostAlwaysTrue()):
+            result = self.resource_feeder.get_resource_items()
+        self.assertEqual(tuple(result), tuple(self.response.data))
 
-        # @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
-        # @mock.patch('openprocurement_client.sync.spawn')
-        # @mock.patch('gevent.greenlet.Greenlet.ready')
-        # def test_get_resource_items(self, mock_ready, mock_spawn, mock_sync_tenders):
-        #
-        #     mock_sync_tenders.return_value = self.response
-        #     mock_spawn.return_value = mock.MagicMock()
-        #
-        #     mock_spawn.return_value.value = 0
-        #     mock_ready.side_effect = [True, False]
-        #     self.resource_feeder = ResourceFeeder()
-        #
-        #     # mock_spawn.return_value.ready.return_value = [True, Exception('error')]
-        #
-        #     self.resource_feeder.get_resource_items()
-        #
-        #     log_strings = self.log_capture_string.getvalue().split('\n')
-        #     self.assertEqual(mock_spawn.return_value.ready.call_count, 1)
-
-        # @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
-        # @mock.patch('openprocurement_client.sync.spawn')
-        # @mock.patch('gevent.greenlet.Greenlet.ready')
-        # def test_feeder(self, mock_ready, mock_spawn, mock_sync_tenders):
-        #     mock_sync_tenders.return_value = self.response
-        #     self.resource_feeder = ResourceFeeder()
-        #     mock_spawn.return_value = mock.MagicMock()
-        #     mock_spawn.return_value.value = 0
-        #     mock_ready.side_effect = [1, 0]
-        #
-        #     mock_spawn.return_value.value = 0
-        #     mock_ready.return_value = True
-        #     with mock.patch('__builtin__.True', AlmostAlwaysTrue(4)):
-        #         self.resource_feeder.feeder()
-        #         log_strings = self.log_capture_string.getvalue().split('\n')
-        #     self.assertEqual(log_strings[0], 'Stop check backward worker')
+    @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
+    @mock.patch('openprocurement_client.sync.spawn')
+    @mock.patch('openprocurement_client.sync.sleep')
+    def test_feeder(self, mock_sleep, mock_spawn, mock_sync_tenders):
+        mock_sleep.return_value = 'sleeping'
+        mock_sync_tenders.side_effect = [self.response, self.response, ConnectionError('conn error')]
+        self.resource_feeder = ResourceFeeder()
+        mock_spawn.return_value = mock.MagicMock()
+        mock_spawn.return_value.value = 0
+        mock_spawn.return_value.ready.return_value = True
+        with self.assertRaises(ConnectionError) as e:
+            self.resource_feeder.feeder()
+        self.assertEqual(e.exception.message, 'conn error')
+        self.assertEqual(mock_sleep.call_count, 1)
 
     @mock.patch('openprocurement_client.sync.spawn')
     def test_run_feeder(self, mock_spawn):

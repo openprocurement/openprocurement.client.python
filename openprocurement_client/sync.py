@@ -163,7 +163,7 @@ class ResourceFeeder(object):
         self.init_api_clients()
         self.start_sync()
         check_down_worker = True
-        while 1:
+        while True:
             if check_down_worker and self.backward_worker.ready():
                 if self.backward_worker.value == 0:
                     logger.info('Stop check backward worker')
