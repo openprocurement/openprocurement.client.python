@@ -48,18 +48,14 @@ class PlansClient(APIBaseClient):
         iso_dt = parse_date(date)
         dt = iso_dt.strftime('%Y-%m-%d')
         tm = iso_dt.strftime('%H:%M:%S')
-        response = self._get_resource_item(
+        data = self._get_resource_item(
             '{}?offset={}T{}&opt_fields=plan_id&mode=test'.format(
                 self.prefix_path,
                 dt,
                 tm
             )
         )
-        if response.status_code == 200:
-            plan_list = munchify(loads(response.text))
-            self._update_params(plan_list.next_page)
-            return plan_list.data
-        raise InvalidResponse
+        return data
 
     def _get_plan_resource_list(self, plan, items_name):
         return self._get_resource_item(

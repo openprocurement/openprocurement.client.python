@@ -223,7 +223,7 @@ class ResourceFeederTestCase(unittest.TestCase):
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
     @mock.patch('openprocurement_client.sync.spawn')
-    def test_get_resource_items(self, mock_spawn, mock_sync_tenders):
+    def test_get_resource_items_zero_value(self, mock_spawn, mock_sync_tenders):
         mock_sync_tenders.side_effect = [self.response, munchify(
             {'data': {}, 'next_page': {'offset': 'next_page'}, 'prev_page': {'offset': 'next_page'}}
         )]
@@ -231,9 +231,38 @@ class ResourceFeederTestCase(unittest.TestCase):
         mock_spawn.return_value.value = 0
         self.resource_feeder = ResourceFeeder()
         mock_spawn.return_value.ready.return_value = True
-        with mock.patch('__builtin__.True', AlmostAlwaysTrue()):
+        with mock.patch('__builtin__.True', AlmostAlwaysTrue(4)):
             result = self.resource_feeder.get_resource_items()
         self.assertEqual(tuple(result), tuple(self.response.data))
+
+    @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
+    @mock.patch('openprocurement_client.sync.spawn')
+    def test_get_resource_items_non_zero_value(self, mock_spawn, mock_sync_tenders):
+        mock_sync_tenders.side_effect = [self.response, munchify(
+            {'data': {}, 'next_page': {'offset': 'next_page'}, 'prev_page': {'offset': 'next_page'}}
+        )]
+        mock_spawn.return_value = mock.MagicMock()
+        mock_spawn.return_value.value = 1
+        self.resource_feeder = ResourceFeeder()
+        mock_spawn.return_value.ready.side_effect = [True, False]
+        with mock.patch('__builtin__.True', AlmostAlwaysTrue(4)):
+            result = self.resource_feeder.get_resource_items()
+        self.assertEqual(tuple(result), tuple(self.response.data))
+
+    @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
+    @mock.patch('openprocurement_client.sync.spawn')
+    @mock.patch('openprocurement_client.sync.sleep')
+    def test_feeder_zero_value(self, mock_sleep, mock_spawn, mock_sync_tenders):
+        mock_sleep.return_value = 'sleeping'
+        mock_sync_tenders.side_effect = [self.response, self.response, ConnectionError('conn error')]
+        self.resource_feeder = ResourceFeeder()
+        mock_spawn.return_value = mock.MagicMock()
+        mock_spawn.return_value.value = 0
+        mock_spawn.return_value.ready.return_value = True
+        with self.assertRaises(ConnectionError) as e:
+            self.resource_feeder.feeder()
+        self.assertEqual(e.exception.message, 'conn error')
+        self.assertEqual(mock_sleep.call_count, 1)
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
     @mock.patch('openprocurement_client.sync.spawn')
@@ -243,8 +272,8 @@ class ResourceFeederTestCase(unittest.TestCase):
         mock_sync_tenders.side_effect = [self.response, self.response, ConnectionError('conn error')]
         self.resource_feeder = ResourceFeeder()
         mock_spawn.return_value = mock.MagicMock()
-        mock_spawn.return_value.value = 0
-        mock_spawn.return_value.ready.return_value = True
+        mock_spawn.return_value.value = 1
+        mock_spawn.return_value.ready.side_effect = [True, False, False, True]
         with self.assertRaises(ConnectionError) as e:
             self.resource_feeder.feeder()
         self.assertEqual(e.exception.message, 'conn error')
@@ -299,7 +328,11 @@ class ResourceFeederTestCase(unittest.TestCase):
 
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward(self, mock_get_response):
-        mock_get_response.side_effect = [self.response, ConnectionError('connection error')]
+        mock_get_response.side_effect = [
+            self.response,
+            self.response,
+            ConnectionError('connection error')
+        ]
         self.resource_feeder = ResourceFeeder()
         self.resource_feeder.init_api_clients()
         self.resource_feeder.forward_params = {"limit": 0}
@@ -315,7 +348,8 @@ class ResourceFeederTestCase(unittest.TestCase):
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward_no_data(self, mock_get_response):
         mock_get_response.side_effect = [
-            munchify({'data': {}, 'next_page': {'offset': 'next_page'}}), ConnectionError('connection error')
+            munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
+            ConnectionError('connection error')
         ]
         self.resource_feeder = ResourceFeeder()
         self.resource_feeder.init_api_clients()
@@ -331,7 +365,12 @@ class ResourceFeederTestCase(unittest.TestCase):
 
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward_adaptive(self, mock_get_response):
-        mock_get_response.side_effect = [self.response, ConnectionError('connection error')]
+        mock_get_response.side_effect = [
+            self.response,
+            munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
+            self.response,
+            ConnectionError('connection error')
+        ]
         self.resource_feeder = ResourceFeeder(adaptive=True)
         self.resource_feeder.init_api_clients()
         self.resource_feeder.forward_params = {"limit": 0}
@@ -347,9 +386,20 @@ class ResourceFeederTestCase(unittest.TestCase):
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward_no_data_adaptive(self, mock_get_response):
         mock_get_response.side_effect = [
-            munchify({'data': {}, 'next_page': {'offset': 'next_page'}}), ConnectionError('connection error')
+            munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
+            munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
+            ConnectionError('connection error')
         ]
-        self.resource_feeder = ResourceFeeder(adaptive=True)
+        self.resource_feeder = ResourceFeeder(
+            adaptive=True,
+            retrievers_params={
+                'down_requests_sleep': 5,
+                'up_requests_sleep': 1,
+                'up_wait_sleep': 15,
+                'up_wait_sleep_min': 5,
+                'queue_size': 101
+            }
+        )
         self.resource_feeder.init_api_clients()
         self.resource_feeder.forward_params = {"limit": 0}
         self.resource_feeder.forward_client = mock.MagicMock()
