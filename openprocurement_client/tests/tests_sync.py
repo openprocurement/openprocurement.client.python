@@ -3,9 +3,10 @@ from gevent import monkey; monkey.patch_all()
 
 from openprocurement_client.client import TendersClientSync
 from openprocurement_client.exceptions import (
+    NotAFunction,
     RequestFailed,
     PreconditionFailed,
-    ResourceNotFound
+    ResourceNotFound,
 )
 from openprocurement_client.sync import (
     get_response,
@@ -24,6 +25,10 @@ import json
 import logging
 import mock
 import unittest
+
+
+def filter_function(item):
+        return not set(item['id']).difference('0123456789')
 
 
 class AlmostAlwaysTrue(object):
@@ -192,6 +197,27 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertIn('tender1', list(self.resource_feeder.queue.queue))
         self.assertIn('tender2', list(self.resource_feeder.queue.queue))
         self.assertNotIn('tender3', list(self.resource_feeder.queue.queue))
+
+    def test_filtered_handle_response_data(self):
+        tender1, tender2, tender3 = {'id': '18532'}, {'id': 'non_numeric_id'}, {'id': '9999'}
+        self.resource_feeder = ResourceFeeder(filter_function=filter_function)
+        self.resource_feeder.handle_response_data([tender1, tender2, tender3])
+        self.assertIn(tender1, list(self.resource_feeder.queue.queue))
+        self.assertIn(tender3, list(self.resource_feeder.queue.queue))
+        self.assertNotIn(tender2, list(self.resource_feeder.queue.queue))
+
+    def test_filtered_handle_response_data_lambda(self):
+        tender1, tender2, tender3 = {'id': '18532'}, {'id': 'non_numeric_id'}, {'id': '9999'}
+        self.resource_feeder = ResourceFeeder(filter_function=lambda x: not set(x['id']).difference('0123456789'))
+        self.resource_feeder.handle_response_data([tender1, tender2, tender3])
+        self.assertIn(tender1, list(self.resource_feeder.queue.queue))
+        self.assertIn(tender3, list(self.resource_feeder.queue.queue))
+        self.assertNotIn(tender2, list(self.resource_feeder.queue.queue))
+
+    def test_filtered_handle_response_data_not_a_function(self):
+        with self.assertRaises(NotAFunction) as e:
+            self.resource_feeder = ResourceFeeder(filter_function='12')
+        self.assertEqual(e.exception.message, "supplied object is not a function")
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
     @mock.patch('openprocurement_client.sync.spawn')

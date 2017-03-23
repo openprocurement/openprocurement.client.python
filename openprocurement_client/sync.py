@@ -2,6 +2,7 @@ from gevent import monkey
 monkey.patch_all()
 
 import logging
+import types
 from .client import TendersClientSync
 from datetime import datetime
 from gevent import spawn, sleep, idle
@@ -10,7 +11,8 @@ from requests.exceptions import ConnectionError
 from openprocurement_client.exceptions import (
     RequestFailed,
     PreconditionFailed,
-    ResourceNotFound
+    ResourceNotFound,
+    NotAFunction
 )
 
 # Statuses
@@ -89,7 +91,7 @@ class ResourceFeeder(object):
 
     def __init__(self, host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                  key=DEFAULT_API_KEY, resource='tenders', extra_params=DEFAULT_API_EXTRA_PARAMS,
-                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False):
+                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False, filter_function=None):
         super(ResourceFeeder, self).__init__()
         self.host = host
         self.version = version
@@ -102,6 +104,19 @@ class ResourceFeeder(object):
         self.queue = Queue(maxsize=retrievers_params['queue_size'])
         self.forward_info = {}
         self.backward_info = {}
+
+        if filter_function:
+            if isinstance(filter_function, (types.FunctionType,
+                                            types.LambdaType,
+                                            types.BuiltinFunctionType,
+                                            types.MethodType,
+                                            types.BuiltinMethodType,
+                                            types.UnboundMethodType
+                                            )):
+                self.filter_function = filter_function
+                self.handle_response_data = self.filtered_handle_response_data
+            else:
+                raise NotAFunction("supplied object is not a function")
 
     def init_api_clients(self):
         self.backward_params = {'descending': True, 'feed': 'changes'}
@@ -120,6 +135,11 @@ class ResourceFeeder(object):
         for tender in data:
             # self.idle()
             self.queue.put(tender)
+
+    def filtered_handle_response_data(self, data):
+        for tender in data:
+            if self.filter_function(tender):
+                self.queue.put(tender)
 
     def start_sync(self):
         # self.init_api_clients()
