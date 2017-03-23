@@ -312,6 +312,7 @@ routes_dict = {
         "plans": (PLANS_PATH, 'GET', plans_page_get),
         "plan_create": (PLANS_PATH, 'POST', plan_create),
         "plan": (PLANS_PATH + "/<plan_id>", 'GET', plan_page),
+        "plan_patch": (PLANS_PATH + "/<plan_id>", 'PATCH', plan_patch),
         "plan_offset_error": (PLANS_PATH, 'GET', plan_offset_error),
         "contracts": (CONTRACTS_PATH, 'GET', contracts_page_get),
         "contract_create": (CONTRACTS_PATH, 'POST', contract_create),

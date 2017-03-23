@@ -6,13 +6,14 @@ from StringIO import StringIO
 from collections import Iterable
 from simplejson import loads, load
 from munch import munchify
+import mock
 import sys
 import unittest
-from openprocurement_client.client import TendersClient
+from openprocurement_client.client import TendersClient, TendersClientSync
 from openprocurement_client.contract import ContractingClient
 from openprocurement_client.document_service_client \
     import DocumentServiceClient
-from openprocurement_client.exceptions import ResourceNotFound
+from openprocurement_client.exceptions import InvalidResponse, ResourceNotFound
 from openprocurement_client.plan import PlansClient
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
@@ -134,6 +135,20 @@ class ViewerTenderTestCase(BaseTestClass):
         self.assertIsInstance(tenders, Iterable)
         self.assertEqual(tenders, self.tenders.data)
 
+    def test_get_latest_tenders(self):
+        setup_routing(self.app, routes=["tenders"])
+        tenders = self.client.get_latest_tenders('2015-11-16T12:00:00.960077+02:00', '')
+        self.assertIsInstance(tenders, Iterable)
+        self.assertEqual(tenders.data, self.tenders.data)
+
+    @mock.patch('openprocurement_client.client.TendersClient.request')
+    def test_get_tenders_failed(self, mock_request):
+        mock_request.return_value = munchify({'status_code': 404})
+        self.client.params['offset'] = 'offset_value'
+        with self.assertRaises(KeyError) as e:
+            self.client.get_tenders()
+        self.assertEqual(e.exception.message, 'offset')
+
     def test_get_tender(self):
         setup_routing(self.app, routes=["tender"])
         tender = self.client.get_tender(TEST_TENDER_KEYS.tender_id)
@@ -170,6 +185,20 @@ class ViewerPlanTestCase(BaseTestClass):
         self.assertIsInstance(plans, Iterable)
         self.assertEqual(plans, self.plans.data)
 
+    def test_get_latest_plans(self):
+        setup_routing(self.app, routes=["plans"])
+        plans = self.client.get_latest_plans('2015-11-16T12:00:00.960077+02:00')
+        self.assertIsInstance(plans, Iterable)
+        self.assertEqual(plans.data, self.plans.data)
+
+    @mock.patch('openprocurement_client.plan.PlansClient.request')
+    def test_get_plans_failed(self, mock_request):
+        mock_request.return_value = munchify({'status_code': 412})
+        self.client.params['offset'] = 'offset_value'
+        with self.assertRaises(KeyError) as e:
+            self.client.get_plans()
+        self.assertEqual(e.exception.message, 'offset')
+
     def test_get_plan(self):
         setup_routing(self.app, routes=["plan"])
         plan = self.client.get_plan(TEST_PLAN_KEYS.plan_id)
@@ -185,6 +214,38 @@ class ViewerPlanTestCase(BaseTestClass):
         plans = self.client.get_plans()
         self.assertIsInstance(plans, Iterable)
         self.assertEqual(plans, self.plans.data)
+
+    def test_patch_plan(self):
+        setup_routing(self.app, routes=["plan_patch"])
+        self.plan.data.description = 'test_patch_plan'
+        patched_tender = self.client.patch_plan(self.plan)
+        self.assertEqual(patched_tender.data.id, self.plan.data.id)
+        self.assertEqual(patched_tender.data.description, self.plan.data.description)
+
+    def test_create_plan(self):
+        setup_routing(self.app, routes=["plan_create"])
+        plan = munchify({'data': 'plan'})
+        self.assertEqual(self.client.create_plan(plan), plan)
+
+
+class TendersClientSyncTestCase(BaseTestClass):
+    """"""
+    def setUp(self):
+        self.setting_up(client=TendersClientSync)
+
+        with open(ROOT + 'tenders.json') as tenders:
+            self.tenders = munchify(load(tenders))
+        with open(ROOT + TEST_TENDER_KEYS.tender_id + '.json') as tender:
+            self.tender = munchify(load(tender))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_sync_tenders(self):
+        setup_routing(self.app, routes=["tenders"])
+        tenders = self.client.sync_tenders()
+        self.assertIsInstance(tenders.data, Iterable)
+        self.assertEqual(tenders.data, self.tenders.data)
 
 
 class UserTestCase(BaseTestClass):
@@ -473,6 +534,15 @@ class UserTestCase(BaseTestClass):
         self.assertEqual(doc.data.title, file_name)
         self.assertEqual(doc.data.id, TEST_TENDER_KEYS.new_document_id)
 
+    @mock.patch('openprocurement_client.document_service_client.DocumentServiceClient.request')
+    def test_upload_tender_document_path_failed(self, mock_request):
+        mock_request.return_value = munchify({'status_code': 204})
+        setup_routing(self.app, routes=["tender_document_create"])
+        file_name = "test_document.txt"
+        file_path = ROOT + file_name
+        with self.assertRaises(InvalidResponse):
+            self.client.upload_document(file_path, self.tender)
+
     def test_upload_qualification_document(self):
         setup_routing(self.app, routes=["tender_subpage_document_create"])
         file_ = StringIO()
@@ -680,8 +750,31 @@ class ContractingUserTestCase(BaseTestClass):
             self.contract = munchify(load(contract))
             self.contract.update({'access':{"token": API_KEY}})
 
+        with open(ROOT + 'contracts.json') as contracts:
+            self.contracts = munchify(load(contracts))
+
     def tearDown(self):
         self.server.stop()
+
+    ###########################################################################
+    #             GET ITEM TEST
+    ###########################################################################
+
+    def test_get_contract(self):
+        setup_routing(self.app, routes=["contract"])
+        contract = self.client.get_contract(self.contract.data['id'])
+        self.assertEqual(contract.data.id, self.contract.data.id)
+
+    ###########################################################################
+    #             GET ITEMS LIST TEST
+    ###########################################################################
+
+    def test_get_contracts(self):
+        setup_routing(self.app, routes=["contracts"])
+        contracts = self.client.get_contracts()
+        self.assertEqual(contracts[0], self.contracts.data[0])
+        self.assertEqual(len(contracts), len(self.contracts.data))
+
 
     ###########################################################################
     #             CREATE ITEM TEST
@@ -705,5 +798,15 @@ class ContractingUserTestCase(BaseTestClass):
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
 
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(ViewerTenderTestCase))
+    suite.addTest(unittest.makeSuite(ViewerPlanTestCase))
+    suite.addTest(unittest.makeSuite(ViewerPlanTestCase))
+    suite.addTest(unittest.makeSuite(UserTestCase))
+    suite.addTest(unittest.makeSuite(ContractingUserTestCase))
+    return suite
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(defaultTest='suite')

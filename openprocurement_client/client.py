@@ -55,18 +55,14 @@ class TendersClient(APIBaseClient):
         iso_dt = parse_date(date)
         dt = iso_dt.strftime('%Y-%m-%d')
         tm = iso_dt.strftime('%H:%M:%S')
-        response = self._get_resource_item(
+        data = self._get_resource_item(
             '{}?offset={}T{}&opt_fields=tender_id&mode=test'.format(
                 self.prefix_path,
                 dt,
                 tm
             )
         )
-        if response.status_code == 200:
-            tender_list = munchify(loads(response.text))
-            self._update_params(tender_list.next_page)
-            return tender_list.data
-        raise InvalidResponse(response)
+        return data
 
     def _get_tender_resource_list(self, tender, items_name):
         return self._get_resource_item(
@@ -481,7 +477,6 @@ class TendersClientSync(TendersClient):
     def sync_tenders(self, params={}, extra_headers={}):
         params['feed'] = 'changes'
         self.headers.update(extra_headers)
-
         response = self.request('GET', self.prefix_path, params_dict=params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
