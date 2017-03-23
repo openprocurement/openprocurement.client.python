@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import os
 
-version = '2.0b5'
+version = '2.0b6'
 
 tests_require = {
     'test': [
