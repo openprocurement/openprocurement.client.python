@@ -647,8 +647,9 @@ class TendersClientSync(TendersClient):
 class EDRClient(Resource):
     """ Client for validate members by EDR """
 
-    def __init__(self, host_url, username, password='', **kwargs):
-        super(EDRClient, self).__init__(host_url,
+    def __init__(self, host_url, api_version, username, password='', **kwargs):
+        prefix_path = '{}/api/{}'.format(host_url, api_version)
+        super(EDRClient, self).__init__(prefix_path,
                                         filters=[BasicAuth(username, password)],
                                         **kwargs)
         self.headers = {"Content-Type": "application/json"}
@@ -672,7 +673,7 @@ class EDRClient(Resource):
 
     def verify_member(self, edrpou, headers=None):
         response = self.request("GET", "/verify",
-                                params_dict={'code': edrpou},
+                                params_dict={'id': edrpou},
                                 headers=headers)
         if response.status_int == 200:
             return munchify(loads(response.body_string()))
