@@ -647,7 +647,7 @@ class TendersClientSync(TendersClient):
 class EDRClient(Resource):
     """ Client for validate members by EDR """
 
-    def __init__(self, host_url, api_version, username, password='', **kwargs):
+    def __init__(self, host_url, api_version, username, password, **kwargs):
         prefix_path = '{}/api/{}'.format(host_url, api_version)
         super(EDRClient, self).__init__(prefix_path,
                                         filters=[BasicAuth(username, password)],
