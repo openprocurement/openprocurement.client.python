@@ -228,6 +228,20 @@ class TendersClient(APIBaseClient):
     def get_documents(self, tender, params={}):
         return self._get_tender_resource_list(tender, "documents")
 
+    def get_awards_documents(self, tender, award_id, params={}):
+        return self._get_resource_item(
+            '{}/{}/awards/{}/documents'.format(self.prefix_path, tender.data.id, award_id),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    def get_qualification_documents(self, tender, qualification_id, params={}):
+        return self._get_resource_item(
+            '{}/{}/awards/{}/documents'.format(self.prefix_path, tender.data.id, qualification_id),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def get_awards(self, tender, params={}):
         return self._get_tender_resource_list(tender, "awards")
 
