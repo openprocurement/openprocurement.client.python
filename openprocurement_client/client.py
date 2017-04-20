@@ -237,7 +237,7 @@ class TendersClient(APIBaseClient):
 
     def get_qualification_documents(self, tender, qualification_id, params={}):
         return self._get_resource_item(
-            '{}/{}/awards/{}/documents'.format(self.prefix_path, tender.data.id, qualification_id),
+            '{}/{}/qualifications/{}/documents'.format(self.prefix_path, tender.data.id, qualification_id),
             headers={'X-Access-Token':
                      getattr(getattr(tender, 'access', ''), 'token', '')}
         )
