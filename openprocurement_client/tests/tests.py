@@ -178,7 +178,7 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(self.client.get_documents(self.tender), documents)
 
     def test_get_awards_documents(self):
-        setup_routing(self.app, routs=["tender_award_documets"])
+        setup_routing(self.app, routs=["tender_award_documents"])
         documents = munchify({'data': self.tender['data']['awards'][0].get('documents', [])})
         self.assertEqual(self.client.get_awards_documents(self.tender, self.tender['data']['awards'][0]['id']), documents)
 
