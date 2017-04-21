@@ -66,6 +66,20 @@ def tender_subpage(tender_id, subpage_name):
     subpage = tender_partition(tender_id, subpage_name)
     return dumps({"data": subpage})
 
+def tender_award_documents(tender_id, award_id):
+    tender = tender_partition(tender_id)
+    for award in tender['data']['awards']:
+        if award['id'] == award_id:
+            return dumps({"data": award['documents']})
+    return location_error(award_id)
+
+def tender_qualification_documents(tender_id, qualification_id):
+    tender = tender_partition(tender_id)
+    for qualification in tender['data']['qualifications']:
+        if qualification['id'] == qualification_id:
+            return dumps({"data": qualification['documents']})
+    return location_error(qualification_id)
+
 def tender_subpage_item_create(tender_id, subpage_name):
     response.status = 201
     if not tender_partition(tender_id, subpage_name):
@@ -272,6 +286,8 @@ routs_dict = {
         "tender_patch": (TENDERS_PATH + "/<tender_id>", 'PATCH', tender_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
+        "tender_award_documents": (TENDERS_PATH + "/<tender_id>/awards/<award_id>/documents", 'GET', tender_award_documents),
+        "tender_qualification_documents": (TENDERS_PATH + "/<tender_id>/qualifications/<qualification_id>/documents", 'GET', tender_qualification_documents),
         "tender_subpage_item_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'POST', tender_subpage_item_create),
         "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
