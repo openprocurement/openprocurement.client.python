@@ -231,8 +231,8 @@ class TendersClient(APIBaseClient):
 
     def patch_award_document(self, tender, document_data, award_id, document_id):
         return self._patch_resource_item(
-            '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, 'awards', award_id, document_id
+            '{}/{}/awards/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, award_id, document_id
             ),
             payload=document_data,
             headers={'X-Access-Token':
