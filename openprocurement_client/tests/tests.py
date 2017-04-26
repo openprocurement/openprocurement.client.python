@@ -282,6 +282,16 @@ class UserTestCase(BaseTestClass):
         documents = munchify({'data': self.tender['data'].get('documents', [])})
         self.assertEqual(self.client.get_documents(self.tender), documents)
 
+    def test_get_awards_documents(self):
+        setup_routing(self.app, routs=["tender_award_documents"])
+        documents = munchify({'data': self.tender['data']['awards'][0].get('documents', [])})
+        self.assertEqual(self.client.get_awards_documents(self.tender, self.tender['data']['awards'][0]['id']), documents)
+
+    def test_get_qualification_documents(self):
+        setup_routing(self.app, routs=["tender_qualification_documents"])
+        documents = munchify({'data': self.tender['data']['qualifications'][0].get('documents', [])})
+        self.assertEqual(self.client.get_qualification_documents(self.tender, self.tender['data']['qualifications'][0]['id']), documents)
+
     def test_get_awards(self):
         setup_routing(self.app, routes=["tender_subpage"])
         awards = munchify({'data': self.tender['data'].get('awards', [])})

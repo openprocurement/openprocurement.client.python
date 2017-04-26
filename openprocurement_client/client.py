@@ -76,6 +76,20 @@ class TendersClient(APIBaseClient):
     def get_documents(self, tender):
         return self._get_tender_resource_list(tender, 'documents')
 
+    def get_awards_documents(self, tender, award_id):
+        return self._get_resource_item(
+            '{}/{}/awards/{}/documents'.format(self.prefix_path, tender.data.id, award_id),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    def get_qualification_documents(self, tender, qualification_id):
+        return self._get_resource_item(
+            '{}/{}/qualifications/{}/documents'.format(self.prefix_path, tender.data.id, qualification_id),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
     def get_awards(self, tender):
         return self._get_tender_resource_list(tender, 'awards')
 
@@ -215,6 +229,16 @@ class TendersClient(APIBaseClient):
 
     def patch_award(self, tender, award):
         return self._patch_obj_resource_item(tender, award, 'awards')
+
+    def patch_award_document(self, tender, document_data, award_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, 'awards', award_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     def patch_cancellation(self, tender, cancellation):
         return self._patch_obj_resource_item(
@@ -397,12 +421,14 @@ class TendersClient(APIBaseClient):
 
     @verify_file
     def upload_award_document(self, file_, tender, award_id,
-                              use_ds_client=True, doc_registration=True):
+                              use_ds_client=True, doc_registration=True,
+                              doc_type='documents'):
         return self._upload_resource_file(
-            '{}/{}/awards/{}/documents'.format(
+            '{}/{}/awards/{}/{}'.format(
                 self.prefix_path,
                 tender.data.id,
-                award_id
+                award_id,
+                doc_type
             ),
             file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)},
@@ -486,3 +512,39 @@ class TendersClientSync(TendersClient):
     def get_tender(self, id, extra_headers={}):
         self.headers.update(extra_headers)
         return super(TendersClientSync, self).get_tender(id)
+
+
+class EDRClient(Resource):
+    """ Client for validate members by EDR """
+
+    def __init__(self, host_url, api_version, username, password, **kwargs):
+        prefix_path = '{}/api/{}'.format(host_url, api_version)
+        super(EDRClient, self).__init__(prefix_path,
+                                        filters=[BasicAuth(username, password)],
+                                        **kwargs)
+        self.headers = {"Content-Type": "application/json"}
+
+    def request(self, method, path=None, payload=None, headers=None,
+                params_dict=None, **params):
+        _headers = dict(self.headers)
+        _headers.update(headers or {})
+        try:
+            response = super(EDRClient, self).request(
+                method, path=path, payload=payload, headers=_headers,
+                params_dict=params_dict, **params
+            )
+            if 'Set-Cookie' in response.headers:
+                self.headers['Cookie'] = response.headers['Set-Cookie']
+            return response
+        except ResourceNotFound as e:
+            if 'Set-Cookie' in e.response.headers:
+                self.headers['Cookie'] = e.response.headers['Set-Cookie']
+            raise e
+
+    def verify_member(self, edrpou, headers=None):
+        response = self.request("GET", "/verify",
+                                params_dict={'id': edrpou},
+                                headers=headers)
+        if response.status_int == 200:
+            return munchify(loads(response.body_string()))
+        raise InvalidResponse
