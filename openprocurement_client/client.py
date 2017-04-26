@@ -29,7 +29,6 @@ class TendersClient(APIBaseClient):
             key, resource, host_url, api_version, params, ds_client,
             user_agent
         )
-        self.headers = {'Content-Type': 'application/json'}
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -514,37 +513,26 @@ class TendersClientSync(TendersClient):
         return super(TendersClientSync, self).get_tender(id)
 
 
-class EDRClient(Resource):
+class EDRClient(APIBaseClient):
     """ Client for validate members by EDR """
 
-    def __init__(self, host_url, api_version, username, password, **kwargs):
-        prefix_path = '{}/api/{}'.format(host_url, api_version)
-        super(EDRClient, self).__init__(prefix_path,
-                                        filters=[BasicAuth(username, password)],
-                                        **kwargs)
-        self.headers = {"Content-Type": "application/json"}
+    def __init__(self,
+                 key,
+                 resource='verify',
+                 host_url=None,
+                 api_version=None,
+                 params=None,
+                 ds_client=None,
+                 user_agent=None):
+        super(EDRClient, self).__init__(
+            key, resource, host_url, api_version, params, ds_client,
+            user_agent
+        )
 
-    def request(self, method, path=None, payload=None, headers=None,
-                params_dict=None, **params):
-        _headers = dict(self.headers)
-        _headers.update(headers or {})
-        try:
-            response = super(EDRClient, self).request(
-                method, path=path, payload=payload, headers=_headers,
-                params_dict=params_dict, **params
-            )
-            if 'Set-Cookie' in response.headers:
-                self.headers['Cookie'] = response.headers['Set-Cookie']
-            return response
-        except ResourceNotFound as e:
-            if 'Set-Cookie' in e.response.headers:
-                self.headers['Cookie'] = e.response.headers['Set-Cookie']
-            raise e
-
-    def verify_member(self, edrpou, headers=None):
-        response = self.request("GET", "/verify",
-                                params_dict={'id': edrpou},
-                                headers=headers)
-        if response.status_int == 200:
-            return munchify(loads(response.body_string()))
-        raise InvalidResponse
+    def verify_member(self, edrpou, extra_headers={}):
+        self.headers.update(extra_headers)
+        response = self.request('GET', self.prefix_path,
+                                params_dict={'id': edrpou})
+        if response.status_code == 200:
+            return munchify(loads(response.text))
+        raise InvalidResponse(response)
