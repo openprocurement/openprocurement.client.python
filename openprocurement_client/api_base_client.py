@@ -107,9 +107,8 @@ class APIBaseClient(APITemplateClient):
                       user_agent=user_agent)
 
         self.ds_client = ds_client
-
-        _host_url = host_url or self.host_url
-        _api_version = api_version or self.api_version
+        self.host_url = host_url or self.host_url
+        self.api_version = api_version or self.api_version
 
         if not isinstance(params, dict):
             params = {'mode': '_all_'}
@@ -118,12 +117,12 @@ class APIBaseClient(APITemplateClient):
         # we first need to obtain a cookie. For that reason,
         # here we send a HEAD request to a neutral URL.
         response = self.session.request(
-            'HEAD', '{}/api/{}/spore'.format(_host_url, _api_version)
+            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
         )
         response.raise_for_status()
 
         self.prefix_path = '{}/api/{}/{}'\
-            .format(_host_url, _api_version, resource)
+            .format(self.host_url, self.api_version, resource)
 
     @staticmethod
     def _get_access_token(obj):

@@ -1,6 +1,6 @@
 import logging
 
-from .api_base_client import APIBaseClient, verify_file
+from .api_base_client import APIBaseClient, APITemplateClient, verify_file
 from .exceptions import InvalidResponse
 
 from iso8601 import parse_date
@@ -513,26 +513,25 @@ class TendersClientSync(TendersClient):
         return super(TendersClientSync, self).get_tender(id)
 
 
-class EDRClient(APIBaseClient):
+class EDRClient(APITemplateClient):
     """ Client for validate members by EDR """
 
-    def __init__(self,
-                 key,
-                 resource='verify',
-                 host_url=None,
-                 api_version=None,
-                 params=None,
-                 ds_client=None,
-                 user_agent=None):
-        super(EDRClient, self).__init__(
-            key, resource, host_url, api_version, params, ds_client,
-            user_agent
-        )
+    host_url = 'https://api-sandbox.openprocurement.org'
+    api_version = '2.0'
 
-    def verify_member(self, edrpou, extra_headers={}):
-        self.headers.update(extra_headers)
-        response = self.request('GET', self.prefix_path,
-                                params_dict={'id': edrpou})
+    def __init__(self, host_url=None, api_version=None, username=None,
+                 password=None):
+        super(EDRClient, self).__init__(login_pass=(username, password))
+        self.host_url = host_url or self.host_url
+        self.api_version = api_version or self.api_version
+
+    def verify_member(self, edrpou, extra_headers=None):
+        self.headers.update(extra_headers or {})
+        response = self.request(
+            'GET',
+            '{}/api/{}/verify'.format(self.host_url, self.api_version),
+            params_dict={'id': edrpou}
+        )
         if response.status_code == 200:
             return munchify(loads(response.text))
         raise InvalidResponse(response)
