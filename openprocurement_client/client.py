@@ -1,6 +1,6 @@
 import logging
 
-from .api_base_client import APIBaseClient, verify_file
+from .api_base_client import APIBaseClient, APITemplateClient, verify_file
 from .exceptions import InvalidResponse
 
 from iso8601 import parse_date
@@ -29,7 +29,6 @@ class TendersClient(APIBaseClient):
             key, resource, host_url, api_version, params, ds_client,
             user_agent
         )
-        self.headers = {'Content-Type': 'application/json'}
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
@@ -75,6 +74,20 @@ class TendersClient(APIBaseClient):
 
     def get_documents(self, tender):
         return self._get_tender_resource_list(tender, 'documents')
+
+    def get_awards_documents(self, tender, award_id):
+        return self._get_resource_item(
+            '{}/{}/awards/{}/documents'.format(self.prefix_path, tender.data.id, award_id),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
+
+    def get_qualification_documents(self, tender, qualification_id):
+        return self._get_resource_item(
+            '{}/{}/qualifications/{}/documents'.format(self.prefix_path, tender.data.id, qualification_id),
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     def get_awards(self, tender):
         return self._get_tender_resource_list(tender, 'awards')
@@ -215,6 +228,16 @@ class TendersClient(APIBaseClient):
 
     def patch_award(self, tender, award):
         return self._patch_obj_resource_item(tender, award, 'awards')
+
+    def patch_award_document(self, tender, document_data, award_id, document_id):
+        return self._patch_resource_item(
+            '{}/{}/awards/{}/documents/{}'.format(
+                self.prefix_path, tender.data.id, award_id, document_id
+            ),
+            payload=document_data,
+            headers={'X-Access-Token':
+                     getattr(getattr(tender, 'access', ''), 'token', '')}
+        )
 
     def patch_cancellation(self, tender, cancellation):
         return self._patch_obj_resource_item(
@@ -397,12 +420,14 @@ class TendersClient(APIBaseClient):
 
     @verify_file
     def upload_award_document(self, file_, tender, award_id,
-                              use_ds_client=True, doc_registration=True):
+                              use_ds_client=True, doc_registration=True,
+                              doc_type='documents'):
         return self._upload_resource_file(
-            '{}/{}/awards/{}/documents'.format(
+            '{}/{}/awards/{}/{}'.format(
                 self.prefix_path,
                 tender.data.id,
-                award_id
+                award_id,
+                doc_type
             ),
             file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)},
@@ -486,3 +511,27 @@ class TendersClientSync(TendersClient):
     def get_tender(self, id, extra_headers={}):
         self.headers.update(extra_headers)
         return super(TendersClientSync, self).get_tender(id)
+
+
+class EDRClient(APITemplateClient):
+    """ Client for validate members by EDR """
+
+    host_url = 'https://api-sandbox.openprocurement.org'
+    api_version = '2.0'
+
+    def __init__(self, host_url=None, api_version=None, username=None,
+                 password=None):
+        super(EDRClient, self).__init__(login_pass=(username, password))
+        self.host_url = host_url or self.host_url
+        self.api_version = api_version or self.api_version
+
+    def verify_member(self, edrpou, extra_headers=None):
+        self.headers.update(extra_headers or {})
+        response = self.request(
+            'GET',
+            '{}/api/{}/verify'.format(self.host_url, self.api_version),
+            params_dict={'id': edrpou}
+        )
+        if response.status_code == 200:
+            return munchify(loads(response.text))
+        raise InvalidResponse(response)

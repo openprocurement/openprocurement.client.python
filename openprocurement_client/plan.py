@@ -20,18 +20,18 @@ class PlansClient(APIBaseClient):
                  params=None,
                  ds_client=None):
 
-        _api_version = api_version or self.api_version
         super(PlansClient, self)\
-            .__init__(key, 'plans', host_url, _api_version, params, ds_client)
+            .__init__(key, 'plans', host_url, api_version, params, ds_client)
 
     ###########################################################################
     #             GET ITEMS LIST API METHODS
     ###########################################################################
 
     @retry(stop_max_attempt_number=5)
-    def get_plans(self, params={}, feed='changes'):
-        params['feed'] = feed
-        self._update_params(params)
+    def get_plans(self, params=None, feed='changes'):
+        _params = (params or {}).copy()
+        _params['feed'] = feed
+        self._update_params(_params)
         response = self.request('GET',
             self.prefix_path,
             params_dict=self.params)
