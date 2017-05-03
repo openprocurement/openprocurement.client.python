@@ -1,0 +1,32 @@
+{
+  "data": {
+    "date": "2016-07-04T19:00:55.244506+03:00",
+    "id": "caddc3ab74fb47aba406db4b10acb5c0",
+    "value": {
+      "currency": "UAH",
+      "amount": 500.0,
+      "valueAddedTaxIncluded": true
+    },
+    "tenderers": [
+      {
+        "contactPoint": {
+          "name": "Державне управління справами",
+          "telephone": "0440000000"
+        },
+        "identifier": {
+          "scheme": "UA-EDR",
+          "id": "00037256",
+          "uri": "http://www.dus.gov.ua/"
+        },
+        "name": "Державне управління справами",
+        "address": {
+          "postalCode": "01220",
+          "countryName": "Україна",
+          "streetAddress": "вул. Банкова, 11, корпус 1",
+          "region": "м. Київ",
+          "locality": "м. Київ"
+        }
+      }
+    ]
+  }
+}
