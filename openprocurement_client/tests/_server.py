@@ -3,7 +3,8 @@ from munch import munchify
 from simplejson import dumps, load
 from openprocurement_client.document_service_client \
     import DocumentServiceClient
-from uuid import uuid4
+from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
+    TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
 import magic
 import os
 
@@ -16,12 +17,21 @@ HOST_URL = BASIS_URL + ':' + str(PORT)
 DS_HOST_URL = BASIS_URL + ':' + str(DS_PORT)
 AUTH_DS_FAKE = ['login_ds_fake', 'pass_ds_fake']
 ROOT = os.path.dirname(__file__) + '/data/'
-API_PATH = '/api/{0}/{1}'
-TENDERS_PATH = API_PATH.format(API_VERSION, "tenders")
-PLANS_PATH = API_PATH.format(API_VERSION, "plans")
-CONTRACTS_PATH = API_PATH.format(API_VERSION, "contracts")
-SPORE_PATH = API_PATH.format(API_VERSION, "spore")
+API_PATH = '/api/' + API_VERSION + '/{0}'
+TENDERS_PATH = API_PATH.format('tenders')
+PLANS_PATH = API_PATH.format('plans')
+CONTRACTS_PATH = API_PATH.format('contracts')
+SPORE_PATH = API_PATH.format('spore')
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
+RESOURCE_DICT = \
+    {'tender':   {'sublink': 'tenders',   'data': TEST_TENDER_KEYS},
+     'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
+     'plan':     {'sublink': 'plans',     'data': TEST_PLAN_KEYS}}
+
+
+def resource_filter(resource_name):
+    regexp = r'{}'.format(RESOURCE_DICT[resource_name]['sublink'])
+    return regexp, lambda x: resource_name, lambda x: None
 
 
 def setup_routing(app, routes=None):
@@ -54,107 +64,127 @@ def spore():
                                       "8cf9b7adf0fae467a524747e3c6c6973262130fac2b"
                                       "96a11693fa8bd38623e4daee121f60b4301aef012c"))
 
-def offset_error():
-    response.status = 404
-    setup_routing(request.app, routes=["tenders"])
 
-def tenders_page_get():
-    with open(ROOT + 'tenders.json') as json:
-        tenders = load(json)
-    return dumps(tenders)
+def offset_error(resource_name):
+    response.status = 404
+    setup_routing(request.app,
+                  routes=[RESOURCE_DICT[resource_name]['sublink']])
+
+
+def resource_page_get(resource_name):
+    with open(ROOT + '{}.json'.format(
+            RESOURCE_DICT[resource_name]['sublink'])) as json:
+        resources = load(json)
+    return dumps(resources)
+
 
 ### Tender operations
 #
 
-def tender_create():
+
+def resource_create():
     response.status = 201
     return request.json
 
-def tender_page(tender_id):
-    tender = tender_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    return dumps(tender)
 
-def tender_patch(tender_id):
-    tender = tender_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    tender.update(request.json['data'])
-    return dumps({"data": tender})
+def resource_page(resource_name, resource_id):
+    resource = resource_partition(resource_id, resource_name)
+    if not resource:
+        return location_error(resource_name)
+    return dumps(resource)
+
+
+def resource_patch(resource_name, resource_id):
+    resource = resource_partition(resource_id, resource_name)
+    if not resource:
+        return location_error(resource_name)
+    resource.update(request.json['data'])
+    return dumps({'data': resource})
+
 
 ### Subpage operations
 #
 
 def tender_subpage(tender_id, subpage_name):
-    subpage = tender_partition(tender_id, subpage_name)
-    return dumps({"data": subpage})
+    subpage = resource_partition(tender_id, part=subpage_name)
+    return dumps({'data': subpage})
+
 
 def tender_award_documents(tender_id, award_id):
-    tender = tender_partition(tender_id)
+    tender = resource_partition(tender_id)
     for award in tender['data']['awards']:
         if award['id'] == award_id:
-            return dumps({"data": award['documents']})
+            return dumps({'data': award['documents']})
     return location_error(award_id)
 
+
 def tender_qualification_documents(tender_id, qualification_id):
-    tender = tender_partition(tender_id)
+    tender = resource_partition(tender_id)
     for qualification in tender['data']['qualifications']:
         if qualification['id'] == qualification_id:
-            return dumps({"data": qualification['documents']})
+            return dumps({'data': qualification['documents']})
     return location_error(qualification_id)
+
 
 def tender_subpage_item_create(tender_id, subpage_name):
     response.status = 201
-    if not tender_partition(tender_id, subpage_name):
-        return location_error(subpage_name)
     return request.json
 
+
+def resource_subpage_item_create(resource_id, subpage_name):
+    response.status = 201
+    return request.json
+
+
 def tender_subpage_item(tender_id, subpage_name, subpage_id):
-    subpage = tender_partition(tender_id, subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
-            return dumps({"data": unit})
+            return dumps({'data': unit})
     return location_error(subpage_name)
 
-def tender_subpage_item_patch(tender_id, subpage_name, subpage_id):
-    subpage = tender_partition(tender_id, subpage_name)
+
+def object_subpage_item_patch(obj_id, subpage_name, subpage_id, resource_name):
+    subpage = resource_partition(obj_id, resource_name, subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
             unit.update(request.json['data'])
-            return dumps({"data": unit})
+            return dumps({'data': unit})
     return location_error(subpage_name)
 
+
 def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
-    subpage = tender_partition(tender_id, subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     for unit in subpage:
         if unit.id == subpage_id:
             response.status_int = 200
             return {}
     return location_error(subpage_name)
 
-def tender_patch_credentials(tender_id):
-    tender = tender_partition(tender_id)
-    if not tender:
-        return location_error("tender")
-    tender['access'] = {'token': uuid4().hex}
-    return tender
+
+def patch_credentials(resource_name, resource_id):
+    resource = resource_partition(resource_id, resource_name)
+    if not resource:
+        return location_error(RESOURCE_DICT[resource_name]['sublink'])
+    resource['access'] = \
+        {'token': RESOURCE_DICT[resource_name]['data']['new_token']}
+    return resource
 
 ### Document and file operations
 #
 
+
 def tender_document_create(tender_id):
-    from openprocurement_client.tests.tests import TEST_TENDER_KEYS
     response.status = 201
-    document = tender_partition(tender_id, 'documents')[0]
+    document = resource_partition(tender_id, part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_TENDER_KEYS.new_document_id
     return dumps({"data": document})
 
+
 def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document_type):
-    from openprocurement_client.tests.tests import TEST_TENDER_KEYS
     response.status = 201
-    subpage = tender_partition(tender_id, subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
@@ -165,9 +195,10 @@ def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document
             return dumps({"data": document})
     return location_error(subpage_name)
 
+
 def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
-    subpage = tender_partition(tender_id, subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
@@ -181,7 +212,7 @@ def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document
 
 def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
-    subpage = tender_partition(tender_id, subpage_name)
+    subpage = resource_partition(tender_id, part=subpage_name)
     if not subpage:
         return location_error("tender")
     for unit in subpage:
@@ -192,6 +223,7 @@ def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_
                     return dumps({"data": document})
     return location_error(subpage_name)
 
+
 def get_file(filename):
     redirect("/download/" + filename, code=302)
 
@@ -200,16 +232,19 @@ def download_file(filename):
 
 ####
 
-def tender_partition(tender_id, part="tender"):
+
+def resource_partition(resource_id, resource_name='tender', part='all'):
     try:
-        with open(ROOT + tender_id + '.json') as json:
-            tender = load(json)
-            if part=="tender":
-                return tender
+        with open(ROOT + resource_name + '_' + resource_id + '.json') \
+                as json:
+            obj = munchify(load(json))
+            if part == 'all':
+                return obj
             else:
-                return munchify(tender['data'][part])
+                return munchify(obj['data'][part])
     except (KeyError, IOError):
         return []
+
 
 def location_error(name):
     return dumps({"status": "error", "errors": [{"location": "url", "name": name + '_id', "description": "Not Found"}]})
@@ -217,24 +252,6 @@ def location_error(name):
 ### Plan operations
 #
 
-def plan_offset_error():
-    response.status = 404
-    setup_routing(request.app, routes=["plans"])
-
-def plans_page_get():
-    with open(ROOT + 'plans.json') as json:
-        plans = load(json)
-    return dumps(plans)
-
-def plan_create():
-    response.status = 201
-    return request.json
-
-def plan_page(plan_id):
-    plan = plan_partition(plan_id)
-    if not plan:
-        return location_error("plan")
-    return dumps(plan)
 
 def plan_patch(plan_id):
     plan = plan_partition(plan_id)
@@ -242,6 +259,7 @@ def plan_patch(plan_id):
         return location_error("plan")
     plan.update(request.json['data'])
     return dumps({"data": plan})
+
 
 def plan_partition(plan_id, part="plan"):
     try:
@@ -257,84 +275,61 @@ def plan_partition(plan_id, part="plan"):
 ### Contract operations
 #
 
-def contract_offset_error():
-    response.status = 404
-    setup_routing(request.app, routes=["contracts"])
-
-def contracts_page_get():
-    with open(ROOT + 'contracts.json') as json:
-        contracts = load(json)
-    return dumps(contracts)
-
-def contract_create():
-    response.status = 201
-    return request.json
-
-def contract_page(contract_id):
-    contract = contract_partition(contract_id)
-    if not contract:
-        return location_error("contract")
-    return dumps(contract)
-
-def contract_patch(contract_id):
-    contract = contract_partition(contract_id)
-    if not contract:
-        return location_error("contract")
-    contract.update(request.json['data'])
-    return dumps({"data": contract})
 
 def contract_document_create(contract_id):
-    from openprocurement_client.tests.tests import TEST_CONTRACT_KEYS
     response.status = 201
-    document = contract_partition(contract_id, 'documents')[0]
+    document = resource_partition(contract_id,
+                                  resource_name='contract',
+                                  part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_CONTRACT_KEYS.new_document_id
     return dumps({"data": document})
 
-def contract_partition(contract_id, part="contract"):
-    try:
-        with open(ROOT + 'contract_' + contract_id + '.json') as json:
-            contract = load(json)
-            if part=="contract":
-                return contract
-            else:
-                return munchify(contract['data'][part])
-    except (KeyError, IOError):
-        return []
+
+def contract_change_patch(contract_id, change_id):
+    response.status = 200
+    change = resource_partition(change_id, resource_name='change')
+    change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
+    return dumps(change)
 
 #### Routes
 
+
 routes_dict = {
         "spore": (SPORE_PATH, 'HEAD', spore),
-        "offset_error": (TENDERS_PATH, 'GET', offset_error),
-        "tenders": (TENDERS_PATH, 'GET', tenders_page_get),
-        "tender_create": (TENDERS_PATH, 'POST', tender_create),
-        "tender": (TENDERS_PATH + "/<tender_id>", 'GET', tender_page),
-        "tender_patch": (TENDERS_PATH + "/<tender_id>", 'PATCH', tender_patch),
+        "offset_error": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', offset_error),
+        "tenders": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', resource_page_get),
+        "tender_create": (TENDERS_PATH, 'POST', resource_create),
+        "tender": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>', 'GET', resource_page),
+        "tender_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + "/<resource_id>", 'PATCH', resource_patch),
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
+        "tender_subpage_item_create": (TENDERS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
         "tender_award_documents": (TENDERS_PATH + "/<tender_id>/awards/<award_id>/documents", 'GET', tender_award_documents),
         "tender_qualification_documents": (TENDERS_PATH + "/<tender_id>/qualifications/<qualification_id>/documents", 'GET', tender_qualification_documents),
-        "tender_subpage_item_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'POST', tender_subpage_item_create),
         "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
         "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
         "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
-        "tender_subpage_item_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'PATCH', tender_subpage_item_patch),
+        "tender_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
         "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
-        "tender_patch_credentials": (TENDERS_PATH + "/<tender_id>/credentials", 'PATCH', tender_patch_credentials),
+        "tender_patch_credentials": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
         "redirect": ('/redirect/<filename:path>', 'GET', get_file),
         "download": ('/download/<filename:path>', 'GET', download_file),
-        "plans": (PLANS_PATH, 'GET', plans_page_get),
-        "plan_create": (PLANS_PATH, 'POST', plan_create),
-        "plan": (PLANS_PATH + "/<plan_id>", 'GET', plan_page),
-        "plan_patch": (PLANS_PATH + "/<plan_id>", 'PATCH', plan_patch),
-        "plan_offset_error": (PLANS_PATH, 'GET', plan_offset_error),
-        "contracts": (CONTRACTS_PATH, 'GET', contracts_page_get),
-        "contract_create": (CONTRACTS_PATH, 'POST', contract_create),
+        "plans": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', resource_page_get),
+        "plan_create": (PLANS_PATH, 'POST', resource_create),
+        "plan_patch": (API_PATH.format('<resource_name:resource_filter:plan>') + "/<resource_id>", 'PATCH', resource_patch),
+        "plan": (API_PATH.format('<resource_name:resource_filter:plan>') + '/<resource_id>', 'GET', resource_page),
+        "plan_offset_error": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', offset_error),
+        "contracts": (API_PATH.format('<resource_name:resource_filter:contract>'), 'GET', resource_page_get),
+        "contract_create": (CONTRACTS_PATH, 'POST', resource_create),
         "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
-        "contract": (CONTRACTS_PATH + "/<contract_id>", 'GET', contract_page),
-        "contract_offset_error": (CONTRACTS_PATH, 'GET', contract_offset_error)
+        "contract": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>', 'GET', resource_page),
+        "contract_subpage_item_create": (CONTRACTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
+        "contract_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+        "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
+        "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
+        "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
         }
 
 
@@ -346,6 +341,7 @@ def file_info(file_):
     file_.seek(0, 0)
 
     return file_info_dict
+
 
 def register_document_upload_inside():
     req_json = request.json

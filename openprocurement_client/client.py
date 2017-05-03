@@ -35,9 +35,10 @@ class TendersClient(APIBaseClient):
     ###########################################################################
 
     @retry(stop_max_attempt_number=5)
-    def get_tenders(self, params={}, feed='changes'):
-        params['feed'] = feed
-        self._update_params(params)
+    def get_tenders(self, params=None, feed='changes'):
+        _params = (params or {}).copy()
+        _params['feed'] = feed
+        self._update_params(_params)
         response = self.request('GET',
                                 self.prefix_path,
                                 params_dict=self.params)
@@ -156,11 +157,9 @@ class TendersClient(APIBaseClient):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
     def _get_tender_resource_item(self, tender, item_id, items_name,
-                                  access_token=''):
-        if access_token:
-            headers = {'X-Access-Token': access_token}
-        else:
-            headers = {'X-Access-Token': self._get_access_token(tender)}
+                                  access_token=None):
+        access_token = access_token or self._get_access_token(tender)
+        headers = {'X-Access-Token': access_token}
         return self._get_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path,
                                  tender.data.id,
@@ -179,10 +178,8 @@ class TendersClient(APIBaseClient):
     def get_lot(self, tender, lot_id):
         return self._get_tender_resource_item(tender, lot_id, 'lots')
 
-    def get_file(self, tender, url, access_token=None):
-        headers = {}
-        if access_token:
-            headers = {'X-Access-Token': access_token}
+    def get_file(self, url, access_token=None):
+        headers = {'X-Access-Token': access_token} if access_token else {}
 
         headers.update(self.headers)
         response_item = self.request('GET', url, headers=headers)
@@ -292,13 +289,6 @@ class TendersClient(APIBaseClient):
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
-    def patch_credentials(self, id, access_token):
-        return self._patch_resource_item(
-            '{}/{}/credentials'.format(self.prefix_path, id),
-            payload={},
-            headers={'X-Access-Token': access_token}
-        )
-
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
@@ -333,7 +323,7 @@ class TendersClient(APIBaseClient):
             ),
             file_=file_,
             headers={'X-Access-Token': self._get_access_token(tender)},
-            method='put',
+            method='PUT',
             use_ds_client=use_ds_client,
             doc_registration=doc_registration
         )
@@ -367,7 +357,7 @@ class TendersClient(APIBaseClient):
                 ),
                 file_=file_,
                 headers={'X-Access-Token': self._get_access_token(tender)},
-                method='put',
+                method='PUT',
                 use_ds_client=use_ds_client,
                 doc_registration=doc_registration
             )
@@ -437,10 +427,7 @@ class TendersClient(APIBaseClient):
 
     @verify_file
     def upload_contract_document(self, file_, tender, contract_id,
-                                 doc_type='documents', use_ds_client=True,
-                                 doc_registration=True):
-        # TODO: find out what actually depends on the doc_type parameter.
-        # TODO: is it necessary to pass it here?
+                                 use_ds_client=True, doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/contracts/{}/documents'.format(
                 self.prefix_path,
@@ -499,17 +486,20 @@ class Client(TendersClient):
 
 class TendersClientSync(TendersClient):
 
-    def sync_tenders(self, params={}, extra_headers={}):
-        params['feed'] = 'changes'
-        self.headers.update(extra_headers)
-        response = self.request('GET', self.prefix_path, params_dict=params)
+    def sync_tenders(self, params=None, extra_headers=None):
+        _params = (params or {}).copy()
+        _params['feed'] = 'changes'
+        self.headers.update(extra_headers or {})
+
+        response = self.request('GET', self.prefix_path,
+                                params_dict=_params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             return tender_list
 
     @retry(stop_max_attempt_number=5)
-    def get_tender(self, id, extra_headers={}):
-        self.headers.update(extra_headers)
+    def get_tender(self, id, extra_headers=None):
+        self.headers.update(extra_headers or {})
         return super(TendersClientSync, self).get_tender(id)
 
 

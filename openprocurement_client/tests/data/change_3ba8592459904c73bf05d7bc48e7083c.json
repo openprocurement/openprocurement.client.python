@@ -1,0 +1,13 @@
+{
+  "data": {
+      "status": "pending",
+      "rationaleTypes": [
+          "volumeCuts",
+          "priceReduction"
+      ],
+      "rationale_en": "Contract change cause",
+      "rationale": "Опис причини змін контракту",
+      "date": "2016-10-06T11:41:15.285638+03:00",
+      "id": "3ba8592459904c73bf05d7bc48e7083c"
+  }
+}

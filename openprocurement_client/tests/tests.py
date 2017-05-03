@@ -15,49 +15,12 @@ from openprocurement_client.document_service_client \
     import DocumentServiceClient
 from openprocurement_client.exceptions import InvalidResponse, ResourceNotFound
 from openprocurement_client.plan import PlansClient
+from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
+    TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
     HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
-    tender_partition
-
-
-TEST_TENDER_KEYS = munchify({
-    "tender_id": '823d50b3236247adad28a5a66f74db42',
-    "empty_tender": 'f3849ade33534174b8402579152a5f41',
-    "question_id": '615ff8be8eba4a81b300036d6bec991c',
-    "lot_id": '563ef5d999f34d36a5a0e4e4d91d7be1',
-    "bid_id": 'f7fc1212f9f140bba5c4e3cd4f2b62d9',
-    "bid_document_id":"ff001412c60c4164a0f57101e4eaf8aa",
-    "bid_qualification_document_id": "7519d21b32af432396acd6e2c9e18ee5",
-    "bid_financial_document_id": "7519d21b32af432396acd6e2c9e18ee5",
-    "bid_eligibility_document_id": "7519d21b32af432396acd6e2c9e18ee5",
-    "award_id": '7054491a5e514699a56e44d32e23edf7',
-    "qualification_id": "cec4b82d2708465291fb4af79f8a3e52",
-    "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
-    "new_document_id": 'jh8LjkJ477kJ6lovWER8HRT839jDs82h',
-    "error_id": '111a11a1111111aaa11111a1a1a111a1'
-})
-
-TEST_TENDER_KEYS_LIMITED = munchify({
-    "tender_id": '668c3156c8cb496fb28359909cde6e96',
-    "cancellation_id": "0dd6f9e8cc4f4d1c9c404d842b56d0d7",
-    "cancellation_document_id": "1afca9faaf2b4f9489ee264b136371c6",
-    "document_id": "330822cbbd724671a1d2ff7c3a51dd52",
-    "contract_id": "c65d3526cdc44f75b2457b4489970a7c",
-    "complaint_id": "22b086222a7a4bc6a9cc8adeaa91a57f",
-    "complaint_document_id": "129f4013b33a45b8bc70699a62a81499"
-})
-
-TEST_PLAN_KEYS = munchify({
-    "plan_id": '34cebf0e7b474753854b0ef155b4a0f1',
-    "error_id": 'xxx111'
-})
-
-TEST_CONTRACT_KEYS = munchify({
-    "contract_id": '3c0bf3eed3fc4b189103e62b828c599d',
-    "new_document_id": 'newid678123456781234567812345678',
-    "error_id": 'zzzxxx111'
-})
+    resource_partition, resource_filter
 
 
 def generate_file_obj(file_name, content):
@@ -72,6 +35,7 @@ class BaseTestClass(unittest.TestCase):
 
     def setting_up(self, client):
         self.app = Bottle()
+        self.app.router.add_filter('resource_filter', resource_filter)
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         try:
@@ -123,7 +87,7 @@ class ViewerTenderTestCase(BaseTestClass):
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
-        with open(ROOT + TEST_TENDER_KEYS.tender_id + '.json') as tender:
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
 
     def tearDown(self):
@@ -216,7 +180,7 @@ class ViewerPlanTestCase(BaseTestClass):
         self.assertEqual(plans, self.plans.data)
 
     def test_patch_plan(self):
-        setup_routing(self.app, routes=["plan_patch"])
+        setup_routing(self.app, routes=['plan_patch'])
         self.plan.data.description = 'test_patch_plan'
         patched_tender = self.client.patch_plan(self.plan)
         self.assertEqual(patched_tender.data.id, self.plan.data.id)
@@ -235,14 +199,14 @@ class TendersClientSyncTestCase(BaseTestClass):
 
         with open(ROOT + 'tenders.json') as tenders:
             self.tenders = munchify(load(tenders))
-        with open(ROOT + TEST_TENDER_KEYS.tender_id + '.json') as tender:
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
 
     def tearDown(self):
         self.server.stop()
 
     def test_sync_tenders(self):
-        setup_routing(self.app, routes=["tenders"])
+        setup_routing(self.app, routes=['tenders'])
         tenders = self.client.sync_tenders()
         self.assertIsInstance(tenders.data, Iterable)
         self.assertEqual(tenders.data, self.tenders.data)
@@ -251,18 +215,15 @@ class TendersClientSyncTestCase(BaseTestClass):
 class UserTestCase(BaseTestClass):
     """"""
     def setUp(self):
-        #self._testMethodName
         self.setting_up(client=TendersClient)
 
-        with open(ROOT + TEST_TENDER_KEYS.tender_id + '.json') as tender:
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.tender_id + '.json') as tender:
             self.tender = munchify(load(tender))
-            self.tender.update({'access':{"token": API_KEY}})
-        with open(ROOT + TEST_TENDER_KEYS.empty_tender + '.json') as tender:
+            self.tender.update({'access': {'token': TEST_TENDER_KEYS['token']}})
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS.empty_tender + '.json') as tender:
             self.empty_tender = munchify(load(tender))
-            self.empty_tender.update({'access':{"token": API_KEY}})
-        with open(ROOT + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
             self.limited_tender = munchify(load(tender))
-            self.limited_tender.update({'access':{"token": API_KEY}})
 
     def tearDown(self):
         self.server.stop()
@@ -283,12 +244,12 @@ class UserTestCase(BaseTestClass):
         self.assertEqual(self.client.get_documents(self.tender), documents)
 
     def test_get_awards_documents(self):
-        setup_routing(self.app, routs=["tender_award_documents"])
+        setup_routing(self.app, routes=["tender_award_documents"])
         documents = munchify({'data': self.tender['data']['awards'][0].get('documents', [])})
         self.assertEqual(self.client.get_awards_documents(self.tender, self.tender['data']['awards'][0]['id']), documents)
 
     def test_get_qualification_documents(self):
-        setup_routing(self.app, routs=["tender_qualification_documents"])
+        setup_routing(self.app, routes=["tender_qualification_documents"])
         documents = munchify({'data': self.tender['data']['qualifications'][0].get('documents', [])})
         self.assertEqual(self.client.get_qualification_documents(self.tender, self.tender['data']['qualifications'][0]['id']), documents)
 
@@ -308,8 +269,8 @@ class UserTestCase(BaseTestClass):
 
     def test_create_tender(self):
         setup_routing(self.app, routes=["tender_create"])
-        tender = munchify({'data': 'tender'})
-        self.client.create_tender(self.tender)
+        tender = self.client.create_tender(self.tender)
+        assert tender  # check that it is not None
 
     def test_create_question(self):
         setup_routing(self.app, routes=["tender_subpage_item_create"])
@@ -347,17 +308,20 @@ class UserTestCase(BaseTestClass):
 
     def test_get_question(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        questions = tender_partition(TEST_TENDER_KEYS.tender_id, part="questions")
+        questions = resource_partition(TEST_TENDER_KEYS.tender_id,
+                                       part="questions")
         for question in questions:
             if question['id'] == TEST_TENDER_KEYS.question_id:
                 question_ = munchify({"data": question})
                 break
-        question = self.client.get_question(self.tender, question_id=TEST_TENDER_KEYS.question_id)
+        question = self.client.get_question(
+            self.tender, question_id=TEST_TENDER_KEYS.question_id
+        )
         self.assertEqual(question, question_)
 
     def test_get_lot(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        lots = tender_partition(TEST_TENDER_KEYS.tender_id, part="lots")
+        lots = resource_partition(TEST_TENDER_KEYS.tender_id, part="lots")
         for lot in lots:
             if lot['id'] == TEST_TENDER_KEYS.lot_id:
                 lot_ = munchify({"data": lot})
@@ -367,13 +331,13 @@ class UserTestCase(BaseTestClass):
 
     def test_get_bid(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
-        bids = tender_partition(TEST_TENDER_KEYS.tender_id, part="bids")
+        bids = resource_partition(TEST_TENDER_KEYS.tender_id, part="bids")
         for bid in bids:
             if bid['id'] == TEST_TENDER_KEYS.bid_id:
                 bid_ = munchify({"data": bid})
                 break
         bid = self.client.get_bid(self.tender, bid_id=TEST_TENDER_KEYS.bid_id, access_token=API_KEY)
-        self.assertEqual(bid , bid_)
+        self.assertEqual(bid, bid_)
 
     def test_get_location_error(self):
         setup_routing(self.app, routes=["tender_subpage_item"])
@@ -494,6 +458,7 @@ class UserTestCase(BaseTestClass):
         patched_credentials = self.client.patch_credentials(self.tender.data.id, self.tender.access['token'])
         self.assertEqual(patched_credentials.data.id, self.tender.data.id)
         self.assertNotEqual(patched_credentials.access.token, self.tender.access['token'])
+        self.assertEqual(patched_credentials.access.token, TEST_TENDER_KEYS['new_token'])
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
@@ -505,7 +470,7 @@ class UserTestCase(BaseTestClass):
         with open(ROOT + file_name) as local_file:
             test_file_data = local_file.read()
         url = HOST_URL + '/redirect/' + file_name
-        doc = self.client.get_file(self.tender, url, API_KEY)
+        doc = self.client.get_file(url, API_KEY)
         self.assertEqual(test_file_data, doc[0])
         self.assertEqual(file_name, doc[1])
 
@@ -513,8 +478,7 @@ class UserTestCase(BaseTestClass):
         setup_routing(self.app, routes=["redirect", "download"])
         file_name = 'error.txt'
         url = HOST_URL + '/redirect/' + file_name
-        self.assertRaises(ResourceNotFound, self.client.get_file,
-                          self.tender, url, API_KEY)
+        self.assertRaises(ResourceNotFound, self.client.get_file, url, API_KEY)
 
     def test_get_file_no_token(self):
         setup_routing(self.app, routes=["redirect", "download"])
@@ -522,7 +486,7 @@ class UserTestCase(BaseTestClass):
         with open(ROOT + file_name) as local_file:
             test_file_data = local_file.read()
         url = HOST_URL + '/redirect/' + file_name
-        doc = self.client.get_file(self.tender, url)
+        doc = self.client.get_file(url)
         self.assertEqual(test_file_data, doc[0])
         self.assertEqual(file_name, doc[1])
 
@@ -732,13 +696,13 @@ class UserTestCase(BaseTestClass):
 
     def test_delete_bid(self):
         setup_routing(self.app, routes=["tender_subpage_item_delete"])
-        bid_id = tender_partition(TEST_TENDER_KEYS.tender_id, part="bids")[0]['id']
+        bid_id = resource_partition(TEST_TENDER_KEYS.tender_id, part="bids")[0]['id']
         deleted_bid = self.client.delete_bid(self.tender, bid_id, API_KEY)
         self.assertFalse(deleted_bid)
 
     def test_delete_lot(self):
         setup_routing(self.app, routes=["tender_subpage_item_delete"])
-        lot_id = tender_partition(TEST_TENDER_KEYS.tender_id, part="lots")[0]['id']
+        lot_id = resource_partition(TEST_TENDER_KEYS.tender_id, part="lots")[0]['id']
         deleted_lot = self.client.delete_lot(self.tender, lot_id)
         self.assertFalse(deleted_lot)
 
@@ -753,12 +717,21 @@ class UserTestCase(BaseTestClass):
 class ContractingUserTestCase(BaseTestClass):
     """"""
     def setUp(self):
-        #self._testMethodName
         self.setting_up(client=ContractingClient)
 
-        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id + '.json') as contract:
+        with open(ROOT + 'contract_' + TEST_CONTRACT_KEYS.contract_id +
+                  '.json') as contract:
             self.contract = munchify(load(contract))
-            self.contract.update({'access':{"token": API_KEY}})
+            self.contract.update(
+                {'access': {'token': TEST_CONTRACT_KEYS.contract_token}}
+            )
+
+        with open(ROOT + 'contracts.json') as contracts:
+            self.contracts = munchify(load(contracts))
+
+        with open(ROOT + 'change_' + TEST_CONTRACT_KEYS.change_id +
+                  '.json') as change:
+            self.change = munchify(load(change))
 
         with open(ROOT + 'contracts.json') as contracts:
             self.contracts = munchify(load(contracts))
@@ -773,27 +746,32 @@ class ContractingUserTestCase(BaseTestClass):
     def test_get_contract(self):
         setup_routing(self.app, routes=["contract"])
         contract = self.client.get_contract(self.contract.data['id'])
-        self.assertEqual(contract.data.id, self.contract.data.id)
-
-    ###########################################################################
-    #             GET ITEMS LIST TEST
-    ###########################################################################
+        self.assertEqual(contract, self.contract)
 
     def test_get_contracts(self):
         setup_routing(self.app, routes=["contracts"])
         contracts = self.client.get_contracts()
-        self.assertEqual(contracts[0], self.contracts.data[0])
-        self.assertEqual(len(contracts), len(self.contracts.data))
+        self.assertIsInstance(contracts, Iterable)
+        self.assertEqual(contracts, self.contracts.data)
 
+    def test_get_contract_location_error(self):
+        setup_routing(self.app, routes=["contract"])
+        contract = self.client.get_contract(TEST_CONTRACT_KEYS.error_id)
+        self.assertEqual(contract, munchify(loads(location_error('contract'))))
 
     ###########################################################################
     #             CREATE ITEM TEST
     ###########################################################################
 
     def test_create_contract(self):
-        setup_routing(self.app, routes=["contract_create"])
-        contract = munchify({'data': 'contract'})
-        self.client.create_contract(contract)
+        setup_routing(self.app, routes=['contract_create'])
+        contract = self.client.create_contract(self.contract)
+        self.assertEqual(contract, self.contract)
+
+    def test_create_change(self):
+        setup_routing(self.app, routes=['contract_subpage_item_create'])
+        change = self.client.create_change(self.contract, self.change)
+        self.assertEqual(change, self.change)
 
     ###########################################################################
     #             DOCUMENTS FILE TEST
@@ -806,6 +784,53 @@ class ContractingUserTestCase(BaseTestClass):
         doc = self.client.upload_document(file_, self.contract)
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_CONTRACT_KEYS.new_document_id)
+
+    ###########################################################################
+    #             PATCH ITEM TEST
+    ###########################################################################
+
+    def test_patch_document(self):
+        setup_routing(self.app, routes=['contract_subpage_item_patch'])
+        document = munchify({'data': {'id': TEST_CONTRACT_KEYS.document_id,
+                                      'title': 'test_patch_document.txt'}})
+        patched_document = self.client.patch_document(self.contract, document)
+        self.assertEqual(patched_document.data.id, document.data.id)
+        self.assertEqual(patched_document.data.title, document.data.title)
+
+    def test_patch_change(self):
+        setup_routing(self.app, routes=['contract_change_patch'])
+        patch_change_data = \
+            {'data': {'rationale':
+                          TEST_CONTRACT_KEYS['patch_change_rationale']}}
+        patched_change = self.change.copy()
+        patched_change['data'].update(patch_change_data['data'])
+        patched_change = munchify(patched_change)
+
+        response_change = self.client.patch_change(
+            self.contract, self.change.data.id,
+            data=patch_change_data
+        )
+
+        self.assertEqual(response_change, patched_change)
+
+    def test_retrieve_contract_credentials(self):
+        setup_routing(self.app, routes=['contract_patch_credentials'])
+        patched_credentials = self.client.patch_credentials(
+            self.contract.data.id, self.contract.access['token'])
+        self.assertEqual(patched_credentials.data.id, self.contract.data.id)
+        self.assertNotEqual(patched_credentials.access.token,
+                            self.contract.access['token'])
+        self.assertEqual(patched_credentials.access.token,
+                         TEST_CONTRACT_KEYS['new_token'])
+
+    ###########################################################################
+
+    def test_patch_contract(self):
+        setup_routing(self.app, routes=["contract_patch"])
+        self.contract.data.description = 'test_patch_contract'
+        patched_contract = self.client.patch_contract(self.contract)
+        self.assertEqual(patched_contract.data.id, self.contract.data.id)
+        self.assertEqual(patched_contract.data.description, self.contract.data.description)
 
 
 def suite():

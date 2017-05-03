@@ -348,4 +348,4 @@ def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
 
 if __name__ == '__main__':
     for tender_item in get_tenders():
-        print 'Tender {0[id]}'.format(tender_item)
+        print('Tender {0[id]}'.format(tender_item))
