@@ -53,7 +53,7 @@ class ContractingClient(APIBaseClient):
     def retrieve_contract_credentials(self, contract):
         return self._patch_resource_item(
             '{}/{}/credentials'.format(self.prefix_path, contract.data.id),
-            payload={},
+            payload=None,
             headers={'X-Access-Token': self._get_access_token(contract)}
         )
 

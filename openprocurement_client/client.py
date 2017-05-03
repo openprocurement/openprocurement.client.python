@@ -36,9 +36,10 @@ class TendersClient(APIBaseClient):
     ###########################################################################
 
     @retry(stop_max_attempt_number=5)
-    def get_tenders(self, params={}, feed='changes'):
-        params['feed'] = feed
-        self._update_params(params)
+    def get_tenders(self, params=None, feed='changes'):
+        _params = (params or {}).copy()
+        _params['feed'] = feed
+        self._update_params(_params)
         response = self.request('GET',
                                 self.prefix_path,
                                 params_dict=self.params)
@@ -464,16 +465,19 @@ class Client(TendersClient):
 
 class TendersClientSync(TendersClient):
 
-    def sync_tenders(self, params={}, extra_headers={}):
-        params['feed'] = 'changes'
-        self.headers.update(extra_headers)
+    def sync_tenders(self, params=None, extra_headers=None):
+        _params = (params or {}).copy()
+        _params['feed'] = 'changes'
+        self._update_params(_params)
+        self.headers.update(extra_headers or {})
 
-        response = self.request('GET', self.prefix_path, params_dict=params)
+        response = self.request('GET', self.prefix_path,
+                                params_dict=self.params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             return tender_list
 
     @retry(stop_max_attempt_number=5)
-    def get_tender(self, id, extra_headers={}):
-        self.headers.update(extra_headers)
+    def get_tender(self, id, extra_headers=None):
+        self.headers.update(extra_headers or {})
         return super(TendersClientSync, self).get_tender(id)

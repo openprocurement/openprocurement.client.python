@@ -29,9 +29,10 @@ class PlansClient(APIBaseClient):
     ###########################################################################
 
     @retry(stop_max_attempt_number=5)
-    def get_plans(self, params={}, feed='changes'):
-        params['feed'] = feed
-        self._update_params(params)
+    def get_plans(self, params=None, feed='changes'):
+        _params = (params or {}).copy()
+        _params['feed'] = feed
+        self._update_params(_params)
         response = self.request('GET',
             self.prefix_path,
             params_dict=self.params)

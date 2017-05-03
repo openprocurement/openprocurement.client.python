@@ -139,7 +139,7 @@ class APIBaseClient(APITemplateClient):
         _headers.update(headers or {})
 
         response_item = self.request(
-            method, url, headers=headers, json=payload
+            method, url, headers=_headers, json=payload
         )
         if (response_item.status_code == 201 and method == 'POST') \
                 or (response_item.status_code in (200, 204)
@@ -246,6 +246,6 @@ class APIBaseClient(APITemplateClient):
     def patch_credentials(self, id, access_token):
         return self._patch_resource_item(
             '{}/{}/credentials'.format(self.prefix_path, id),
-            payload={},
+            payload=None,
             headers={'X-Access-Token': access_token}
         )
