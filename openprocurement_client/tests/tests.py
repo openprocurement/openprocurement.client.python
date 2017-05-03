@@ -746,18 +746,18 @@ class ContractingUserTestCase(BaseTestClass):
     def test_get_contract(self):
         setup_routing(self.app, routes=["contract"])
         contract = self.client.get_contract(self.contract.data['id'])
-        self.assertEqual(contract.data.id, self.contract.data.id)
-
-    ###########################################################################
-    #             GET ITEMS LIST TEST
-    ###########################################################################
+        self.assertEqual(contract, self.contract)
 
     def test_get_contracts(self):
         setup_routing(self.app, routes=["contracts"])
         contracts = self.client.get_contracts()
-        self.assertEqual(contracts[0], self.contracts.data[0])
-        self.assertEqual(len(contracts), len(self.contracts.data))
+        self.assertIsInstance(contracts, Iterable)
+        self.assertEqual(contracts, self.contracts.data)
 
+    def test_get_contract_location_error(self):
+        setup_routing(self.app, routes=["contract"])
+        contract = self.client.get_contract(TEST_CONTRACT_KEYS.error_id)
+        self.assertEqual(contract, munchify(loads(location_error('contract'))))
 
     ###########################################################################
     #             CREATE ITEM TEST
@@ -813,7 +813,7 @@ class ContractingUserTestCase(BaseTestClass):
 
         self.assertEqual(response_change, patched_change)
 
-    def test_get_contract_credentials(self):
+    def test_retrieve_contract_credentials(self):
         setup_routing(self.app, routes=['contract_patch_credentials'])
         patched_credentials = self.client.patch_credentials(
             self.contract.data.id, self.contract.access['token'])
@@ -825,28 +825,13 @@ class ContractingUserTestCase(BaseTestClass):
 
     ###########################################################################
 
-    def test_get_contracts(self):
-        setup_routing(self.app, routes=["contracts"])
-        contracts = self.client.get_contracts()
-        self.assertIsInstance(contracts, Iterable)
-        self.assertEqual(contracts, self.contracts.data)
-
-    def test_get_contract(self):
-        setup_routing(self.app, routes=["contract"])
-        contract = self.client.get_contract(TEST_CONTRACT_KEYS.contract_id)
-        self.assertEqual(contract, self.contract)
-
-    def test_get_contract_location_error(self):
-        setup_routing(self.app, routes=["contract"])
-        contract = self.client.get_contract(TEST_CONTRACT_KEYS.error_id)
-        self.assertEqual(contract, munchify(loads(location_error('contract'))))
-
     def test_patch_contract(self):
         setup_routing(self.app, routes=["contract_patch"])
         self.contract.data.description = 'test_patch_contract'
         patched_contract = self.client.patch_contract(self.contract)
         self.assertEqual(patched_contract.data.id, self.contract.data.id)
         self.assertEqual(patched_contract.data.description, self.contract.data.description)
+
 
 def suite():
     suite = unittest.TestSuite()
