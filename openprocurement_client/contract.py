@@ -22,14 +22,15 @@ class ContractingClient(APIBaseClient):
     def get_contract(self, id):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
 
-    def get_contracts(self, params={}, feed='changes'):
-        params['feed'] = feed
-        self._update_params(params)
+    def get_contracts(self, params=None, feed='changes'):
+        _params = (params or {}).copy()
+        _params['feed'] = feed
+        self._update_params(_params)
         try:
             response = self.request('GET', self.prefix_path,
                                     params_dict=self.params)
         except ResourceNotFound as e:
-            self.params.pop('offset', 'None')
+            self.params.pop('offset', None)
             raise e
         if response.status_code == 200:
             contracts = munchify(loads(response.text))
@@ -49,7 +50,7 @@ class ContractingClient(APIBaseClient):
         return self._create_contract_resource_item(contract, change_data,
                                                    'changes')
 
-    def get_contract_credentials(self, contract):
+    def retrieve_contract_credentials(self, contract):
         return self._patch_resource_item(
             '{}/{}/credentials'.format(self.prefix_path, contract.data.id),
             payload={},
