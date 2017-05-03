@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from openprocurement_client.exceptions import IdNotFound
-from openprocurement_client.contract import ContractingClient
 from time import sleep
 import logging
 logger = logging.getLogger()

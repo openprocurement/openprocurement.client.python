@@ -34,8 +34,7 @@ class BaseTestClass(unittest.TestCase):
 
     def setting_up(self, client):
         self.app = Bottle()
-        self.app.router.add_filter('resource_filter',
-                                   resource_filter)
+        self.app.router.add_filter('resource_filter', resource_filter)
         setup_routing(self.app)
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         try:

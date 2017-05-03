@@ -4,8 +4,7 @@ from simplejson import dumps, load
 from openprocurement_client.document_service_client \
     import DocumentServiceClient
 from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
-    TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
-from uuid import uuid4
+    TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
 import magic
 import os
 
@@ -110,13 +109,16 @@ def tender_subpage(tender_id, subpage_name):
     subpage = resource_partition(tender_id, part=subpage_name)
     return dumps({"data": subpage})
 
+
 def tender_subpage_item_create(tender_id, subpage_name):
     response.status = 201
     return request.json
 
+
 def resource_subpage_item_create(resource_id, subpage_name):
     response.status = 201
     return request.json
+
 
 def tender_subpage_item(tender_id, subpage_name, subpage_id):
     subpage = resource_partition(tender_id, part=subpage_name)
@@ -125,6 +127,7 @@ def tender_subpage_item(tender_id, subpage_name, subpage_id):
             return dumps({'data': unit})
     return location_error(subpage_name)
 
+
 def object_subpage_item_patch(obj_id, subpage_name, subpage_id, resource_name):
     subpage = resource_partition(obj_id, resource_name, subpage_name)
     for unit in subpage:
@@ -132,6 +135,7 @@ def object_subpage_item_patch(obj_id, subpage_name, subpage_id, resource_name):
             unit.update(request.json['data'])
             return dumps({'data': unit})
     return location_error(subpage_name)
+
 
 def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
     subpage = resource_partition(tender_id, part=subpage_name)
@@ -143,11 +147,9 @@ def tender_subpage_item_delete(tender_id, subpage_name, subpage_id):
 
 
 def patch_credentials(resource_name, resource_id):
-    resource = resource_partition(resource_id,
-                                                 resource_name)
+    resource = resource_partition(resource_id, resource_name)
     if not resource:
-        return location_error(
-            RESOURCE_DICT[resource_name]['sublink'])
+        return location_error(RESOURCE_DICT[resource_name]['sublink'])
     resource['access'] = \
         {'token': RESOURCE_DICT[resource_name]['data']['new_token']}
     return resource
@@ -155,12 +157,14 @@ def patch_credentials(resource_name, resource_id):
 ### Document and file operations
 #
 
+
 def tender_document_create(tender_id):
     response.status = 201
     document = resource_partition(tender_id, part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_TENDER_KEYS.new_document_id
     return dumps({"data": document})
+
 
 def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document_type):
     response.status = 201
@@ -174,6 +178,7 @@ def tender_subpage_document_create(tender_id, subpage_name, subpage_id, document
             document.id = TEST_TENDER_KEYS.new_document_id
             return dumps({"data": document})
     return location_error(subpage_name)
+
 
 def tender_subpage_document_update(tender_id, subpage_name, subpage_id, document_type, document_id):
     response.status = 200
@@ -202,6 +207,7 @@ def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_
                     return dumps({"data": document})
     return location_error(subpage_name)
 
+
 def get_file(filename):
     redirect("/download/" + filename, code=302)
 
@@ -223,6 +229,7 @@ def resource_partition(resource_id, resource_name='tender', part='all'):
     except (KeyError, IOError):
         return []
 
+
 def location_error(name):
     return dumps({"status": "error", "errors": [{"location": "url", "name": name + '_id', "description": "Not Found"}]})
 
@@ -236,6 +243,7 @@ def plan_patch(plan_id):
         return location_error("plan")
     plan.update(request.json['data'])
     return dumps({"data": plan})
+
 
 def plan_partition(plan_id, part="plan"):
     try:
@@ -255,8 +263,8 @@ def plan_partition(plan_id, part="plan"):
 def contract_document_create(contract_id):
     response.status = 201
     document = resource_partition(contract_id,
-                                            resource_name='contract',
-                                            part='documents')[0]
+                                  resource_name='contract',
+                                  part='documents')[0]
     document.title = get_doc_title_from_request(request)
     document.id = TEST_CONTRACT_KEYS.new_document_id
     return dumps({"data": document})
@@ -264,8 +272,7 @@ def contract_document_create(contract_id):
 
 def contract_change_patch(contract_id, change_id):
     response.status = 200
-    change = resource_partition(change_id,
-                                          resource_name='change')
+    change = resource_partition(change_id, resource_name='change')
     change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
     return dumps(change)
 
@@ -306,7 +313,6 @@ routes_dict = {
         "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
         }
 
-# tender_subpage_item_patch
 
 def file_info(file_):
     file_info_dict = {}
@@ -316,6 +322,7 @@ def file_info(file_):
     file_.seek(0, 0)
 
     return file_info_dict
+
 
 def register_document_upload_inside():
     req_json = request.json
