@@ -14,10 +14,10 @@ TEST_TENDER_KEYS = munchify({
     "award_id": '7054491a5e514699a56e44d32e23edf7',
     "qualification_id": "cec4b82d2708465291fb4af79f8a3e52",
     "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
-    "new_document_id": 'jh8LjkJ477kJ6lovWER8HRT839jDs82h',
+    "new_document_id": '7206763e862c4689a51dfcf821771c61',
     "error_id": '111a11a1111111aaa11111a1a1a111a1',
-    "token": 'tender0token1234123412341234',  # uuid4().hex
-    "new_token": 'new0tender0token123412341234'
+    "token": 'f6247c315d2744f1aa18c7c3de523bc3',
+    "new_token": '4fa3e89efbaa46f0a1b86b911bec76e7'
 })
 
 TEST_TENDER_KEYS_LIMITED = munchify({
