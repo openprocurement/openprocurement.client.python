@@ -107,7 +107,23 @@ def resource_patch(resource_name, resource_id):
 
 def tender_subpage(tender_id, subpage_name):
     subpage = resource_partition(tender_id, part=subpage_name)
-    return dumps({"data": subpage})
+    return dumps({'data': subpage})
+
+
+def tender_award_documents(tender_id, award_id):
+    tender = resource_partition(tender_id)
+    for award in tender['data']['awards']:
+        if award['id'] == award_id:
+            return dumps({'data': award['documents']})
+    return location_error(award_id)
+
+
+def tender_qualification_documents(tender_id, qualification_id):
+    tender = resource_partition(tender_id)
+    for qualification in tender['data']['qualifications']:
+        if qualification['id'] == qualification_id:
+            return dumps({'data': qualification['documents']})
+    return location_error(qualification_id)
 
 
 def tender_subpage_item_create(tender_id, subpage_name):
@@ -289,6 +305,8 @@ routes_dict = {
         "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
         "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
         "tender_subpage_item_create": (TENDERS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
+        "tender_award_documents": (TENDERS_PATH + "/<tender_id>/awards/<award_id>/documents", 'GET', tender_award_documents),
+        "tender_qualification_documents": (TENDERS_PATH + "/<tender_id>/qualifications/<qualification_id>/documents", 'GET', tender_qualification_documents),
         "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
         "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
         "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
@@ -300,6 +318,7 @@ routes_dict = {
         "download": ('/download/<filename:path>', 'GET', download_file),
         "plans": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', resource_page_get),
         "plan_create": (PLANS_PATH, 'POST', resource_create),
+        "plan_patch": (API_PATH.format('<resource_name:resource_filter:plan>') + "/<resource_id>", 'PATCH', resource_patch),
         "plan": (API_PATH.format('<resource_name:resource_filter:plan>') + '/<resource_id>', 'GET', resource_page),
         "plan_offset_error": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', offset_error),
         "contracts": (API_PATH.format('<resource_name:resource_filter:contract>'), 'GET', resource_page_get),
