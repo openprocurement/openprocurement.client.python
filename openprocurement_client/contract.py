@@ -50,11 +50,13 @@ class ContractingClient(APIBaseClient):
         return self._create_contract_resource_item(contract_id, access_token, change_data,
                                                     "changes")
 
-    def retrieve_contract_credentials(self, contract):
+    def retrieve_contract_credentials(self, contract_id, access_token):
+        # In order to get rights for future contract editing, tender token is passed as access token here.
+        # Response will contain the new access token for further contract modification.
         return self._patch_resource_item(
-            '{}/{}/credentials'.format(self.prefix_path, contract.data.id),
+            '{}/{}/credentials'.format(self.prefix_path, contract_id),
             payload=None,
-            headers={'X-Access-Token': self._get_access_token(contract)}
+            headers={'X-Access-Token': access_token}
         )
 
     def patch_contract(self, contract_id, access_token, data):
