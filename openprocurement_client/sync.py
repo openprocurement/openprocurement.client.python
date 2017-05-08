@@ -310,7 +310,7 @@ class ResourceFeeder(object):
         logger.debug('{}: SERVER_ID {}'.format(
             name, client.session.cookies.get('SERVER_ID', '')
         ))
-        logger.debug('{}: limit {}'.format(name, params['limit']))
+        logger.debug('{}: limit {}'.format(name, params.get('limit', '')))
 
 
 def get_resource_items(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
