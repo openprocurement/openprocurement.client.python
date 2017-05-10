@@ -119,6 +119,10 @@ class IdNotFound(ResourceError):
     pass
 
 
+class NotAFunction(TypeError):
+    pass
+
+
 http_exceptions_dict = {
     405: MethodNotAllowed,
     409: Conflict,
