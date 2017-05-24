@@ -164,8 +164,6 @@ class ResourceFeederTestCase(unittest.TestCase):
             'queue_size': 101
         })
         self.assertIsInstance(self.resource_feeder.queue, Queue)
-        self.assertEqual(self.resource_feeder.forward_info, {})
-        self.assertEqual(self.resource_feeder.backward_info, {})
 
     def test_init_api_clients(self):
         self.resource_feeder = ResourceFeeder()
@@ -181,8 +179,6 @@ class ResourceFeederTestCase(unittest.TestCase):
             'opt_fields': 'status',
             'mode': '_all_'
         })
-        self.assertEqual(self.resource_feeder.forward_info, {'status': 1})
-        self.assertEqual(self.resource_feeder.backward_info, {'status': 1})
         self.assertEqual(self.resource_feeder.forward_client.session.cookies,
                          self.resource_feeder.backward_client.session.cookies)
 
@@ -297,8 +293,6 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.resource_feeder.cookies = self.resource_feeder.backward_client.session.cookies
         self.resource_feeder.retriever_backward()
         self.assertEqual(self.resource_feeder.backward_params['offset'], self.response.next_page.offset)
-        self.assertEqual(self.resource_feeder.backward_info['resource_item_count'], 0)
-        self.assertEqual(self.resource_feeder.backward_info['status'], 0)
 
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_backward_wrong_cookies(self, mock_get_response):
@@ -342,8 +336,6 @@ class ResourceFeederTestCase(unittest.TestCase):
             self.resource_feeder.retriever_forward()
         self.assertEqual(e.exception.message, 'connection error')
         self.assertEqual(self.resource_feeder.forward_params['offset'], self.response.next_page.offset)
-        self.assertEqual(self.resource_feeder.forward_info['resource_item_count'], 3)
-        self.assertEqual(self.resource_feeder.forward_info['status'], 3)
 
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward_no_data(self, mock_get_response):
@@ -360,8 +352,6 @@ class ResourceFeederTestCase(unittest.TestCase):
             self.resource_feeder.retriever_forward()
         self.assertEqual(e.exception.message, 'connection error')
         self.assertEqual(self.resource_feeder.forward_params['offset'], 'next_page')
-        self.assertEqual(self.resource_feeder.forward_info['resource_item_count'], 0)
-        self.assertEqual(self.resource_feeder.forward_info['status'], 3)
 
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward_adaptive(self, mock_get_response):
@@ -380,8 +370,6 @@ class ResourceFeederTestCase(unittest.TestCase):
             self.resource_feeder.retriever_forward()
         self.assertEqual(e.exception.message, 'connection error')
         self.assertEqual(self.resource_feeder.forward_params['offset'], self.response.next_page.offset)
-        self.assertEqual(self.resource_feeder.forward_info['resource_item_count'], 3)
-        self.assertEqual(self.resource_feeder.forward_info['status'], 3)
 
     @mock.patch('openprocurement_client.sync.get_response')
     def test_retriever_forward_no_data_adaptive(self, mock_get_response):
@@ -408,8 +396,6 @@ class ResourceFeederTestCase(unittest.TestCase):
             self.resource_feeder.retriever_forward()
         self.assertEqual(e.exception.message, 'connection error')
         self.assertEqual(self.resource_feeder.forward_params['offset'], 'next_page')
-        self.assertEqual(self.resource_feeder.forward_info['resource_item_count'], 0)
-        self.assertEqual(self.resource_feeder.forward_info['status'], 3)
 
     @mock.patch('openprocurement_client.sync.ResourceFeeder.get_resource_items')
     def test_get_resource_items(self, mock_get_resource_items):

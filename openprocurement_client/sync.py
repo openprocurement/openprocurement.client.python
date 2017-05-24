@@ -3,7 +3,7 @@ monkey.patch_all()
 
 import logging
 from .client import TendersClientSync
-from datetime import datetime
+from time import time
 from gevent import spawn, sleep, idle
 from gevent.queue import Queue, Empty
 from requests.exceptions import ConnectionError
@@ -12,14 +12,6 @@ from openprocurement_client.exceptions import (
     PreconditionFailed,
     ResourceNotFound
 )
-
-# Statuses
-FINISHED = 0
-INITIALIZED = 1
-SLEEP = 2
-PROCESS_REQUEST = 3
-PROCESS_DATA = 4
-BROKEN = 5
 
 DEFAULT_RETRIEVERS_PARAMS = {
     'down_requests_sleep': 5,
@@ -43,42 +35,56 @@ def get_response(client, params):
     sleep_interval = 0.2
     while response_fail:
         try:
+            start = time()
             response = client.sync_tenders(params)
+            end = time() - start
+            logger.debug(
+                'Request duration {} sec'.format(end),
+                extra={'FEEDER_REQUEST_DURATION': end * 1000})
             response_fail = False
         except PreconditionFailed as e:
-            logger.error('PreconditionFailed: {}'.format(e.message))
+            logger.error('PreconditionFailed: {}'.format(e.message),
+                         extra={'MESSAGE_ID': 'precondition_failed'})
             continue
         except ConnectionError as e:
-            logger.error('ConnectionError: {}'.format(e.message))
+            logger.error('ConnectionError: {}'.format(e.message),
+                         extra={'MESSAGE_ID': 'connection_error'})
             if sleep_interval > 300:
                 raise e
             sleep_interval = sleep_interval * 2
-            logger.debug('Client sleeping after ConnectionError {} sec.'.format(sleep_interval))
+            logger.debug(
+                'Client sleeping after ConnectionError {} sec.'.format(
+                    sleep_interval))
             sleep(sleep_interval)
             continue
         except RequestFailed as e:
             logger.error('Request failed. Status code: {}'.format(
-                e.status_code))
+                e.status_code), extra={'MESSAGE_ID': 'request_failed'})
             if e.status_code == 429:
                 if sleep_interval > 120:
                     raise e
-                logger.debug('Client sleeping after RequestFailed {} sec.'.format(sleep_interval))
+                logger.debug(
+                    'Client sleeping after RequestFailed {} sec.'.format(
+                        sleep_interval))
                 sleep_interval = sleep_interval * 2
                 sleep(sleep_interval)
                 continue
         except ResourceNotFound as e:
-            logger.error('Resource not found: {}'.format(e.message))
+            logger.error('Resource not found: {}'.format(e.message),
+                         extra={'MESSAGE_ID': 'resource_not_found'})
             logger.debug('Clear offset and client cookies.')
             client.session.cookies.clear()
             del params['offset']
             continue
         except Exception as e:
-            logger.error('Exception: {}'.format(e.message))
+            logger.error('Exception: {}'.format(e.message),
+                         extra={'MESSAGE_ID': 'exceptions'})
             if sleep_interval > 300:
                 raise e
             sleep_interval = sleep_interval * 2
-            logger.debug('Client sleeping after Exception: {}, {} sec.'.format(e.message,
-                                                                               sleep_interval))
+            logger.debug(
+                'Client sleeping after Exception: {}, {} sec.'.format(
+                    e.message, sleep_interval))
             sleep(sleep_interval)
             continue
     return response
@@ -88,7 +94,8 @@ class ResourceFeeder(object):
     idle = idle
 
     def __init__(self, host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
-                 key=DEFAULT_API_KEY, resource='tenders', extra_params=DEFAULT_API_EXTRA_PARAMS,
+                 key=DEFAULT_API_KEY, resource='tenders',
+                 extra_params=DEFAULT_API_EXTRA_PARAMS,
                  retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False):
         super(ResourceFeeder, self).__init__()
         self.host = host
@@ -100,21 +107,20 @@ class ResourceFeeder(object):
         self.extra_params = extra_params
         self.retrievers_params = retrievers_params
         self.queue = Queue(maxsize=retrievers_params['queue_size'])
-        self.forward_info = {}
-        self.backward_info = {}
 
     def init_api_clients(self):
         self.backward_params = {'descending': True, 'feed': 'changes'}
         self.backward_params.update(self.extra_params)
         self.forward_params = {'feed': 'changes'}
         self.forward_params.update(self.extra_params)
-        self.forward_client = TendersClientSync(self.key, resource=self.resource,
-                                                host_url=self.host, api_version=self.version)
-        self.forward_info['status'] = INITIALIZED
-        self.backward_client = TendersClientSync(self.key, resource=self.resource,
-                                                 host_url=self.host, api_version=self.version)
-        self.backward_info['status'] = INITIALIZED
-        self.cookies = self.forward_client.session.cookies = self.backward_client.session.cookies
+        self.forward_client = TendersClientSync(
+            self.key, resource=self.resource, host_url=self.host,
+            api_version=self.version)
+        self.backward_client = TendersClientSync(
+            self.key, resource=self.resource, host_url=self.host,
+            api_version=self.version)
+        self.cookies = self.forward_client.session.cookies =\
+            self.backward_client.session.cookies
 
     def handle_response_data(self, data):
         for tender in data:
@@ -210,6 +216,9 @@ class ResourceFeeder(object):
             if self.forward_worker.ready():
                 self.restart_sync()
                 check_down_worker = True
+            logger.debug('Feeder queue size {} items'.format(
+                self.queue.qsize()),
+                extra={'FEEDER_QUEUE_SIZE': self.queue.qsize()})
             sleep(2)
 
     def run_feeder(self):
@@ -218,76 +227,70 @@ class ResourceFeeder(object):
 
     def retriever_backward(self):
         logger.info('Backward: Start worker')
-        logger.debug('Backward: Start process request.')
-        self.backward_info['status'] = PROCESS_REQUEST
         response = get_response(self.backward_client, self.backward_params)
-        self.backward_info['last_response'] = datetime.now()
-        self.backward_info['resource_item_count'] = len(response.data)
+        logger.debug('Backward response length {} items'.format(
+            len(response.data)),
+            extra={'BACKWARD_RESPONSE_LENGTH': len(response.data)})
         if self.cookies != self.backward_client.session.cookies:
             raise Exception('LB Server mismatch')
         while response.data:
-            self.backward_info['status'] = PROCESS_DATA
             logger.debug('Backward: Start process data.')
             self.handle_response_data(response.data)
             self.backward_params['offset'] = response.next_page.offset
-            self.log_retriever_state('Backward', self.backward_client, self.backward_params)
-            self.backward_info['status'] = PROCESS_REQUEST
+            self.log_retriever_state(
+                'Backward', self.backward_client, self.backward_params)
             logger.debug('Backward: Start process request.')
             response = get_response(self.backward_client, self.backward_params)
-            self.backward_info['last_response'] = datetime.now()
-            self.backward_info['resource_item_count'] = len(response.data)
+            logger.debug('Backward response length {} items'.format(
+                len(response.data)),
+                extra={'BACKWARD_RESPONSE_LENGTH': len(response.data)})
             if self.cookies != self.backward_client.session.cookies:
                 raise Exception('LB Server mismatch')
             logger.info('Backward: pause between requests {} sec.'.format(
-                self.retrievers_params.get('down_requests_sleep', 5)
-            ))
-            self.backward_info['status'] = SLEEP
+                self.retrievers_params.get('down_requests_sleep', 5)))
             sleep(self.retrievers_params.get('down_requests_sleep', 5))
         logger.info('Backward: finished')
-        self.backward_info['status'] = FINISHED
         return 0
 
     def retriever_forward(self):
         logger.info('Forward: Start worker')
-        logger.debug('Forward: Start process request.')
-        self.forward_info['status'] = PROCESS_REQUEST
         response = get_response(self.forward_client, self.forward_params)
-        self.forward_info['last_response'] = datetime.now()
-        self.forward_info['resource_item_count'] = len(response.data)
+        logger.debug('Forward response length {} items'.format(
+            len(response.data)),
+            extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
         if self.cookies != self.forward_client.session.cookies:
             raise Exception('LB Server mismatch')
         while 1:
             while response.data:
-                self.forward_info['status'] = PROCESS_DATA
-                logger.debug('Forward: Start process data.')
                 self.handle_response_data(response.data)
                 self.forward_params['offset'] = response.next_page.offset
-                self.log_retriever_state('Forward', self.forward_client, self.forward_params)
-                logger.debug('Forward: Start process request.')
-                self.forward_info['status'] = PROCESS_REQUEST
-                response = get_response(self.forward_client, self.forward_params)
-                self.forward_info['last_response'] = datetime.now()
-                self.forward_info['resource_item_count'] = len(response.data)
+                self.log_retriever_state(
+                    'Forward', self.forward_client, self.forward_params)
+                response = get_response(self.forward_client,
+                                        self.forward_params)
+                logger.debug('Forward response length {} items'.format(
+                    len(response.data)),
+                    extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
                 if self.cookies != self.forward_client.session.cookies:
                     raise Exception('LB Server mismatch')
                 if len(response.data) != 0:
-                    logger.info('Forward: pause between requests {} sec.'.format(
-                        self.retrievers_params.get('up_requests_sleep', 1.0)
-                    ))
-                    self.forward_info['status'] = SLEEP
-                    sleep(self.retrievers_params.get('up_requests_sleep', 1.0))
-            self.forward_info['status'] = SLEEP
+                    logger.info(
+                        'Forward: pause between requests {} sec.'.format(
+                            self.retrievers_params.get('up_requests_sleep',
+                                                       5.0)))
+                    sleep(self.retrievers_params.get('up_requests_sleep', 5.0))
             logger.info('Forward: pause after empty response {} sec.'.format(
-                self.retrievers_params.get('up_wait_sleep', 30.0)
-            ))
+                self.retrievers_params.get('up_wait_sleep', 30.0)),
+                extra={'FORWARD_WAIT_SLEEP':
+                       self.retrievers_params.get('up_wait_sleep', 30.0)})
             sleep(self.retrievers_params.get('up_wait_sleep', 30.0))
             self.forward_params['offset'] = response.next_page.offset
-            self.log_retriever_state('Forward', self.forward_client, self.forward_params)
-            logger.debug('Forward: Start process request.')
-            self.forward_info['status'] = PROCESS_REQUEST
+            self.log_retriever_state(
+                'Forward', self.forward_client, self.forward_params)
             response = get_response(self.forward_client, self.forward_params)
-            self.forward_info['last_response'] = datetime.now()
-            self.forward_info['resource_item_count'] = len(response.data)
+            logger.debug('Forward response length {} items'.format(
+                len(response.data)),
+                extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
             if self.adaptive:
                 if len(response.data) != 0:
                     if (self.retrievers_params['up_wait_sleep'] >
@@ -302,7 +305,7 @@ class ResourceFeeder(object):
         return 1
 
     def log_retriever_state(self, name, client, params):
-        logger.debug('{}: offset {}'.format(name, params['offset']))
+        logger.debug('{}: offset {}'.format(name, params.get('offset', '')))
         logger.debug('{}: AWSELB {}'.format(
             name,
             client.session.cookies.get('AWSELB', ' ')
@@ -314,8 +317,10 @@ class ResourceFeeder(object):
 
 
 def get_resource_items(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
-                       key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
-                       retrievers_params=DEFAULT_RETRIEVERS_PARAMS, resource='tenders'):
+                       key=DEFAULT_API_KEY,
+                       extra_params=DEFAULT_API_EXTRA_PARAMS,
+                       retrievers_params=DEFAULT_RETRIEVERS_PARAMS,
+                       resource='tenders'):
     """
     Prepare iterator for retrieving from Openprocurement API.
 
