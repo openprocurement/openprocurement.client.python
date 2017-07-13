@@ -192,6 +192,20 @@ class TendersClient(APIBaseClient):
                 .split("; filename=")[1].strip('"')
         raise InvalidResponse(response_item)
 
+    def get_file_properties(self, url, file_hash, access_token=None):
+        headers = {'X-Access-Token': access_token} if access_token else {}
+        headers.update(self.headers)
+        response_item = self.request('GET', url, headers=headers)
+        if response_item.status_code == 200:
+            file_properties={
+                'Content_Disposition': response_item.headers['Content-Disposition'],
+                'Content_Type': response_item.headers['Content-Type'],
+                'url': url,
+                'hash': file_hash
+            }
+            return file_properties
+        raise InvalidResponse(response_item)
+
     def extract_credentials(self, id):
         return self._get_resource_item(
             '{}/{}/extract_credentials'.format(self.prefix_path, id)
