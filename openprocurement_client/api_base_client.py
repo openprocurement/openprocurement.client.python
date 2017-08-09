@@ -150,6 +150,13 @@ class APIBaseClient(APITemplateClient):
         _headers = self.headers.copy()
         _headers.update(headers or {})
         response_item = self.request('GET', url, headers=_headers)
+        logger.warning(response_item.status_code)
+        # if response_item.status_code == 412:
+        #     logger.warning('retry', response_item.status_code)
+        #     self._get_resource_item(url, headers)
+        while (response_item.status_code == 412):
+            logger.warning('retry',response_item.status_code)
+            response_item = self.request('GET', url, headers=_headers)
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
