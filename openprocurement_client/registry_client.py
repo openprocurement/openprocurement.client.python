@@ -19,7 +19,7 @@ class RegistryClient(APIBaseClient):
 
     def __init__(self,
                  key,
-                 resource='lots',  # another possible value is 'assets'
+                 resource='assets',  # another possible value is 'assets'
                  host_url=None,
                  api_version=None,
                  params=None,
@@ -41,6 +41,9 @@ class RegistryClient(APIBaseClient):
         return process_response(response)
 
     def get_lots(self, extra_headers=None):
+
+        resp = self.request('GET', 'http://localhost:20602/api/0.10/lots')
+
         self.headers.update(extra_headers or {})
         response = self.request(
             'GET',
@@ -50,21 +53,25 @@ class RegistryClient(APIBaseClient):
 
     def get_asset(self, asset_id=None, extra_headers=None):
         self.headers.update(extra_headers or {})
+
         response = self.request(
             'GET',
-            '{}/api/{}/asssets/{}'.format(self.host_url, self.api_version, asset_id)
+            '{}/api/{}/assets/{}'.format(self.host_url, self.api_version, asset_id)
         )
         return process_response(response)
 
     def get_lot(self, lot_id=None, extra_headers=None):
+
         self.headers.update(extra_headers or {})
+
         response = self.request(
             'GET',
-            '{}/api/{}/lot/{}'.format(self.host_url, self.api_version, lot_id)
+            '{}/api/{}/lots/{}'.format(self.host_url, self.api_version, lot_id)
         )
         return process_response(response)
 
     def patch_asset(self, asset):
+
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, asset['data']['id']),
             payload=asset,
@@ -103,6 +110,7 @@ class RegistryClientSync(RegistryClient):
 
 
 def process_response(response):
+
     if response.status_code == 200:
         return munchify(loads(response.text))
     raise InvalidResponse(response)
