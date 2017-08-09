@@ -1,5 +1,7 @@
 from __future__ import print_function
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey;
+
+monkey.patch_all()
 from gevent.pywsgi import WSGIServer
 from bottle import Bottle
 from StringIO import StringIO
@@ -19,11 +21,11 @@ from openprocurement_client.tests.data_dict import TEST_ASSET_KEYS, TEST_LOT_KEY
     TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
-    HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
+    HOST_URL, location_error, PORT, ROOT, setup_routing, setup_routing_ds, \
     resource_partition, resource_filter
 
-class BaseTestClass(unittest.TestCase):
 
+class BaseTestClass(unittest.TestCase):
     def setting_up(self, client, resource=None):
         self.app = Bottle()
         self.app.router.add_filter('resource_filter', resource_filter)
@@ -68,7 +70,6 @@ class BaseTestClass(unittest.TestCase):
     def setUpClass(cls):
         cls.setting_up_ds()
 
-
     @classmethod
     def tearDownClass(cls):
         cls.server_ds.stop()
@@ -76,13 +77,12 @@ class BaseTestClass(unittest.TestCase):
 
 class AssetsRegistryTestCase(BaseTestClass):
     def setUp(self):
-        self.setting_up(client=RegistryClient)
+        self.setting_up(client=RegistryClient, resource='assets')
 
         with open(ROOT + 'assets.json') as assets:
             self.assets = munchify(load(assets))
         with open(ROOT + 'asset_{}.json'.format(TEST_ASSET_KEYS.asset_id)) as asset:
             self.asset = munchify(load(asset))
-
 
     def tearDown(self):
         self.server.stop()
@@ -113,16 +113,15 @@ class AssetsRegistryTestCase(BaseTestClass):
         self.assertEqual(patched_asset.data.id, self.asset.data.id)
         self.assertEqual(patched_asset.data.description, self.asset.data.description)
 
-class LotRegistryTestCase(BaseTestClass):
+
+class LotsRegistryTestCase(BaseTestClass):
     def setUp(self):
         self.setting_up(client=RegistryClient, resource='lots')
 
         with open(ROOT + 'lots.json') as lots:
             self.lots = munchify(load(lots))
         with open(ROOT + 'lot_{}.json'.format(TEST_LOT_KEYS.lot_id)) as lot:
-
             self.lot = munchify(load(lot))
-
 
     def tearDown(self):
         self.server.stop()
@@ -141,7 +140,6 @@ class LotRegistryTestCase(BaseTestClass):
             self.client.get_lots()
 
     def test_get_lot(self):
-
         setup_routing(self.app, routes=["lot"])
         lot = self.client.get_lot(TEST_LOT_KEYS.lot_id)
         self.assertEqual(lot, self.lot)
@@ -154,10 +152,53 @@ class LotRegistryTestCase(BaseTestClass):
         self.assertEqual(patched_lot.data.id, self.lot.data.id)
         self.assertEqual(patched_lot.data.description, self.lot.data.description)
 
+
+class AssetsClientSyncTestCase(BaseTestClass):
+    """"""
+
+    def setUp(self):
+        self.setting_up(client=RegistryClientSync, resource='assets')
+
+        with open(ROOT + 'assets.json') as assets:
+            self.assets = munchify(load(assets))
+        with open(ROOT + 'asset_' + TEST_ASSET_KEYS.asset_id + '.json') as asset:
+            self.asset = munchify(load(asset))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_sync_assets(self):
+        setup_routing(self.app, routes=['assets'])
+        assets = self.client.sync_item()
+        self.assertIsInstance(assets.data, Iterable)
+        self.assertEqual(assets.data, self.assets.data)
+
+
+class LotsClientSyncTestCase(BaseTestClass):
+    """"""
+
+    def setUp(self):
+        self.setting_up(client=RegistryClientSync)
+
+        with open(ROOT + 'lots.json') as lots:
+            self.lots = munchify(load(lots))
+        with open(ROOT + 'lot_' + TEST_ASSET_KEYS.lot_id + '.json') as lot:
+            self.lot = munchify(load(lot))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_sync_lots(self):
+        setup_routing(self.app, routes=['lots'])
+        lots = self.client.sync_item()
+        self.assertIsInstance(lots.data, Iterable)
+        self.assertEqual(lots.data, self.lots.data)
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(AssetsRegistryTestCase))
-    suite.addTest(unittest.makeSuite(LotRegistryTestCase))
+    suite.addTest(unittest.makeSuite(LotsRegistryTestCase))
     return suite
 
 

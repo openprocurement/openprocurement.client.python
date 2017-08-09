@@ -9,8 +9,6 @@ from retrying import retry
 from simplejson import loads
 
 
-
-
 class RegistryClient(APIBaseClient):
     """ Client for validate members by EDR """
 
@@ -19,7 +17,7 @@ class RegistryClient(APIBaseClient):
 
     def __init__(self,
                  key,
-                 resource='assets',  # another possible value is 'assets'
+                 resource='lots',  # another possible value is 'assets'
                  host_url=None,
                  api_version=None,
                  params=None,
@@ -41,7 +39,6 @@ class RegistryClient(APIBaseClient):
         return process_response(response)
 
     def get_lots(self, extra_headers=None):
-
         resp = self.request('GET', 'http://localhost:20602/api/0.10/lots')
 
         self.headers.update(extra_headers or {})
@@ -61,7 +58,6 @@ class RegistryClient(APIBaseClient):
         return process_response(response)
 
     def get_lot(self, lot_id=None, extra_headers=None):
-
         self.headers.update(extra_headers or {})
 
         response = self.request(
@@ -71,12 +67,12 @@ class RegistryClient(APIBaseClient):
         return process_response(response)
 
     def patch_asset(self, asset):
-
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, asset['data']['id']),
             payload=asset,
             headers={'X-Access-Token': self._get_access_token(asset)}
         )
+
     def patch_lot(self, lot):
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, lot['data']['id']),
@@ -84,8 +80,8 @@ class RegistryClient(APIBaseClient):
             headers={'X-Access-Token': self._get_access_token(lot)}
         )
 
-class RegistryClientSync(RegistryClient):
 
+class RegistryClientSync(RegistryClient):
     def sync_item(self, params=None, extra_headers=None):
         _params = (params or {}).copy()
         _params['feed'] = 'changes'
@@ -108,9 +104,7 @@ class RegistryClientSync(RegistryClient):
         return super(RegistryClientSync, self).get_asset(id)
 
 
-
 def process_response(response):
-
     if response.status_code == 200:
         return munchify(loads(response.text))
     raise InvalidResponse(response)
