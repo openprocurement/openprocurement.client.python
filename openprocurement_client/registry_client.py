@@ -30,6 +30,12 @@ class RegistryClient(APIBaseClient):
         self.host_url = host_url or self.host_url
         self.api_version = api_version or self.api_version
 
+    def create_asset(self, asset):
+        return self._create_resource_item(self.prefix_path, asset)
+
+    def create_lot(self, lot):
+        return self._create_resource_item(self.prefix_path, lot)
+
     def get_assets(self, extra_headers=None):
         self.headers.update(extra_headers or {})
         response = self.request(
