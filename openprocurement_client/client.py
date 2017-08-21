@@ -1,7 +1,7 @@
 import logging
 
 from .api_base_client import APIBaseClient, APITemplateClient, verify_file
-from .exceptions import InvalidResponse
+from .exceptions import InvalidResponse, IdNotFound
 
 from iso8601 import parse_date
 from munch import munchify
@@ -14,169 +14,57 @@ logger = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')
 
 
-class TendersClient(APIBaseClient):
-    """client for tenders"""
+class APIClient(APIBaseClient):
+    """ API Client """
 
-    def __init__(self,
-                 key,
-                 resource='tenders',  # another possible value is 'auctions'
-                 host_url=None,
-                 api_version=None,
-                 params=None,
-                 ds_client=None,
-                 user_agent=None):
-        super(TendersClient, self).__init__(
-            key, resource, host_url, api_version, params, ds_client,
-            user_agent
-        )
+    def __init__(self, *args, **kwargs):
+        super(APIClient, self).__init__(*args, **kwargs)
 
     ###########################################################################
-    #             GET ITEMS LIST API METHODS
+    #                        CREATE CLIENT METHODS
     ###########################################################################
 
-    @retry(stop_max_attempt_number=5)
-    def get_tenders(self, params=None, feed='changes'):
-        _params = (params or {}).copy()
-        _params['feed'] = feed
-        self._update_params(_params)
-        response = self.request('GET',
-                                self.prefix_path,
-                                params_dict=self.params)
-        if response.status_code == 200:
-            tender_list = munchify(loads(response.text))
-            self._update_params(tender_list.next_page)
-            return tender_list.data
-        elif response.status_code == 404:
-            del self.params['offset']
+    def create_resource_item(self, resource_item):
+        return self._create_resource_item(self.prefix_path, resource_item)
 
-        raise InvalidResponse(response)
-
-    def get_latest_tenders(self, date, tender_id):
-        iso_dt = parse_date(date)
-        dt = iso_dt.strftime('%Y-%m-%d')
-        tm = iso_dt.strftime('%H:%M:%S')
-        data = self._get_resource_item(
-            '{}?offset={}T{}&opt_fields=tender_id&mode=test'.format(
-                self.prefix_path,
-                dt,
-                tm
-            )
-        )
-        return data
-
-    def _get_tender_resource_list(self, tender, items_name):
-        return self._get_resource_item(
-            '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
-            headers={'X-Access-Token': self._get_access_token(tender)}
-        )
-
-    def get_questions(self, tender):
-        return self._get_tender_resource_list(tender, 'questions')
-
-    def get_documents(self, tender):
-        return self._get_tender_resource_list(tender, 'documents')
-
-    def get_awards_documents(self, tender, award_id):
-        return self._get_resource_item(
-            '{}/{}/awards/{}/documents'.format(self.prefix_path, tender.data.id, award_id),
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
-        )
-
-    def get_qualification_documents(self, tender, qualification_id):
-        return self._get_resource_item(
-            '{}/{}/qualifications/{}/documents'.format(self.prefix_path, tender.data.id, qualification_id),
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
-        )
-
-    def get_awards(self, tender):
-        return self._get_tender_resource_list(tender, 'awards')
-
-    def get_lots(self, tender):
-        return self._get_tender_resource_list(tender, 'lots')
-
-    ###########################################################################
-    #             CREATE ITEM API METHODS
-    ###########################################################################
-
-    def _create_tender_resource_item(self, tender, item_obj, items_name):
-        return self._create_resource_item(
-            '{}/{}/{}'.format(self.prefix_path, tender.data.id, items_name),
-            item_obj,
-            headers={'X-Access-Token': self._get_access_token(tender)}
-        )
-
-    def create_tender(self, tender):
-        return self._create_resource_item(self.prefix_path, tender)
-
-    def create_question(self, tender, question):
-        return self._create_tender_resource_item(tender, question, 'questions')
-
-    def create_bid(self, tender, bid):
-        return self._create_tender_resource_item(tender, bid, 'bids')
-
-    def create_lot(self, tender, lot):
-        return self._create_tender_resource_item(tender, lot, 'lots')
-
-    def create_award(self, tender, award):
-        return self._create_tender_resource_item(tender, award, 'awards')
-
-    def create_cancellation(self, tender, cancellation):
-        return self._create_tender_resource_item(
-            tender, cancellation, 'cancellations'
-        )
-
-    def create_complaint(self, tender, complaint):
-        return self\
-            ._create_tender_resource_item(tender, complaint, 'complaints')
-
-    def create_award_complaint(self, tender, complaint, award_id):
-        return self._create_resource_item(
-            '{}/{}/{}'.format(self.prefix_path, tender.data.id,
-                              'awards/{0}/complaints'.format(award_id)),
-            complaint,
-            headers={'X-Access-Token': self._get_access_token(tender)}
-        )
-
-    def create_thin_document(self, tender, document_data):
-        return self._create_resource_item(
-            '{}/{}/documents'.format(
-                self.prefix_path,
-                tender.data.id
-            ),
-            document_data,
-            headers={'X-Access-Token': self._get_access_token(tender)}
-        )
-
-    ###########################################################################
-    #             GET ITEM API METHODS
-    ###########################################################################
-
-    def get_tender(self, id):
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id))
-
-    def _get_tender_resource_item(self, tender, item_id, items_name,
-                                  access_token=None):
-        access_token = access_token or self._get_access_token(tender)
+    def create_resource_item_subitem(self, resource_item, subitem_obj,
+                                     subitem_name, resource_item_id=None,
+                                     depth_path=None, access_token=None):
+        resource_item_id = resource_item_id or resource_item['data'].get('id')
+        access_token = access_token or self._get_access_token(resource_item)
         headers = {'X-Access-Token': access_token}
-        return self._get_resource_item(
-            '{}/{}/{}/{}'.format(self.prefix_path,
-                                 tender.data.id,
-                                 items_name,
-                                 item_id),
-            headers=headers
-        )
+        if depth_path:
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id,
+                                       depth_path, subitem_name)
+        else:
+            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id,
+                                    subitem_name)
+        return self._create_resource_item(url, subitem_obj, headers=headers)
 
-    def get_question(self, tender, question_id):
-        return self._get_tender_resource_item(tender, question_id, 'questions')
+    ###########################################################################
+    #                          GET CLIENT METHODS
+    ###########################################################################
 
-    def get_bid(self, tender, bid_id, access_token):
-        return self._get_tender_resource_item(tender, bid_id, 'bids',
-                                              access_token)
+    def get_resource_item(self, resource_item_id, headers=None):
+        return self._get_resource_item('{}/{}'.format(
+            self.prefix_path, resource_item_id), headers=headers)
 
-    def get_lot(self, tender, lot_id):
-        return self._get_tender_resource_item(tender, lot_id, 'lots')
+    def get_resource_item_submitem(self, resource_item, subitem_id_or_name,
+                                   resource_item_id=None, access_token=None,
+                                   depth_path=None):
+        resource_item_id = resource_item_id or resource_item['data'].get('id')
+        access_token = access_token or self._get_access_token(resource_item)
+        headers = {'X-Access-Token': access_token}
+        if depth_path:
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id,
+                                       depth_path, subitem_id_or_name)
+        else:
+            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id,
+                                    subitem_id_or_name)
+        return self._get_resource_item(url, headers=headers)
+
+    def get_resource_items(self, params=None, feed='changes'):
+        return self._get_resource_items(params=params, feed=feed)
 
     def get_file(self, url, access_token=None):
         headers = {'X-Access-Token': access_token} if access_token else {}
@@ -197,8 +85,9 @@ class TendersClient(APIBaseClient):
         headers.update(self.headers)
         response_item = self.request('GET', url, headers=headers)
         if response_item.status_code == 200:
-            file_properties={
-                'Content_Disposition': response_item.headers['Content-Disposition'],
+            file_properties = {
+                'Content_Disposition':
+                    response_item.headers['Content-Disposition'],
                 'Content_Type': response_item.headers['Content-Type'],
                 'url': url,
                 'hash': file_hash
@@ -206,110 +95,337 @@ class TendersClient(APIBaseClient):
             return file_properties
         raise InvalidResponse(response_item)
 
-    def extract_credentials(self, id):
+    ###########################################################################
+    #                          PATCH CLIENT METHODS
+    ###########################################################################
+
+    def patch_credentials(self, resource_item_id, access_token):
+        return self._patch_resource_item(
+            '{}/{}/credentials'.format(self.prefix_path, resource_item_id),
+            payload=None,
+            headers={'X-Access-Token': access_token}
+        )
+
+    def patch_resource_item(self, resource_item, resource_item_id=None):
+        resource_item_id = resource_item_id or resource_item['data'].get('id')
+        return self._patch_resource_item(
+            '{}/{}'.format(self.prefix_path, resource_item_id),
+            payload=resource_item,
+            headers={'X-Access-Token': self._get_access_token(resource_item)}
+        )
+
+    def patch_resource_item_subitem(self, resource_item, subitem_obj,
+                                    subitem_name, resource_item_id=None,
+                                    subitem_id=None, depth_path=None,
+                                    headers=None):
+        subitem_id = subitem_id or subitem_obj['data'].get('id')
+        resource_item_id = resource_item_id or resource_item['data'].get('id')
+        access_token = self._get_access_token(resource_item)
+        headers = {'X-Access-Token': access_token}
+        if depth_path:
+            url = '{}/{}/{}/{}/{}'.format(
+                self.prefix_path, resource_item_id, depth_path, subitem_name,
+                subitem_id
+            )
+        else:
+            url = '{}/{}/{}/{}'.format(
+                self.prefix_path, resource_item_id, subitem_name, subitem_id
+            )
+        return self._patch_resource_item(url, subitem_obj, headers=headers)
+
+    ###########################################################################
+    #                          UPLOAD CLIENT METHODS
+    ###########################################################################
+
+    @verify_file
+    def upload_document(
+            self, file_, resource_item, use_ds_client=True,
+            doc_registration=True, resource_item_id=None, depth_path=None):
+        resource_item_id = resource_item_id or resource_item['data'].get('id')
+        headers = {'X-Access-Token': self._get_access_token(tender)}
+        if depth_path:
+            url = '{}/{}/{}/documents'.format(
+                self.prefix_path, resource_item_id, depth_path
+            )
+        else:
+            url = '{}/{}/documents'.format(self.prefix_path, resource_item_id)
+        return self._upload_resource_file(
+            url, file_=file_, headers=headers, use_ds_client=use_ds_client,
+            doc_registration=doc_registration
+        )
+
+    # def patch_document(self, obj, document):
+    #     return self._patch_obj_resource_item(obj, document, 'documents')
+    #
+    # @verify_file
+    # def upload_document(self, file_, obj, use_ds_client=True,
+    #                     doc_registration=True):
+    #     return self._upload_resource_file(
+    #         '{}/{}/documents'.format(
+    #             self.prefix_path,
+    #             obj.data.id
+    #         ),
+    #         file_=file_,
+    #         headers={'X-Access-Token': self._get_access_token(obj)},
+    #         use_ds_client=use_ds_client,
+    #         doc_registration=doc_registration
+    #     )
+
+
+
+
+    def extract_credentials(self, resource_item_id):
         return self._get_resource_item(
-            '{}/{}/extract_credentials'.format(self.prefix_path, id)
+            '{}/{}/extract_credentials'.format(self.prefix_path,
+                                               resource_item_id)
+        )
+
+
+class TendersClient(APIClient):
+    """client for tenders"""
+
+    def __init__(self, *args, **kwargs):
+        super(TendersClient, self).__init__(*args, **kwargs)
+
+    ###########################################################################
+    #             GET ITEMS LIST API METHODS
+    ###########################################################################
+
+    @retry(stop_max_attempt_number=5)
+    def get_tenders(self, params=None, feed='changes'):
+        return self.get_resource_items(params=params, feed=feed)
+
+    def get_latest_tenders(self, date, tender_id):
+        iso_dt = parse_date(date)
+        dt = iso_dt.strftime('%Y-%m-%d')
+        tm = iso_dt.strftime('%H:%M:%S')
+        data = self._get_resource_item(
+            '{}?offset={}T{}&opt_fields=tender_id&mode=test'.format(
+                self.prefix_path,
+                dt,
+                tm
+            )
+        )
+        return data
+
+    def get_questions(self, tender, tender_id=None):
+        return self.get_resource_item_subitem(
+            tender, 'questions', resource_item_id=tender_id
+        )
+
+    def get_documents(self, tender, tender_id=None):
+        return self.get_resource_item_subitem(
+            tender, 'documents', resource_item_id=tender_id)
+
+    def get_awards_documents(self, tender, award_id, tender_id=None):
+        return self.get_resource_item_subitem(
+            tender, 'documents', depth_path='awards/{}'.format(award_id),
+            resource_item_id=tender_id
+        )
+
+    def get_qualification_documents(self, tender, qualification_id,
+                                    tender_id=None):
+        return self.get_resource_item_subitem(
+            tender, 'documents',
+            depth_path='qualifications/{}'.format(qualification_id),
+            resource_item_id=tender_id
+        )
+
+    def get_awards(self, tender, tender_id=None):
+        return self.get_resource_item_subitem(
+            tender, 'awards', resource_item_id=tender_id
+        )
+
+    def get_lots(self, tender, tender_id=None):
+        return self.get_resource_item_subitem(
+            tender, 'lots', resource_item_id=tender_id
+        )
+
+    ###########################################################################
+    #             CREATE ITEM API METHODS
+    ###########################################################################
+
+    def create_tender(self, tender):
+        return self.create_resource_item(self.prefix_path, tender)
+
+    def create_question(self, tender, question, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, question, 'questions', resource_item_id=tender_id
+        )
+
+    def create_bid(self, tender, bid, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, bid, 'bids', resource_item_id=tender_id
+        )
+
+    def create_lot(self, tender, lot, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, lot, 'lots', resource_item_id=tender_id
+        )
+
+    def create_award(self, tender, award, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, award, 'awards', resource_item_id=tender_id
+        )
+
+    def create_cancellation(self, tender, cancellation, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, cancellation, 'cancellations', resource_item_id=tender_id
+        )
+
+    def create_complaint(self, tender, complaint, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, complaint, 'complaints', resource_item_id=tender_id
+        )
+
+    def create_award_complaint(self, tender, complaint, award_id,
+                               tender_id=None):
+        depth_path = 'awards/{}'.format(award_id)
+        return self.create_resource_item_subitem(
+            tender, complaint, 'complaints', depth_path=depth_path,
+            resource_item_id=tender_id
+        )
+
+    def create_thin_document(self, tender, document_data, tender_id=None):
+        return self.create_resource_item_subitem(
+            tender, document_data, 'documents', resource_item_id=tender_id
+        )
+
+    ###########################################################################
+    #             GET ITEM API METHODS
+    ###########################################################################
+
+    def get_tender(self, tender_id):
+        return self.get_resource_item(tender_id)
+
+    def get_question(self, tender, question_id, tender_id=None):
+        depth_path = 'questions'
+        return self.get_resource_item_submitem(
+            tender, question_id, depth_path=depth_path,
+            resource_item_id=tender_id
+        )
+
+    def get_bid(self, tender, bid_id, access_token=None, tender_id=None):
+        depth_path = 'bids'
+        return self.get_resource_item_submitem(
+            tender, bid_id, depth_path=depth_path, access_token=access_token,
+            resource_item_id=tender_id
+        )
+
+    def get_lot(self, tender, lot_id, tender_id=None):
+        depth_path = 'lots'
+        return self.get_resource_item_submitem(
+            tender, lot_id, depth_path=depth_path, resource_item_id=tender_id
         )
 
     ###########################################################################
     #             PATCH ITEM API METHODS
     ###########################################################################
 
-    def patch_tender(self, tender):
-        return self._patch_resource_item(
-            '{}/{}'.format(self.prefix_path, tender['data']['id']),
-            payload=tender,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+    def patch_tender(self, tender, tender_id=None):
+        return self.patch_resource_item(tender, resource_item_id=tender_id)
+
+    def patch_question(self, tender, question, tender_id=None,
+                       question_id=None):
+        return self.patch_resource_item_subitem(
+            tender, question, 'questions', resource_item_id=tender_id,
+            subitem_id=question_id
         )
 
-    def patch_question(self, tender, question):
-        return self._patch_obj_resource_item(tender, question, 'questions')
-
-    def patch_bid(self, tender, bid):
-        return self._patch_obj_resource_item(tender, bid, 'bids')
-
-    def patch_bid_document(self, tender, document_data, bid_id, document_id):
-        return self._patch_resource_item(
-            '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, 'bids', bid_id, document_id
-            ),
-            payload=document_data,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+    def patch_bid(self, tender, bid, tender_id=None, bid_id=None):
+        return self.patch_resource_item_subitem(
+            tender, bid, 'bids', resource_item_id=tender_id, subitem_id=bid_id
         )
 
-    def patch_award(self, tender, award):
-        return self._patch_obj_resource_item(tender, award, 'awards')
-
-    def patch_award_document(self, tender, document_data, award_id, document_id):
-        return self._patch_resource_item(
-            '{}/{}/awards/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, award_id, document_id
-            ),
-            payload=document_data,
-            headers={'X-Access-Token':
-                     getattr(getattr(tender, 'access', ''), 'token', '')}
+    def patch_bid_document(self, tender, document_data, bid_id,
+                           document_id=None, tender_id=None):
+        depth_path = 'bids/{}'.format(bid_id)
+        return self.patch_resource_item_subitem(
+            tender, document_data, 'documents', subitem_id=document_id,
+            depth_path=depth_path, resource_item_id=tender_id
         )
 
-    def patch_cancellation(self, tender, cancellation):
+    def patch_award(self, tender, award, tender_id=None, award_id=None):
+        return self.patch_resource_item_subitem(
+            tender, award, 'awards', resource_item_id=tender_id,
+            subitem_id=award_id
+        )
+
+    def patch_award_document(self, tender, document_data, award_id,
+                             document_id=None, tender_id=None):
+        depth_path = 'awards/{}'.format(award_id)
+        return self.patch_resource_item_subitem(
+            tender, document_data, 'documents', resource_item_id=tender_id,
+            subitem_id=document_id, depth_path=depth_path
+        )
+
+    def patch_cancellation(self, tender, cancellation, tender_id=None,
+                           cancellation_id=None):
         return self._patch_obj_resource_item(
-            tender, cancellation, 'cancellations'
+            tender, cancellation, 'cancellations', subitem_id=cancellation_id,
+            resource_item_id=tender_id
         )
 
-    def patch_cancellation_document(
-            self, tender, cancellation, cancellation_id, cancellation_doc_id
-    ):
-        return self._patch_resource_item(
-            '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, 'cancellations',
-                cancellation_id, cancellation_doc_id
-            ),
-            payload=cancellation,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+    def patch_cancellation_document(self, tender, cancellation,
+                                    cancellation_id, cancellation_doc_id=None,
+                                    tender_id=None):
+        depth_path = 'cancellations/{}'.format(cancellation_id)
+        return self.patch_resource_item_subitem(
+            tender, cancellation, 'documents', subitem_id=cancellation_doc_id,
+            resource_item_id=tender_id, depth_path=depth_path
         )
 
-    def patch_complaint(self, tender, complaint):
-        return self._patch_obj_resource_item(
-            tender, complaint, 'complaints'
+    def patch_complaint(self, tender, complaint, tender_id=None,
+                        complaint_id=None):
+        return self.patch_resource_item_subitem(
+            tender, complaint, 'complaints', subitem_id=complaint_id,
+            resource_item_id=tender_id
         )
 
-    def patch_award_complaint(self, tender, complaint, award_id):
-        return self._patch_resource_item(
-            '{}/{}/awards/{}/complaints/{}'.format(
-                self.prefix_path, tender.data.id, award_id, complaint.data.id
-            ),
-            payload=complaint,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+    def patch_award_complaint(self, tender, complaint, award_id,
+                              tender_id=None, complaint_id=None):
+        depth_path = 'awards/{}'.format(award_id)
+        return self.patch_resource_item_subitem(
+            tender, complaint, 'complaints', resource_item_id=tender_id,
+            subitem_id=complaint_id,
         )
 
-    def patch_lot(self, tender, lot):
-        return self._patch_obj_resource_item(tender, lot, 'lots')
-
-    def patch_qualification(self, tender, qualification):
-        return self._patch_obj_resource_item(
-            tender, qualification, 'qualifications'
+    def patch_lot(self, tender, lot, lot_id=None, tender_id=None):
+        return self.patch_resource_item_subitem(
+            tender, lot, 'lots', subitem_id=lot_id, resource_item_id=tender_id
         )
 
-    def patch_contract(self, tender, contract):
-        return self._patch_obj_resource_item(tender, contract, 'contracts')
+    def patch_qualification(self, tender, qualification, qualification_id=None,
+                            tender_id=None):
+        return self.patch_resource_item_subitem(
+            tender, qualification, 'qualifications',
+            resource_item_id=tender_id, subitem_id=qualification_id
+        )
+
+    def patch_contract(self, tender, contract, contract_id=None,
+                       tender_id=None):
+        return self.patch_resource_item_subitem(
+            tender, contract, 'contracts', subitem_id=contract_id,
+            resource_item_id=tender_id
+        )
 
     def patch_contract_document(self, tender, document_data,
-                                contract_id, document_id):
-        return self._patch_resource_item(
-            '{}/{}/{}/{}/documents/{}'.format(
-                self.prefix_path, tender.data.id, 'contracts',
-                contract_id, document_id
-            ),
-            payload=document_data,
-            headers={'X-Access-Token': self._get_access_token(tender)}
+                                contract_id, document_id=None, tender_id=None):
+        depth_path = 'contracts/{}'.format(contract_id)
+        return self.patch_resource_item_subitem(
+            tender, document_data, 'documents', subitem_id=document_id,
+            resource_item_id=tender_id
         )
 
     ###########################################################################
     #             UPLOAD FILE API METHODS
     ###########################################################################
 
-    @verify_file
     def upload_bid_document(self, file_, tender, bid_id, doc_type='documents',
-                            use_ds_client=True, doc_registration=True):
+                            use_ds_client=True, doc_registration=True,
+                            tender_id=None):
+        depth_path = 'bids/{}'.format(bid_id)
+        return self.upload_document(file_,)
         return self._upload_resource_file(
             '{}/{}/bids/{}/{}'.format(
                 self.prefix_path,
