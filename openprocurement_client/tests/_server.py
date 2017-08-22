@@ -3,8 +3,13 @@ from munch import munchify
 from simplejson import dumps, load
 from openprocurement_client.document_service_client \
     import DocumentServiceClient
-from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
-    TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
+from openprocurement_client.tests.data_dict import (
+    TEST_TENDER_KEYS,
+    TEST_PLAN_KEYS,
+    TEST_CONTRACT_KEYS,
+    TEST_ASSET_KEYS,
+    TEST_LOT_KEYS
+)
 import magic
 import os
 
@@ -23,10 +28,13 @@ PLANS_PATH = API_PATH.format('plans')
 CONTRACTS_PATH = API_PATH.format('contracts')
 SPORE_PATH = API_PATH.format('spore')
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
-RESOURCE_DICT = \
-    {'tender':   {'sublink': 'tenders',   'data': TEST_TENDER_KEYS},
-     'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
-     'plan':     {'sublink': 'plans',     'data': TEST_PLAN_KEYS}}
+RESOURCE_DICT = {
+    'tender': {'sublink': 'tenders', 'data': TEST_TENDER_KEYS},
+    'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
+    'plan': {'sublink': 'plans', 'data': TEST_PLAN_KEYS},
+    'asset': {'sublink': 'assets', 'data': TEST_ASSET_KEYS},
+    'lot': {'sublink': 'lots', 'data': TEST_LOT_KEYS}
+}
 
 
 def resource_filter(resource_name):
@@ -296,41 +304,47 @@ def contract_change_patch(contract_id, change_id):
 
 
 routes_dict = {
-        "spore": (SPORE_PATH, 'HEAD', spore),
-        "offset_error": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', offset_error),
-        "tenders": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', resource_page_get),
-        "tender_create": (TENDERS_PATH, 'POST', resource_create),
-        "tender": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>', 'GET', resource_page),
-        "tender_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + "/<resource_id>", 'PATCH', resource_patch),
-        "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
-        "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
-        "tender_subpage_item_create": (TENDERS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
-        "tender_award_documents": (TENDERS_PATH + "/<tender_id>/awards/<award_id>/documents", 'GET', tender_award_documents),
-        "tender_qualification_documents": (TENDERS_PATH + "/<tender_id>/qualifications/<qualification_id>/documents", 'GET', tender_qualification_documents),
-        "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
-        "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
-        "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
-        "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
-        "tender_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
-        "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
-        "tender_patch_credentials": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
-        "redirect": ('/redirect/<filename:path>', 'GET', get_file),
-        "download": ('/download/<filename:path>', 'GET', download_file),
-        "plans": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', resource_page_get),
-        "plan_create": (PLANS_PATH, 'POST', resource_create),
-        "plan_patch": (API_PATH.format('<resource_name:resource_filter:plan>') + "/<resource_id>", 'PATCH', resource_patch),
-        "plan": (API_PATH.format('<resource_name:resource_filter:plan>') + '/<resource_id>', 'GET', resource_page),
-        "plan_offset_error": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', offset_error),
-        "contracts": (API_PATH.format('<resource_name:resource_filter:contract>'), 'GET', resource_page_get),
-        "contract_create": (CONTRACTS_PATH, 'POST', resource_create),
-        "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
-        "contract": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>', 'GET', resource_page),
-        "contract_subpage_item_create": (CONTRACTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
-        "contract_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
-        "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
-        "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
-        "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
-        }
+    "spore": (SPORE_PATH, 'HEAD', spore),
+    "offset_error": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', offset_error),
+    "tenders": (API_PATH.format('<resource_name:resource_filter:tender>'), 'GET', resource_page_get),
+    "tender_create": (TENDERS_PATH, 'POST', resource_create),
+    "tender": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>', 'GET', resource_page),
+    "tender_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + "/<resource_id>", 'PATCH', resource_patch),
+    "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
+    "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
+    "tender_subpage_item_create": (TENDERS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
+    "tender_award_documents": (TENDERS_PATH + "/<tender_id>/awards/<award_id>/documents", 'GET', tender_award_documents),
+    "tender_qualification_documents": (TENDERS_PATH + "/<tender_id>/qualifications/<qualification_id>/documents", 'GET', tender_qualification_documents),
+    "tender_subpage_document_create": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>", 'POST', tender_subpage_document_create),
+    "tender_subpage_document_update": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PUT', tender_subpage_document_update),
+    "tender_subpage_document_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<document_type>/<document_id>", 'PATCH', tender_subpage_document_patch),
+    "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
+    "tender_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+    "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
+    "tender_patch_credentials": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
+    "redirect": ('/redirect/<filename:path>', 'GET', get_file),
+    "download": ('/download/<filename:path>', 'GET', download_file),
+    "plans": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', resource_page_get),
+    "plan_create": (PLANS_PATH, 'POST', resource_create),
+    "plan_patch": (API_PATH.format('<resource_name:resource_filter:plan>') + "/<resource_id>", 'PATCH', resource_patch),
+    "plan": (API_PATH.format('<resource_name:resource_filter:plan>') + '/<resource_id>', 'GET', resource_page),
+    "plan_offset_error": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', offset_error),
+    "contracts": (API_PATH.format('<resource_name:resource_filter:contract>'), 'GET', resource_page_get),
+    "contract_create": (CONTRACTS_PATH, 'POST', resource_create),
+    "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
+    "contract": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>', 'GET', resource_page),
+    "contract_subpage_item_create": (CONTRACTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
+    "contract_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
+    "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
+    "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
+    "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
+    "assets": (API_PATH.format('<resource_name:resource_filter:asset>'), 'GET', resource_page_get),
+    "asset": (API_PATH.format('<resource_name:resource_filter:asset>') + '/<resource_id>', 'GET', resource_page),
+    "asset_patch": (API_PATH.format('<resource_name:resource_filter:asset>') + "/<resource_id>", 'PATCH', resource_patch),
+    "lots": (API_PATH.format('<resource_name:resource_filter:lot>'), 'GET', resource_page_get),
+    "lot": (API_PATH.format('<resource_name:resource_filter:lot>') + '/<resource_id>', 'GET', resource_page),
+    "lot_patch": (API_PATH.format('<resource_name:resource_filter:lot>') + "/<resource_id>", 'PATCH', resource_patch),
+}
 
 
 def file_info(file_):
