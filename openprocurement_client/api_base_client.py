@@ -126,6 +126,7 @@ class APIBaseClient(APITemplateClient):
 
     @staticmethod
     def _get_access_token(obj):
+
         return getattr(getattr(obj, 'access', ''), 'token', '')
 
     def _update_params(self, params):

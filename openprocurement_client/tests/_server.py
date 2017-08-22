@@ -1,10 +1,10 @@
-from bottle import request, response, redirect, static_file
+from bottle import request, response, redirect, static_file, run
 from munch import munchify
 from simplejson import dumps, load
 from openprocurement_client.document_service_client \
     import DocumentServiceClient
 from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
-    TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
+    TEST_PLAN_KEYS, TEST_CONTRACT_KEYS, TEST_LOT_KEYS, TEST_ASSET_KEYS
 import magic
 import os
 
@@ -26,7 +26,9 @@ DOWNLOAD_URL_EXTENSION = 'some_key_etc'
 RESOURCE_DICT = \
     {'tender':   {'sublink': 'tenders',   'data': TEST_TENDER_KEYS},
      'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
-     'plan':     {'sublink': 'plans',     'data': TEST_PLAN_KEYS}}
+     'plan':     {'sublink': 'plans',     'data': TEST_PLAN_KEYS},
+     'lot':     {'sublink': 'lots',     'data': TEST_LOT_KEYS},
+     'asset':   {'sublink': 'assets',   'data': TEST_ASSET_KEYS}}
 
 
 def resource_filter(resource_name):
@@ -330,6 +332,12 @@ routes_dict = {
         "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
         "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
         "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
+        "assets": (API_PATH.format('<resource_name:resource_filter:asset>'), 'GET', resource_page_get),
+        "asset": (API_PATH.format('<resource_name:resource_filter:asset>') + '/<resource_id>', 'GET', resource_page),
+        "asset_patch": (API_PATH.format('<resource_name:resource_filter:asset>') + "/<resource_id>", 'PATCH', resource_patch),
+        "lots": (API_PATH.format('<resource_name:resource_filter:lot>'), 'GET', resource_page_get),
+        "lot": (API_PATH.format('<resource_name:resource_filter:lot>') + '/<resource_id>', 'GET', resource_page),
+        "lot_patch": (API_PATH.format('<resource_name:resource_filter:lot>') + "/<resource_id>", 'PATCH', resource_patch),
         }
 
 
