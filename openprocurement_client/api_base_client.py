@@ -10,6 +10,7 @@ from os import path
 from requests import Session
 from requests.auth import HTTPBasicAuth as BasicAuth
 from simplejson import loads
+from retrying import retry
 
 logger = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')
@@ -154,6 +155,23 @@ class APIBaseClient(APITemplateClient):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
+    @retry(stop_max_attempt_number=5)
+    def _get_resource_items(self, params=None, feed='changes'):
+        _params = (params or {}).copy()
+        _params['feed'] = feed
+        self._update_params(_params)
+        response = self.request('GET',
+                                self.prefix_path,
+                                params_dict=self.params)
+        if response.status_code == 200:
+            resource_items_list = munchify(loads(response.text))
+            self._update_params(resource_items_list.next_page)
+            return resource_items_list.data
+        elif response.status_code == 404:
+            del self.params['offset']
+
+        raise InvalidResponse(response)
+
     def _patch_resource_item(self, url, payload, headers=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
@@ -247,4 +265,33 @@ class APIBaseClient(APITemplateClient):
             '{}/{}/credentials'.format(self.prefix_path, id),
             payload=None,
             headers={'X-Access-Token': access_token}
+        )
+
+
+    def renew_cookies(self):
+        old_cookies = 'Old cookies:\n'
+        for k in self.session.cookies.keys():
+            old_cookies += '{}={}\n'.format(k, self.session.cookies[k])
+        logger.debug(old_cookies.strip())
+
+        self.session.cookies.clear()
+
+        response = self.session.request(
+            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
+        )
+        response.raise_for_status()
+
+        new_cookies = 'New cookies:\n'
+        for k in self.session.cookies.keys():
+            new_cookies += '{}={}\n'.format(k, self.session.cookies[k])
+        logger.debug(new_cookies)
+      
+    def create_resource_item(self, resource_item):
+        return self._create_resource_item(self.prefix_path, resource_item)
+
+    def patch_resource_item(self, resource_item):
+        return self._patch_resource_item(
+            '{}/{}'.format(self.prefix_path, resource_item['data']['id']),
+            payload=resource_item,
+            headers={'X-Access-Token': self._get_access_token(resource_item)}
         )
