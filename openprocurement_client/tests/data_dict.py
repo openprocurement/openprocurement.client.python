@@ -7,7 +7,7 @@ TEST_TENDER_KEYS = munchify({
     "question_id": '615ff8be8eba4a81b300036d6bec991c',
     "lot_id": '563ef5d999f34d36a5a0e4e4d91d7be1',
     "bid_id": 'f7fc1212f9f140bba5c4e3cd4f2b62d9',
-    "bid_document_id":"ff001412c60c4164a0f57101e4eaf8aa",
+    "bid_document_id": "ff001412c60c4164a0f57101e4eaf8aa",
     "bid_qualification_document_id": "7519d21b32af432396acd6e2c9e18ee5",
     "bid_financial_document_id": "7519d21b32af432396acd6e2c9e18ee5",
     "bid_eligibility_document_id": "7519d21b32af432396acd6e2c9e18ee5",
@@ -44,4 +44,20 @@ TEST_CONTRACT_KEYS = munchify({
     "change_id": '3ba8592459904c73bf05d7bc48e7083c',
     "patch_change_rationale": u'Друга і третя поставка має бути розфасована',
     "new_token": 'new0contract0token123412341234'
+})
+
+TEST_LOT_KEYS = munchify({
+    "asset_id": '823d50b3236247adad28a5a66f74db42',
+    "lot_id": '823d50b3236247adad28a5a66f74db42',
+    "token": 'f6247c315d2744f1aa18c7c3de523bc3',
+    "new_token": '4fa3e89efbaa46f0a1b86b911bec76e7'
+
+})
+
+TEST_ASSET_KEYS = munchify({
+    "asset_id": '823d50b3236247adad28a5a66f74db42',
+    "lot_id": '823d50b3236247adad28a5a66f74db42',
+    "token": 'f6247c315d2744f1aa18c7c3de523bc3',
+    "new_token": '4fa3e89efbaa46f0a1b86b911bec76e7'
+
 })
