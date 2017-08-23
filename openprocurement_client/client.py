@@ -27,12 +27,12 @@ class APIClient(APIBaseClient):
     def create_resource_item(self, resource_item):
         return self._create_resource_item(self.prefix_path, resource_item)
 
-    def create_resource_item_subitem(self, resource_item, subitem_obj,
-                                     subitem_name, resource_item_id=None,
-                                     depth_path=None, access_token=None):
-        resource_item_id = resource_item_id or resource_item['data'].get('id')
-        access_token = access_token or self._get_access_token(resource_item)
-        headers = {'X-Access-Token': access_token}
+    def create_resource_item_subitem(self, resource_item_id, subitem_obj,
+                                     subitem_name, depth_path=None,
+                                     access_token=None):
+        headers = None
+        if access_token:
+            headers = {'X-Access-Token': access_token}
         if depth_path:
             url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id,
                                        depth_path, subitem_name)
@@ -45,13 +45,13 @@ class APIClient(APIBaseClient):
     #                          GET CLIENT METHODS
     ###########################################################################
 
-    def get_resource_item(self, resource_item_id, headers=None):
-        return self._get_resource_item('{}/{}'.format(
-            self.prefix_path, resource_item_id), headers=headers)
+    def get_resource_item(self, resource_item_id):
+        return self._get_resource_item(
+            '{}/{}'.format(self.prefix_path, resource_item_id)
+        )
 
-    def get_resource_item_submitem(self, resource_item, subitem_id_or_name,
-                                   resource_item_id=None, access_token=None,
-                                   depth_path=None):
+    def get_resource_item_submitem(self, resource_item_id, subitem_id_or_name,
+                                   depth_path=None, access_token=None):
         resource_item_id = resource_item_id or resource_item['data'].get('id')
         access_token = access_token or self._get_access_token(resource_item)
         headers = {'X-Access-Token': access_token}
@@ -425,7 +425,7 @@ class TendersClient(APIClient):
                             use_ds_client=True, doc_registration=True,
                             tender_id=None):
         depth_path = 'bids/{}'.format(bid_id)
-        return self.upload_document(file_,)
+        return self.upload_document(file_, tender)
         return self._upload_resource_file(
             '{}/{}/bids/{}/{}'.format(
                 self.prefix_path,

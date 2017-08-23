@@ -156,17 +156,6 @@ class APIBaseClient(APITemplateClient):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
-    def _get_resource_item_submitem(self, resource_item, subitem_id_or_name,
-                                    access_token=None, depth_path=None):
-        access_token = access_token or self._get_access_token(resource_item)
-        headers = {'X-Access-Token': access_token}
-        if depth_path:
-            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item.data.id,
-                                       depth_path, subitem_id_or_name)
-        else:
-            url = '{}/{}/{}'.format(self.prefix_path, resource_item.data.id,
-                                    subitem_id_or_name)
-
     @retry(stop_max_attempt_number=5)
     def _get_resource_items(self, params=None, feed='changes'):
         _params = (params or {}).copy()
@@ -251,19 +240,59 @@ class APIBaseClient(APITemplateClient):
             headers={'X-Access-Token': self._get_access_token(patched_obj)}
         )
 
-    # def patch_document(self, obj, document):
-    #     return self._patch_obj_resource_item(obj, document, 'documents')
-    #
-    # @verify_file
-    # def upload_document(self, file_, obj, use_ds_client=True,
-    #                     doc_registration=True):
-    #     return self._upload_resource_file(
-    #         '{}/{}/documents'.format(
-    #             self.prefix_path,
-    #             obj.data.id
-    #         ),
-    #         file_=file_,
-    #         headers={'X-Access-Token': self._get_access_token(obj)},
-    #         use_ds_client=use_ds_client,
-    #         doc_registration=doc_registration
-    #     )
+    def patch_document(self, obj, document):
+        return self._patch_obj_resource_item(obj, document, 'documents')
+
+    @verify_file
+    def upload_document(self, file_, obj, use_ds_client=True,
+                        doc_registration=True):
+        return self._upload_resource_file(
+            '{}/{}/documents'.format(
+                self.prefix_path,
+                obj.data.id
+            ),
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(obj)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
+        )
+
+    def get_resource_item(self, id, headers=None):
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, id),
+                                       headers=headers)
+
+    def patch_credentials(self, id, access_token):
+        return self._patch_resource_item(
+            '{}/{}/credentials'.format(self.prefix_path, id),
+            payload=None,
+            headers={'X-Access-Token': access_token}
+        )
+
+
+    def renew_cookies(self):
+        old_cookies = 'Old cookies:\n'
+        for k in self.session.cookies.keys():
+            old_cookies += '{}={}\n'.format(k, self.session.cookies[k])
+        logger.debug(old_cookies.strip())
+
+        self.session.cookies.clear()
+
+        response = self.session.request(
+            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
+        )
+        response.raise_for_status()
+
+        new_cookies = 'New cookies:\n'
+        for k in self.session.cookies.keys():
+            new_cookies += '{}={}\n'.format(k, self.session.cookies[k])
+        logger.debug(new_cookies)
+
+    def create_resource_item(self, resource_item):
+        return self._create_resource_item(self.prefix_path, resource_item)
+
+    def patch_resource_item(self, resource_item):
+        return self._patch_resource_item(
+            '{}/{}'.format(self.prefix_path, resource_item['data']['id']),
+            payload=resource_item,
+            headers={'X-Access-Token': self._get_access_token(resource_item)}
+        )
