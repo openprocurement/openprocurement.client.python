@@ -1,7 +1,6 @@
 import hashlib
-
-from .api_base_client import APITemplateClient
-from .exceptions import InvalidResponse
+from openprocurement_client.templates import APITemplateClient
+from openprocurement_client.exceptions import InvalidResponse
 
 from munch import munchify
 from simplejson import loads

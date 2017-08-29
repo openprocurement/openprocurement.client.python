@@ -1,9 +1,12 @@
 from __future__ import print_function
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey
+monkey.patch_all()
 
-from openprocurement_client.client import TendersClient
+from openprocurement_client.resources.tenders import TendersClient
 from openprocurement_client.exceptions import IdNotFound
-from openprocurement_client.utils import tenders_feed, get_tender_id_by_uaid, get_tender_by_uaid
+from openprocurement_client.utils import (
+    tenders_feed, get_tender_id_by_uaid, get_tender_by_uaid
+)
 
 from munch import munchify
 
@@ -49,7 +52,8 @@ class TestUtilsFunctions(unittest.TestCase):
                    ]
                 }"""))
 
-    @mock.patch('openprocurement_client.client.TendersClient.get_tenders')
+    @mock.patch('openprocurement_client.resources.tenders.TendersClient.'
+                'get_tenders')
     def test_tenders_feed(self, mock_get_tenders):
         mock_get_tenders.side_effect = [self.response.data, []]
         client = TestTendersClient()
@@ -61,8 +65,10 @@ class TestUtilsFunctions(unittest.TestCase):
             result.next()
 
     @mock.patch('openprocurement_client.utils.get_tender_id_by_uaid')
-    @mock.patch('openprocurement_client.client.TendersClient.get_tender')
-    def test_get_tender_by_uaid(self, mock_get_tender, mock_get_tender_id_by_uaid):
+    @mock.patch('openprocurement_client.resources.tenders.TendersClient.'
+                'get_tender')
+    def test_get_tender_by_uaid(self, mock_get_tender,
+                                mock_get_tender_id_by_uaid):
         mock_get_tender_id_by_uaid.return_value = 'tender_id'
         mock_get_tender.return_value = 'called get_tender'
         client = TestTendersClient()
@@ -73,12 +79,14 @@ class TestUtilsFunctions(unittest.TestCase):
         self.assertEqual(mock_get_tender.call_count, 1)
         self.assertEqual(result, 'called get_tender')
 
-    @mock.patch('openprocurement_client.client.TendersClient.get_tenders')
+    @mock.patch('openprocurement_client.resources.tenders.TendersClient.'
+                'get_tenders')
     def test_get_tender_id_by_uaid(self, mock_get_tenders):
         mock_get_tenders.side_effect = [self.response.data, []]
         client = TestTendersClient()
         with self.assertRaises(IdNotFound):
-            result = get_tender_id_by_uaid('f3849ade33534174b8402579152a5f41', client, id_field='dateModified')
+            result = get_tender_id_by_uaid('f3849ade33534174b8402579152a5f41',
+                                           client, id_field='dateModified')
             self.assertEqual(result, self.response.data[0]['id'])
 
 
