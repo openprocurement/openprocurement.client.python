@@ -1,35 +1,30 @@
 from __future__ import print_function
 from gevent import monkey
-
 monkey.patch_all()
-from gevent.pywsgi import WSGIServer
-from bottle import Bottle
-from StringIO import StringIO
-from collections import Iterable
-from simplejson import loads, load
-from munch import munchify
+
 import mock
 import sys
 import unittest
-from openprocurement_client.registry_client import LotsClient, AssetsClient
-from openprocurement_client.document_service_client \
-    import DocumentServiceClient
-from openprocurement_client.exceptions import InvalidResponse, ResourceNotFound
+from gevent.pywsgi import WSGIServer
+from bottle import Bottle
+from collections import Iterable
+from simplejson import load
+from munch import munchify
+from openprocurement_client.resources.assets import AssetsClient
+from openprocurement_client.resources.lots import LotsClient
+from openprocurement_client.exceptions import InvalidResponse
 from openprocurement_client.tests.data_dict import (
     TEST_ASSET_KEYS,
     TEST_LOT_KEYS,
-    TEST_TENDER_KEYS_LIMITED,
-    TEST_PLAN_KEYS,
-    TEST_CONTRACT_KEYS
 )
 from openprocurement_client.tests._server import \
-    API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
-    HOST_URL, location_error, PORT, ROOT, setup_routing, setup_routing_ds, \
-    resource_partition, resource_filter
+    API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
+    HOST_URL, PORT, ROOT, setup_routing, setup_routing_ds, \
+    resource_filter
 
 
 class BaseTestClass(unittest.TestCase):
-    def setting_up(self, client, resource=None):
+    def setting_up(self, client):
         self.app = Bottle()
         self.app.router.add_filter('resource_filter', resource_filter)
         setup_routing(self.app)
@@ -40,13 +35,13 @@ class BaseTestClass(unittest.TestCase):
             print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2],
                   file=sys.stderr)
             raise error
-        ds_client = getattr(self, 'ds_client', None)
+
+        ds_config = {
+            'host_url': DS_HOST_URL,
+            'auth_ds': AUTH_DS_FAKE
+        }
         self.client = client('', host_url=HOST_URL, api_version=API_VERSION,
-                             ds_client=ds_client)
-        if resource:
-            self.client = client(
-                '', host_url=HOST_URL, api_version=API_VERSION,
-                ds_client=ds_client, resource=resource)
+                             ds_config=ds_config)
 
     @classmethod
     def setting_up_ds(cls):
@@ -59,14 +54,6 @@ class BaseTestClass(unittest.TestCase):
             print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2],
                   file=sys.stderr)
             raise error
-
-        cls.ds_client = DocumentServiceClient(host_url=DS_HOST_URL,
-                                              auth_ds=AUTH_DS_FAKE)
-        # to test units performing file operations outside the DS uncomment
-        # following lines:
-        # import logging
-        # logging.basicConfig()
-        # cls.ds_client = None
 
         setup_routing_ds(cls.app_ds)
 
@@ -81,7 +68,7 @@ class BaseTestClass(unittest.TestCase):
 
 class AssetsRegistryTestCase(BaseTestClass):
     def setUp(self):
-        self.setting_up(client=AssetsClient, resource='assets')
+        self.setting_up(client=AssetsClient)
 
         with open(ROOT + 'assets.json') as assets:
             self.assets = munchify(load(assets))
@@ -98,10 +85,10 @@ class AssetsRegistryTestCase(BaseTestClass):
         self.assertIsInstance(assets, Iterable)
         self.assertEqual(assets, self.assets.data)
 
-    @mock.patch('openprocurement_client.registry_client.AssetsClient.request')
+    @mock.patch('openprocurement_client.resources.assets.AssetsClient.request')
     def test_get_assets_failed(self, mock_request):
         mock_request.return_value = munchify({'status_code': 404})
-        with self.assertRaises(InvalidResponse) as e:
+        with self.assertRaises(InvalidResponse):
             self.client.get_assets(params={'offset': 'offset_value'})
 
     def test_get_asset(self):
@@ -111,17 +98,18 @@ class AssetsRegistryTestCase(BaseTestClass):
 
     def test_patch_asset(self):
         setup_routing(self.app, routes=["asset_patch"])
-        self.asset.data.description = 'test_patch_asset'
-
-        patched_asset = self.client.patch_resource_item(self.asset)
+        asset_id = self.asset.data.id
+        patch_data = {'data': {'description': 'test_patch_asset'}}
+        patched_asset = self.client.patch_resource_item(asset_id,
+                                                        patch_data)
         self.assertEqual(patched_asset.data.id, self.asset.data.id)
         self.assertEqual(patched_asset.data.description,
-                         self.asset.data.description)
+                         patch_data['data']['description'])
 
 
 class LotsRegistryTestCase(BaseTestClass):
     def setUp(self):
-        self.setting_up(client=LotsClient, resource='lots')
+        self.setting_up(client=LotsClient)
 
         with open(ROOT + 'lots.json') as lots:
             self.lots = munchify(load(lots))
@@ -137,10 +125,10 @@ class LotsRegistryTestCase(BaseTestClass):
         self.assertIsInstance(lots, Iterable)
         self.assertEqual(lots, self.lots.data)
 
-    @mock.patch('openprocurement_client.registry_client.LotsClient.request')
+    @mock.patch('openprocurement_client.resources.lots.LotsClient.request')
     def test_get_lots_failed(self, mock_request):
         mock_request.return_value = munchify({'status_code': 404})
-        with self.assertRaises(InvalidResponse) as e:
+        with self.assertRaises(InvalidResponse):
             self.client.get_lots(params={'offset': 'offset_value'})
 
     def test_get_lot(self):
@@ -150,12 +138,12 @@ class LotsRegistryTestCase(BaseTestClass):
 
     def test_patch_lot(self):
         setup_routing(self.app, routes=["lot_patch"])
-        self.lot.data.description = 'test_patch_lot'
-
-        patched_lot = self.client.patch_resource_item(self.lot)
-        self.assertEqual(patched_lot.data.id, self.lot.data.id)
+        lot_id = self.lot.data.id
+        patch_data = {'data': {'description': 'test_patch_lot'}}
+        patched_lot = self.client.patch_resource_item(lot_id, patch_data)
+        self.assertEqual(patched_lot.data.id, lot_id)
         self.assertEqual(patched_lot.data.description,
-                         self.lot.data.description)
+                         patch_data['data']['description'])
 
 
 def suite():

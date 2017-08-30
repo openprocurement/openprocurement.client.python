@@ -1,5 +1,4 @@
 from setuptools import find_packages, setup
-import os
 
 version = '2.0b7'
 
@@ -45,9 +44,9 @@ setup(
         # -*- Extra requirements: -*-
     ],
     tests_require=tests_require,
-    extras_require = tests_require,
+    extras_require=tests_require,
     entry_points="""
     # -*- Entry points: -*-
     """,
-    test_suite="openprocurement_client.tests"
+    test_suite="openprocurement_client.tests.main:suite"
 )
