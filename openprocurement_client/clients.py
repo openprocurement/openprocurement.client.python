@@ -9,6 +9,7 @@ from simplejson import loads
 from retrying import retry
 from munch import munchify
 
+from .exceptions import RequestFailed
 from openprocurement_client.resources.document_service import \
     DocumentServiceClient
 
@@ -77,6 +78,10 @@ class APIBaseClient(APITemplateClient):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
+    @retry(wait_exponential_multiplier=200,
+           wait_exponential_max=1200,
+           stop_max_delay=45000,
+           retry_on_exception=lambda exc: isinstance(exc, RequestFailed))
     def _get_resource_item(self, url, headers=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
@@ -102,6 +107,10 @@ class APIBaseClient(APITemplateClient):
 
         raise InvalidResponse(response)
 
+    @retry(wait_exponential_multiplier=200,
+           wait_exponential_max=1200,
+           stop_max_delay=45000,
+           retry_on_exception=lambda exc: isinstance(exc, RequestFailed))
     def _patch_resource_item(self, url, payload, headers=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
