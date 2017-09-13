@@ -770,7 +770,7 @@ class ContractingUserTestCase(BaseTestClass):
 
     def test_create_change(self):
         setup_routing(self.app, routes=['contract_subpage_item_create'])
-        change = self.client.create_change(self.contract, self.change)
+        change = self.client.create_change(self.contract.data.id, '', self.change)
         self.assertEqual(change, self.change)
 
     ###########################################################################
@@ -807,8 +807,8 @@ class ContractingUserTestCase(BaseTestClass):
         patched_change = munchify(patched_change)
 
         response_change = self.client.patch_change(
-            self.contract, self.change.data.id,
-            data=patch_change_data
+            self.contract.data.id, self.change.data.id,
+            '', data=patch_change_data
         )
 
         self.assertEqual(response_change, patched_change)
@@ -828,7 +828,8 @@ class ContractingUserTestCase(BaseTestClass):
     def test_patch_contract(self):
         setup_routing(self.app, routes=["contract_patch"])
         self.contract.data.description = 'test_patch_contract'
-        patched_contract = self.client.patch_contract(self.contract)
+        patched_contract = self.client.patch_contract(self.contract.data.id,
+                                                      '', self.contract)
         self.assertEqual(patched_contract.data.id, self.contract.data.id)
         self.assertEqual(patched_contract.data.description, self.contract.data.description)
 
