@@ -255,3 +255,21 @@ class APIBaseClient(APITemplateClient):
             payload=None,
             headers={'X-Access-Token': access_token}
         )
+
+    def renew_cookies(self):
+        old_cookies = 'Old cookies:\n'
+        for k in self.session.cookies.keys():
+            old_cookies += '{}={}\n'.format(k, self.session.cookies[k])
+        logger.debug(old_cookies.strip())
+
+        self.session.cookies.clear()
+
+        response = self.session.request(
+            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
+        )
+        response.raise_for_status()
+
+        new_cookies = 'New cookies:\n'
+        for k in self.session.cookies.keys():
+            new_cookies += '{}={}\n'.format(k, self.session.cookies[k])
+        logger.debug(new_cookies)

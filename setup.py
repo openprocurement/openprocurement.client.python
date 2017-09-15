@@ -1,7 +1,6 @@
 from setuptools import find_packages, setup
-import os
 
-version = '2.0b7'
+version = '2.0.0'
 
 tests_require = {
     'test': [
@@ -24,16 +23,13 @@ setup(
         "Programming Language :: Python",
     ],
     keywords='',
-
-    author='',
-    author_email='',
+    author='Quintagroup, Ltd.',
+    author_email='info@quintagroup.com',
     url='https://github.com/openprocurement/openprocurement.client.python',
     license='Apache Software License 2.0',
-
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     zip_safe=False,
-
     install_requires=[
         'gevent',
         'iso8601',
@@ -45,7 +41,7 @@ setup(
         # -*- Extra requirements: -*-
     ],
     tests_require=tests_require,
-    extras_require = tests_require,
+    extras_require=tests_require,
     entry_points="""
     # -*- Entry points: -*-
     """,
