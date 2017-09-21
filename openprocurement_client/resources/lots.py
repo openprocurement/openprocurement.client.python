@@ -15,3 +15,5 @@ class LotsClient(APIResourceClient):
     get_lot = APIResourceClient.get_resource_item
 
     get_lots = APIResourceClient.get_resource_items
+
+    patch_lot = APIResourceClient.patch_resource_item
