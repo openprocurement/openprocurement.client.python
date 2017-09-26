@@ -12,11 +12,6 @@ class PlansClient(APIResourceClient):
     api_version = '0'
     resource = PLANS
 
-    def __init__(self, *args, **kwargs):
-
-        super(PlansClient, self).__init__(resource=self.resource, *args,
-                                          **kwargs)
-
     ###########################################################################
     #             GET ITEMS LIST API METHODS
     ###########################################################################

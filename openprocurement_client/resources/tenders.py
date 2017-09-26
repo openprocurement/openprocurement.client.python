@@ -4,16 +4,14 @@ from openprocurement_client.clients import (
 )
 from openprocurement_client.constants import (
     AWARDS, BIDS, CANCELLATIONS, COMPLAINTS, CONTRACTS, DOCUMENTS,
-    LOTS, QUALIFICATIONS, QUESTIONS
+    LOTS, QUALIFICATIONS, QUESTIONS, TENDERS
 )
 from retrying import retry
 
 
 class TendersClient(APIResourceClient):
     """client for tenders"""
-
-    def __init__(self, *args, **kwargs):
-        super(TendersClient, self).__init__(*args, **kwargs)
+    resource = TENDERS
 
     ###########################################################################
     #                         CREATE ITEM API METHODS
@@ -306,6 +304,7 @@ class Client(TendersClient):
 
 
 class TendersClientSync(APIResourceClientSync):
+    resource = TENDERS
 
     sync_tenders = APIResourceClientSync.sync_resource_items
 
