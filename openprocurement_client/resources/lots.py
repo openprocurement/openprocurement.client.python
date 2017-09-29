@@ -11,10 +11,6 @@ class LotsClient(APIResourceClient):
 
     resource = LOTS
 
-    def __init__(self, *args, **kwargs):
-        super(LotsClient, self).__init__(resource=self.resource, *args,
-                                         **kwargs)
-
     get_lots = APIResourceClient.get_resource_items
 
     @retry(wait_exponential_multiplier=200,

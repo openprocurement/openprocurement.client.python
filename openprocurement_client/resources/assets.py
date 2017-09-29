@@ -11,10 +11,6 @@ class AssetsClient(APIResourceClient):
 
     resource = ASSETS
 
-    def __init__(self, *args, **kwargs):
-        super(AssetsClient, self).__init__(resource=self.resource, *args,
-                                           **kwargs)
-
     get_assets = APIResourceClient.get_resource_items
 
     @retry(wait_exponential_multiplier=200,

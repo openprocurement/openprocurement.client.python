@@ -9,8 +9,7 @@ from simplejson import loads
 from retrying import retry
 from munch import munchify
 
-from openprocurement_client.resources.document_service import \
-    DocumentServiceClient
+from openprocurement_client.resources.document_service import DocumentServiceClient
 
 
 LOGGER = logging.getLogger(__name__)
@@ -23,10 +22,11 @@ class APIBaseClient(APITemplateClient):
     host_url = 'https://api-sandbox.openprocurement.org'
     api_version = '0'
     headers = {'Content-Type': 'application/json'}
+    resource = ''
 
     def __init__(self,
                  key='',
-                 resource='tenders',
+                 resource=None,
                  host_url=None,
                  api_version=None,
                  params=None,
@@ -52,9 +52,10 @@ class APIBaseClient(APITemplateClient):
             'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
         )
         response.raise_for_status()
-        self.resource = resource
+        # print (self.resource, resource)
+        self.resource = self.resource or resource
         self.prefix_path = '{}/api/{}/{}'.format(self.host_url,
-                                                 self.api_version, resource)
+                                                 self.api_version, self.resource)
 
     def _create_resource_item(self, url, payload, headers=None, method='POST'):
         _headers = self.headers.copy()
@@ -181,9 +182,6 @@ class APIBaseClient(APITemplateClient):
 
 class APIResourceClient(APIBaseClient):
     """ API Resource Client """
-
-    def __init__(self, *args, **kwargs):
-        super(APIResourceClient, self).__init__(*args, **kwargs)
 
     ###########################################################################
     #                        CREATE CLIENT METHODS

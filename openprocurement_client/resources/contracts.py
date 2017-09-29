@@ -7,10 +7,6 @@ class ContractingClient(APIResourceClient):
     """ Contracting client """
     resource = CONTRACTS
 
-    def __init__(self, *args, **kwargs):
-        super(ContractingClient, self).__init__(resource=self.resource, *args,
-                                                **kwargs)
-
     def create_contract(self, contract):
         return self.create_resource_item(contract)
 

@@ -40,7 +40,10 @@ setup(
         'retrying',
         'simplejson',
         'requests',
-        'python-magic'
+        'python-magic',
+        'bottle',
+        'mock',
+        'nose'
         # -*- Extra requirements: -*-
     ],
     tests_require=tests_require,
