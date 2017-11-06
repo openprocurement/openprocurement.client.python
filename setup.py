@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = '2.0b7'
+version = '2.1+sale'
 
 tests_require = {
     'test': [
