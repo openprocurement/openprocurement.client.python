@@ -43,7 +43,8 @@ setup(
         'python-magic',
         'bottle',
         'mock',
-        'nose'
+        'nose',
+        'future'
         # -*- Extra requirements: -*-
     ],
     tests_require=tests_require,

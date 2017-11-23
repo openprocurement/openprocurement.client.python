@@ -11,7 +11,7 @@ from openprocurement_client.exceptions import (
 from os import path
 from time import sleep, time
 import logging
-
+from past.builtins import basestring
 
 LOGGER = logging.getLogger()
 
