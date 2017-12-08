@@ -93,6 +93,19 @@ class TendersClient(APIBaseClient):
     def get_awards(self, tender):
         return self._get_tender_resource_list(tender, 'awards')
 
+
+    def get_historical_number(self, tender):
+        response = self.request('GET','{}/{}/historical'.format(self.prefix_path, tender.data.id))
+        return response.headers['X-Revision-N']
+
+
+    def get_historical(self, tender, number=''):
+        return self._get_resource_item(
+            '{}/{}/historical'.format(self.prefix_path, tender.data.id),
+             headers={'X-Revision-N': number}
+        )
+
+
     def get_lots(self, tender):
         return self._get_tender_resource_list(tender, 'lots')
 

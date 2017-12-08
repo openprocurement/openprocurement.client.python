@@ -78,14 +78,14 @@ class APITemplateClient(object):
             method, path, data=payload, json=json, headers=_headers,
             params=params_dict, files=file_
         )
-        logger.warning(response.status_code)
+        # logger.warning(response.status_code)
         while response.status_code in (412, 500):
             logger.warning('error')
             response = self.session.request(
                 method, path, data=payload, json=json, headers=_headers,
                 params=params_dict, files=file_
             )
-            logger.warning(response.status_code)
+            # logger.warning(response.status_code)
         if response.status_code >= 400:
             raise http_exceptions_dict\
                 .get(response.status_code, RequestFailed)(response)
