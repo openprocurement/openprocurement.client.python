@@ -26,22 +26,26 @@ class AuctionsClient(APIResourceClient):
     def create_auction(self, auction):
         return self.create_resource_item(auction)
 
-    def create_question(self, auction_id, question):
+    def create_question(self, auction_id, question, access_token=None):
         return self.create_resource_item_subitem(
-            auction_id, question, QUESTIONS
+            auction_id, question, QUESTIONS, access_token=access_token
         )
 
-    def create_bid(self, auction_id, bid):
-        return self.create_resource_item_subitem(auction_id, bid, BIDS)
-
-    def create_cancellation(self, auction_id, cancellation):
+    def create_bid(self, auction_id, bid, access_token=None):
         return self.create_resource_item_subitem(
-            auction_id, cancellation, CANCELLATIONS
+            auction_id, bid, BIDS, access_token=access_token
         )
 
-    def create_thin_document(self, auction_id, document_data):
+    def create_cancellation(self, auction_id, cancellation,
+                            access_token=None):
         return self.create_resource_item_subitem(
-            auction_id, document_data, DOCUMENTS
+            auction_id, cancellation, CANCELLATIONS,
+            access_token=access_token
+        )
+
+    def create_thin_document(self, auction_id, document_data, access_token=None):
+        return self.create_resource_item_subitem(
+            auction_id, document_data, DOCUMENTS, access_token=access_token
         )
 
     ###########################################################################
@@ -55,19 +59,23 @@ class AuctionsClient(APIResourceClient):
     def get_latest_auctions(self, date):
         return self.get_latest_resource_items(date)
 
-    def get_questions(self, auction_id):
-        return self.get_resource_item_subitem(auction_id, QUESTIONS)
+    def get_questions(self, auction_id, access_token=None):
+        return self.get_resource_item_subitem(auction_id, QUESTIONS,
+                                              access_token=access_token)
 
-    def get_documents(self, auction_id):
-        return self.get_resource_item_subitem(auction_id, DOCUMENTS)
+    def get_documents(self, auction_id, access_token=None):
+        return self.get_resource_item_subitem(auction_id, DOCUMENTS,
+                                              access_token=access_token)
 
-    def get_awards_documents(self, auction_id, award_id):
+    def get_awards_documents(self, auction_id, award_id, access_token=None):
         return self.get_resource_item_subitem(
-            auction_id, DOCUMENTS, depth_path='{}/{}'.format(AWARDS, award_id)
+            auction_id, DOCUMENTS, depth_path='{}/{}'.format(AWARDS, award_id),
+            access_token=access_token
         )
 
-    def get_awards(self, auction_id):
-        return self.get_resource_item_subitem(auction_id, AWARDS)
+    def get_awards(self, auction_id, access_token=None):
+        return self.get_resource_item_subitem(auction_id, AWARDS,
+                                              access_token=access_token)
 
     ###########################################################################
     #                           GET ITEM API METHODS
@@ -76,9 +84,10 @@ class AuctionsClient(APIResourceClient):
     def get_auction(self, auction_id):
         return self.get_resource_item(auction_id)
 
-    def get_question(self, auction_id, question_id):
+    def get_question(self, auction_id, question_id, access_token=None):
         return self.get_resource_item_subitem(
-            auction_id, question_id, depth_path=QUESTIONS
+            auction_id, question_id, depth_path=QUESTIONS,
+            access_token=access_token
         )
 
     def get_bid(self, auction_id, bid_id, access_token=None):
@@ -90,64 +99,71 @@ class AuctionsClient(APIResourceClient):
     #                        PATCH ITEM API METHODS
     ###########################################################################
 
-    def patch_auction(self, auction_id, patch_data):
-        return self.patch_resource_item(auction_id, patch_data)
+    def patch_auction(self, auction_id, patch_data, access_token=None):
+        return self.patch_resource_item(auction_id, patch_data,
+                                        access_token=access_token)
 
-    def patch_question(self, auction_id, question, question_id):
+    def patch_question(self, auction_id, question, question_id,
+                       access_token=None):
         return self.patch_resource_item_subitem(
-            auction_id, question, QUESTIONS, subitem_id=question_id
+            auction_id, question, QUESTIONS,
+            subitem_id=question_id, access_token=access_token
         )
 
-    def patch_bid(self, auction_id, bid, bid_id):
+    def patch_bid(self, auction_id, bid, bid_id, access_token=None):
         return self.patch_resource_item_subitem(
-            auction_id, bid, BIDS, subitem_id=bid_id
+            auction_id, bid, BIDS, subitem_id=bid_id, access_token=access_token
         )
 
     def patch_bid_document(self, auction_id, document_data, bid_id,
-                           document_id):
+                           document_id, access_token=None):
         depth_path = '{}/{}'.format(BIDS, bid_id)
         return self.patch_resource_item_subitem(
             auction_id, document_data, DOCUMENTS, subitem_id=document_id,
-            depth_path=depth_path
+            depth_path=depth_path, access_token=access_token
         )
 
-    def patch_award(self, auction_id, award, award_id):
+    def patch_award(self, auction_id, award, award_id, access_token=None):
         return self.patch_resource_item_subitem(
-            auction_id, award, AWARDS, subitem_id=award_id
+            auction_id, award, AWARDS, subitem_id=award_id,
+            access_token=access_token
         )
 
     def patch_award_document(self, auction_id, document_data, award_id,
-                             document_id):
+                             document_id, access_token=None):
         depth_path = '{}/{}'.format(AWARDS, award_id)
         return self.patch_resource_item_subitem(
             auction_id, document_data, DOCUMENTS, subitem_id=document_id,
-            depth_path=depth_path
+            depth_path=depth_path, access_token=access_token
         )
 
-    def patch_cancellation(self, auction_id, cancellation, cancellation_id):
+    def patch_cancellation(self, auction_id, cancellation, cancellation_id,
+                           access_token=None):
         return self.patch_resource_item_subitem(
             auction_id, cancellation, CANCELLATIONS,
-            subitem_id=cancellation_id
+            subitem_id=cancellation_id, access_token=access_token
         )
 
-    def patch_cancellation_document(self, auction_id, cancellation,
-                                    cancellation_id, cancellation_doc_id):
+    def patch_cancellation_document(self, auction_id, cancellation, cancellation_id,
+                                    cancellation_doc_id, access_token=None):
         depth_path = '{}/{}'.format(CANCELLATIONS, cancellation_id)
         return self.patch_resource_item_subitem(
-            auction_id, cancellation, DOCUMENTS,
-            subitem_id=cancellation_doc_id, depth_path=depth_path
+            auction_id, cancellation, DOCUMENTS, subitem_id=cancellation_doc_id,
+            depth_path=depth_path, access_token=access_token
         )
 
-    def patch_contract(self, auction_id, contract, contract_id):
+    def patch_contract(self, auction_id, contract, contract_id, access_token=None):
         return self.patch_resource_item_subitem(
-            auction_id, contract, CONTRACTS, subitem_id=contract_id
+            auction_id, contract, CONTRACTS, subitem_id=contract_id,
+            access_token=access_token
         )
 
     def patch_contract_document(self, auction_id, document_data, contract_id,
-                                document_id):
+                                document_id, access_token=None):
         return self.patch_resource_item_subitem(
             auction_id, document_data, DOCUMENTS, subitem_id=document_id,
-            depth_path='{}/{}'.format(CONTRACTS, contract_id)
+            depth_path='{}/{}'.format(CONTRACTS, contract_id),
+            access_token=access_token
         )
 
     ###########################################################################
