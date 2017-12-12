@@ -20,39 +20,47 @@ class TendersClient(APIResourceClient):
     def create_tender(self, tender):
         return self.create_resource_item(tender)
 
-    def create_question(self, tender_id, question):
+    def create_question(self, tender_id, question, access_token=None):
         return self.create_resource_item_subitem(
-            tender_id, question, QUESTIONS
+            tender_id, question, QUESTIONS, access_token=access_token
         )
 
-    def create_bid(self, tender_id, bid):
-        return self.create_resource_item_subitem(tender_id, bid, BIDS)
-
-    def create_lot(self, tender_id, lot):
-        return self.create_resource_item_subitem(tender_id, lot, LOTS)
-
-    def create_award(self, tender_id, award):
-        return self.create_resource_item_subitem(tender_id, award, AWARDS)
-
-    def create_cancellation(self, tender_id, cancellation):
+    def create_bid(self, tender_id, bid, access_token=None):
         return self.create_resource_item_subitem(
-            tender_id, cancellation, CANCELLATIONS
+            tender_id, bid, BIDS, access_token=access_token
         )
 
-    def create_complaint(self, tender_id, complaint):
+    def create_lot(self, tender_id, lot, access_token=None):
         return self.create_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS
+            tender_id, lot, LOTS, access_token=access_token
         )
 
-    def create_award_complaint(self, tender_id, complaint, award_id):
+    def create_award(self, tender_id, award, access_token=None):
+        return self.create_resource_item_subitem(
+            tender_id, award, AWARDS, access_token=access_token
+        )
+
+    def create_cancellation(self, tender_id, cancellation, access_token=None):
+        return self.create_resource_item_subitem(
+            tender_id, cancellation, CANCELLATIONS, access_token=access_token
+        )
+
+    def create_complaint(self, tender_id, complaint, access_token=None):
+        return self.create_resource_item_subitem(
+            tender_id, complaint, COMPLAINTS, access_token=access_token
+        )
+
+    def create_award_complaint(self, tender_id, complaint, award_id,
+                               access_token=None):
         depth_path = '{}/{}'.format(AWARDS, award_id)
         return self.create_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS, depth_path=depth_path
+            tender_id, complaint, COMPLAINTS,
+            depth_path=depth_path, access_token=access_token
         )
 
-    def create_thin_document(self, tender_id, document_data):
+    def create_thin_document(self, tender_id, document_data, access_token=None):
         return self.create_resource_item_subitem(
-            tender_id, document_data, DOCUMENTS
+            tender_id, document_data, DOCUMENTS, access_token=access_token
         )
 
     ###########################################################################
@@ -66,28 +74,35 @@ class TendersClient(APIResourceClient):
     def get_latest_tenders(self, date):
         return self.get_latest_resource_items(date)
 
-    def get_questions(self, tender_id):
-        return self.get_resource_item_subitem(tender_id, QUESTIONS)
+    def get_questions(self, tender_id, access_token=None):
+        return self.get_resource_item_subitem(tender_id, QUESTIONS,
+                                              access_token=access_token)
 
-    def get_documents(self, tender_id):
-        return self.get_resource_item_subitem(tender_id, DOCUMENTS)
+    def get_documents(self, tender_id, access_token=None):
+        return self.get_resource_item_subitem(tender_id, DOCUMENTS,
+                                              access_token=access_token)
 
-    def get_awards_documents(self, tender_id, award_id):
+    def get_awards_documents(self, tender_id, award_id, access_token=None):
         return self.get_resource_item_subitem(
-            tender_id, DOCUMENTS, depth_path='{}/{}'.format(AWARDS, award_id)
+            tender_id, DOCUMENTS, depth_path='{}/{}'.format(AWARDS, award_id),
+            access_token=access_token
         )
 
-    def get_qualification_documents(self, tender_id, qualification_id):
+    def get_qualification_documents(self, tender_id, qualification_id,
+                                    access_token=None):
         return self.get_resource_item_subitem(
             tender_id, DOCUMENTS,
-            depth_path='{}/{}'.format(QUALIFICATIONS, qualification_id)
+            depth_path='{}/{}'.format(QUALIFICATIONS, qualification_id),
+            access_token=access_token
         )
 
-    def get_awards(self, tender_id):
-        return self.get_resource_item_subitem(tender_id, AWARDS)
+    def get_awards(self, tender_id, access_token=None):
+        return self.get_resource_item_subitem(tender_id, AWARDS,
+                                              access_token=access_token)
 
-    def get_lots(self, tender_id):
-        return self.get_resource_item_subitem(tender_id, LOTS)
+    def get_lots(self, tender_id, access_token=None):
+        return self.get_resource_item_subitem(tender_id, LOTS,
+                                              access_token=access_token)
 
     ###########################################################################
     #                           GET ITEM API METHODS
@@ -96,9 +111,10 @@ class TendersClient(APIResourceClient):
     def get_tender(self, tender_id):
         return self.get_resource_item(tender_id)
 
-    def get_question(self, tender_id, question_id):
+    def get_question(self, tender_id, question_id, access_token=None):
         return self.get_resource_item_subitem(
-            tender_id, question_id, depth_path=QUESTIONS
+            tender_id, question_id, depth_path=QUESTIONS,
+            access_token=access_token
         )
 
     def get_bid(self, tender_id, bid_id, access_token=None):
@@ -106,96 +122,109 @@ class TendersClient(APIResourceClient):
             tender_id, bid_id, depth_path=BIDS, access_token=access_token
         )
 
-    def get_lot(self, tender_id, lot_id):
+    def get_lot(self, tender_id, lot_id, access_token=None):
         return self.get_resource_item_subitem(
-            tender_id, lot_id, depth_path=LOTS
+            tender_id, lot_id, depth_path=LOTS, access_token=access_token
         )
 
     ###########################################################################
     #                        PATCH ITEM API METHODS
     ###########################################################################
 
-    def patch_tender(self, tender_id, patch_data):
-        return self.patch_resource_item(tender_id, patch_data)
+    def patch_tender(self, tender_id, patch_data, access_token=None):
+        return self.patch_resource_item(tender_id, patch_data,
+                                        access_token=access_token)
 
-    def patch_question(self, tender_id, question, question_id):
+    def patch_question(self, tender_id, question, question_id, access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, question, QUESTIONS, subitem_id=question_id
+            tender_id, question, QUESTIONS,
+            subitem_id=question_id, access_token=access_token
         )
 
-    def patch_bid(self, tender_id, bid, bid_id):
+    def patch_bid(self, tender_id, bid, bid_id, access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, bid, BIDS, subitem_id=bid_id
+            tender_id, bid, BIDS, subitem_id=bid_id, access_token=access_token
         )
 
     def patch_bid_document(self, tender_id, document_data, bid_id,
-                           document_id):
+                           document_id, access_token=None):
         depth_path = '{}/{}'.format(BIDS, bid_id)
         return self.patch_resource_item_subitem(
             tender_id, document_data, DOCUMENTS, subitem_id=document_id,
-            depth_path=depth_path
+            depth_path=depth_path, access_token=access_token
         )
 
-    def patch_award(self, tender_id, award, award_id):
+    def patch_award(self, tender_id, award, award_id, access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, award, AWARDS, subitem_id=award_id
+            tender_id, award, AWARDS, subitem_id=award_id,
+            access_token=access_token
         )
 
     def patch_award_document(self, tender_id, document_data, award_id,
-                             document_id):
+                             document_id, access_token=None):
         depth_path = '{}/{}'.format(AWARDS, award_id)
         return self.patch_resource_item_subitem(
             tender_id, document_data, DOCUMENTS, subitem_id=document_id,
-            depth_path=depth_path
+            depth_path=depth_path, access_token=access_token
         )
 
-    def patch_cancellation(self, tender_id, cancellation, cancellation_id):
+    def patch_cancellation(self, tender_id, cancellation, cancellation_id,
+                           access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, cancellation, CANCELLATIONS,
-            subitem_id=cancellation_id
+            subitem_id=cancellation_id, access_token=access_token
         )
 
     def patch_cancellation_document(self, tender_id, cancellation,
-                                    cancellation_id, cancellation_doc_id):
+                                    cancellation_id, cancellation_doc_id,
+                                    access_token=None):
         depth_path = '{}/{}'.format(CANCELLATIONS, cancellation_id)
         return self.patch_resource_item_subitem(
             tender_id, cancellation, DOCUMENTS,
-            subitem_id=cancellation_doc_id, depth_path=depth_path
+            subitem_id=cancellation_doc_id, depth_path=depth_path,
+            access_token=access_token
         )
 
-    def patch_complaint(self, tender_id, complaint, complaint_id):
+    def patch_complaint(self, tender_id, complaint, complaint_id,
+                        access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id
+            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
+            access_token=access_token
         )
 
     def patch_award_complaint(self, tender_id, complaint, award_id,
-                              complaint_id):
+                              complaint_id, access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
-            depth_path='{}/{}'.format(AWARDS, award_id)
+            depth_path='{}/{}'.format(AWARDS, award_id),
+            access_token=access_token
         )
 
-    def patch_lot(self, tender_id, lot, lot_id):
+    def patch_lot(self, tender_id, lot, lot_id, access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, lot, LOTS, subitem_id=lot_id
+            tender_id, lot, LOTS, subitem_id=lot_id, access_token=access_token
         )
 
-    def patch_qualification(self, tender_id, qualification, qualification_id):
+    def patch_qualification(self, tender_id, qualification, qualification_id,
+                            access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, qualification, QUALIFICATIONS,
-            subitem_id=qualification_id
+            subitem_id=qualification_id, access_token=access_token
         )
 
-    def patch_contract(self, tender_id, contract, contract_id):
+    def patch_contract(self, tender_id, contract, contract_id, access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, contract, CONTRACTS, subitem_id=contract_id
+            tender_id, contract, CONTRACTS, subitem_id=contract_id,
+            access_token=access_token
         )
 
     def patch_contract_document(self, tender_id, document_data, contract_id,
-                                document_id):
+                                document_id, access_token=None):
         return self.patch_resource_item_subitem(
-            tender_id, document_data, DOCUMENTS, subitem_id=document_id,
-            depth_path='{}/{}'.format(CONTRACTS, contract_id)
+            tender_id, document_data, DOCUMENTS,
+            subitem_id=document_id,
+            depth_path='{}/{}'.format(CONTRACTS, contract_id),
+            access_token=access_token
         )
 
     ###########################################################################
