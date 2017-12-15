@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
 
-version = '2.1+sale'
+version = '2.1.1+sale'
 
-tests_require = {
+extras_require = {
     'test': [
         'bottle',
         'mock',
@@ -46,8 +46,7 @@ setup(
         'nose'
         # -*- Extra requirements: -*-
     ],
-    tests_require=tests_require,
-    extras_require=tests_require,
+    extras_require=extras_require,
     entry_points="""
     # -*- Entry points: -*-
     """,
