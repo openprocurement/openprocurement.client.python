@@ -96,11 +96,21 @@ class AssetsRegistryTestCase(BaseTestClass):
         asset = self.client.get_asset(TEST_ASSET_KEYS.asset_id)
         self.assertEqual(asset, self.asset)
 
-    def test_patch_asset(self):
+    def test_patch_resource_item(self):
         setup_routing(self.app, routes=["asset_patch"])
         asset_id = self.asset.data.id
         patch_data = {'data': {'description': 'test_patch_asset'}}
         patched_asset = self.client.patch_resource_item(asset_id,
+                                                        patch_data)
+        self.assertEqual(patched_asset.data.id, self.asset.data.id)
+        self.assertEqual(patched_asset.data.description,
+                         patch_data['data']['description'])
+
+    def test_patch_asset(self):
+        setup_routing(self.app, routes=["asset_patch"])
+        asset_id = self.asset.data.id
+        patch_data = {'data': {'description': 'test_patch_asset'}}
+        patched_asset = self.client.patch_asset(asset_id,
                                                         patch_data)
         self.assertEqual(patched_asset.data.id, self.asset.data.id)
         self.assertEqual(patched_asset.data.description,
@@ -136,11 +146,20 @@ class LotsRegistryTestCase(BaseTestClass):
         lot = self.client.get_lot(TEST_LOT_KEYS.lot_id)
         self.assertEqual(lot, self.lot)
 
-    def test_patch_lot(self):
+    def test_patch_resource_item(self):
         setup_routing(self.app, routes=["lot_patch"])
         lot_id = self.lot.data.id
         patch_data = {'data': {'description': 'test_patch_lot'}}
         patched_lot = self.client.patch_resource_item(lot_id, patch_data)
+        self.assertEqual(patched_lot.data.id, lot_id)
+        self.assertEqual(patched_lot.data.description,
+                         patch_data['data']['description'])
+
+    def test_patch_lot(self):
+        setup_routing(self.app, routes=["lot_patch"])
+        lot_id = self.lot.data.id
+        patch_data = {'data': {'description': 'test_patch_lot'}}
+        patched_lot = self.client.patch_lot(lot_id, patch_data)
         self.assertEqual(patched_lot.data.id, lot_id)
         self.assertEqual(patched_lot.data.description,
                          patch_data['data']['description'])
