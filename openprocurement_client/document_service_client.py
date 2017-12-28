@@ -20,10 +20,11 @@ class DocumentServiceClient(APITemplateClient):
     def __init__(self,
                  host_url,
                  auth_ds,
-                 headers=None):
+                 headers=None,
+                 historical=False):
 
         super(DocumentServiceClient, self)\
-            .__init__(login_pass=auth_ds, headers=headers)
+            .__init__(login_pass=auth_ds, headers=headers, historical=False)
 
         self.host_url = host_url or self.host_url
         self.host_url_register = \

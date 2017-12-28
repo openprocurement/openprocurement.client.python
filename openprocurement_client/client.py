@@ -24,10 +24,11 @@ class TendersClient(APIBaseClient):
                  api_version=None,
                  params=None,
                  ds_client=None,
-                 user_agent=None):
+                 user_agent=None,
+                 historical=False):
         super(TendersClient, self).__init__(
             key, resource, host_url, api_version, params, ds_client,
-            user_agent
+            user_agent, historical=historical
         )
 
     ###########################################################################

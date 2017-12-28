@@ -12,9 +12,11 @@ class ContractingClient(APIBaseClient):
                  host_url=None,
                  api_version=None,
                  params=None,
-                 ds_client=None):
+                 ds_client=None,
+                 historical=False):
         super(ContractingClient, self).__init__(key, 'contracts', host_url,
-                                                api_version, params, ds_client)
+                                                api_version, params, ds_client,
+                                                historical=historical)
 
     def create_contract(self, contract):
         return self._create_resource_item(self.prefix_path, contract)

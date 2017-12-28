@@ -55,9 +55,10 @@ def verify_file(fn):
 class APITemplateClient(object):
     """base class for API"""
 
-    def __init__(self, login_pass=None, headers=None, user_agent=None):
+    def __init__(self, login_pass=None, headers=None, user_agent=None, historical=False):
         self.headers = headers or {}
         self.session = Session()
+        self.historical = historical
         if login_pass is not None:
             self.session.auth = BasicAuth(*login_pass)
 
@@ -100,11 +101,12 @@ class APIBaseClient(APITemplateClient):
                  api_version=None,
                  params=None,
                  ds_client=None,
-                 user_agent=None):
+                 user_agent=None,
+                 historical=False):
 
         super(APIBaseClient, self)\
             .__init__(login_pass=(key, ''), headers=self.headers,
-                      user_agent=user_agent)
+                      user_agent=user_agent, historical=historical)
 
         self.ds_client = ds_client
         self.host_url = host_url or self.host_url
@@ -149,6 +151,8 @@ class APIBaseClient(APITemplateClient):
     def _get_resource_item(self, url, headers=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
+        if self.historical:
+            url += "/historical"
         response_item = self.request('GET', url, headers=_headers)
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))

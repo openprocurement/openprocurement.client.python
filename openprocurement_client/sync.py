@@ -96,7 +96,7 @@ class ResourceFeeder(object):
     def __init__(self, host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                  key=DEFAULT_API_KEY, resource='tenders',
                  extra_params=DEFAULT_API_EXTRA_PARAMS,
-                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False):
+                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False, historical=False):
         super(ResourceFeeder, self).__init__()
         self.host = host
         self.version = version
@@ -107,6 +107,7 @@ class ResourceFeeder(object):
         self.extra_params = extra_params
         self.retrievers_params = retrievers_params
         self.queue = Queue(maxsize=retrievers_params['queue_size'])
+        self.historical = historical
 
     def init_api_clients(self):
         self.backward_params = {'descending': True, 'feed': 'changes'}
@@ -115,10 +116,10 @@ class ResourceFeeder(object):
         self.forward_params.update(self.extra_params)
         self.forward_client = TendersClientSync(
             self.key, resource=self.resource, host_url=self.host,
-            api_version=self.version)
+            api_version=self.version, historical=self.historical)
         self.backward_client = TendersClientSync(
             self.key, resource=self.resource, host_url=self.host,
-            api_version=self.version)
+            api_version=self.version, historical=self.historical)
         self.cookies = self.forward_client.session.cookies =\
             self.backward_client.session.cookies
 
