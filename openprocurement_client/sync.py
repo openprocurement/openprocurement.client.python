@@ -98,6 +98,7 @@ class ResourceFeeder(object):
                  extra_params=DEFAULT_API_EXTRA_PARAMS,
                  retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False):
         super(ResourceFeeder, self).__init__()
+        logger.info('Init Resource Feeder...')
         self.host = host
         self.version = version
         self.key = key
@@ -109,6 +110,7 @@ class ResourceFeeder(object):
         self.queue = Queue(maxsize=retrievers_params['queue_size'])
 
     def init_api_clients(self):
+        logger.debug('Init forward and backward clients...')
         self.backward_params = {'descending': True, 'feed': 'changes'}
         self.backward_params.update(self.extra_params)
         self.forward_params = {'feed': 'changes'}
@@ -129,6 +131,7 @@ class ResourceFeeder(object):
 
     def start_sync(self):
         # self.init_api_clients()
+        logger.info('Start sync...')
 
         response = self.backward_client.sync_tenders(self.backward_params)
 
@@ -181,7 +184,14 @@ class ResourceFeeder(object):
                 self.restart_sync()
                 check_down_worker = True
             while not self.queue.empty():
+                logger.debug(
+                    'Feeder queue size: {}'.format(self.queue.qsize()),
+                    extra={'FEEDER_QUEUE_SIZE': self.queue.qsize()})
+                logger.debug('Yield resource item', extra={'MESSAGE_ID': 'feeder_yield'})
                 yield self.queue.get()
+            logger.debug(
+                'Feeder queue size: {}'.format(self.queue.qsize()),
+                extra={'FEEDER_QUEUE_SIZE': self.queue.qsize()})
             try:
                 self.queue.peek(block=True, timeout=0.1)
             except Empty:
