@@ -69,7 +69,7 @@ class APITemplateClient(object):
             self.session.headers['User-Agent'] = user_agent
 
     def request(self, method, path=None, payload=None, json=None,
-                headers=None, params_dict=None, file_=None):
+                headers=None, params_dict=None, file_=None, auth=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
         if file_:
@@ -77,7 +77,7 @@ class APITemplateClient(object):
 
         response = self.session.request(
             method, path, data=payload, json=json, headers=_headers,
-            params=params_dict, files=file_
+            params=params_dict, files=file_, auth=auth
         )
 
         if response.status_code >= 400:
@@ -148,12 +148,10 @@ class APIBaseClient(APITemplateClient):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
-    def _get_resource_item(self, url, headers=None):
+    def _get_resource_item(self, url, headers=None, auth=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
-        if self.historical:
-            url += "/historical"
-        response_item = self.request('GET', url, headers=_headers)
+        response_item = self.request('GET', url, headers=_headers, auth=auth)
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
@@ -242,9 +240,9 @@ class APIBaseClient(APITemplateClient):
             doc_registration=doc_registration
         )
 
-    def get_resource_item(self, id, headers=None):
+    def get_resource_item(self, id, headers=None, auth=None):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id),
-                                       headers=headers)
+                                       headers=headers, auth=auth)
 
     def patch_credentials(self, id, access_token):
         return self._patch_resource_item(
