@@ -121,6 +121,8 @@ class APIBaseClient(Resource):
             if key not in IGNORE_PARAMS:
                 self.params[key] = params[key]
 
+
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _create_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
         response_item = self.post(
@@ -130,6 +132,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _get_resource_item(self, url, headers={}):
         headers.update(self.headers)
         response_item = self.get(url, headers=headers)
@@ -137,6 +140,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _patch_resource_item(self, url, payload, headers={}):
         headers.update(self.headers)
         response_item = self.patch(
@@ -146,6 +150,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _upload_resource_file(self, url, data, headers={}, method='post'):
         file_headers = {}
         file_headers.update(self.headers)
@@ -158,6 +163,7 @@ class APIBaseClient(Resource):
             return munchify(loads(response_item.body_string()))
         raise InvalidResponse
 
+    @retry(stop_max_attempt_number=5, wait_fixed=5000)
     def _delete_resource_item(self, url, headers={}):
         response_item = self.delete(url, headers=headers)
         if response_item.status_int == 200:
@@ -179,7 +185,6 @@ class TendersClient(APIBaseClient):
     #             GET ITEMS LIST API METHODS
     ###########################################################################
 
-    @retry(stop_max_attempt_number=5)
     def get_tenders(self, params={}, feed='changes'):
         params['feed'] = feed
         try:
