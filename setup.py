@@ -2,8 +2,7 @@ from setuptools import find_packages, setup
 import os
 
 version = '1.0b3'
-
-tests_require = {
+extras_require = {
     'test': 'bottle'
 }
 setup(
@@ -40,8 +39,8 @@ setup(
         'simplejson'
         # -*- Extra requirements: -*-
     ],
-    tests_require=tests_require,
-    extras_require = tests_require,
+    tests_require=extras_require['test'],
+    extras_require = extras_require,
     entry_points="""
     # -*- Entry points: -*-
     """,
