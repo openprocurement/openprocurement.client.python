@@ -242,6 +242,9 @@ class APIBaseClient(APITemplateClient):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id),
                                        headers=headers)
 
+    def get_resource_item_historical(self, id, headers=None):
+        return self._get_resource_item('{}/{}/historical'.format(self.prefix_path, id), headers=headers)
+
     def patch_credentials(self, id, access_token):
         return self._patch_resource_item(
             '{}/{}/credentials'.format(self.prefix_path, id),
