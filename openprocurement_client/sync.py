@@ -5,13 +5,14 @@ import logging
 from .client import TendersClientSync
 from time import time
 from gevent import spawn, sleep, idle
-from gevent.queue import Queue, Empty
+from gevent.queue import PriorityQueue, Empty
 from requests.exceptions import ConnectionError
 from openprocurement_client.exceptions import (
     RequestFailed,
     PreconditionFailed,
     ResourceNotFound
 )
+
 
 DEFAULT_RETRIEVERS_PARAMS = {
     'down_requests_sleep': 5,
@@ -96,7 +97,8 @@ class ResourceFeeder(object):
     def __init__(self, host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                  key=DEFAULT_API_KEY, resource='tenders',
                  extra_params=DEFAULT_API_EXTRA_PARAMS,
-                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False):
+                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False,
+                 with_priority=False):
         super(ResourceFeeder, self).__init__()
         self.host = host
         self.version = version
@@ -106,7 +108,11 @@ class ResourceFeeder(object):
 
         self.extra_params = extra_params
         self.retrievers_params = retrievers_params
-        self.queue = Queue(maxsize=retrievers_params['queue_size'])
+        self.queue = PriorityQueue(maxsize=retrievers_params['queue_size'])
+
+        self.forward_priority = 1 if with_priority else 0
+        self.backward_priority = 1000 if with_priority else 0
+
 
     def init_api_clients(self):
         self.backward_params = {'descending': True, 'feed': 'changes'}
@@ -122,17 +128,20 @@ class ResourceFeeder(object):
         self.cookies = self.forward_client.session.cookies =\
             self.backward_client.session.cookies
 
-    def handle_response_data(self, data):
-        for tender in data:
-            # self.idle()
-            self.queue.put(tender)
+    def handle_response_data(self, data, priority=0):
+        if not priority:
+            for resource_item in data:
+                self.queue.put(resource_item)
+        else:
+            for resource_item in data:
+                self.queue.put((priority, resource_item))
 
     def start_sync(self):
         # self.init_api_clients()
 
         response = self.backward_client.sync_tenders(self.backward_params)
 
-        self.handle_response_data(response.data)
+        self.handle_response_data(response.data, self.backward_priority)
 
         self.backward_params['offset'] = response.next_page.offset
         self.forward_params['offset'] = response.prev_page.offset
@@ -235,7 +244,7 @@ class ResourceFeeder(object):
             raise Exception('LB Server mismatch')
         while response.data:
             logger.debug('Backward: Start process data.')
-            self.handle_response_data(response.data)
+            self.handle_response_data(response.data, self.backward_priority)
             self.backward_params['offset'] = response.next_page.offset
             self.log_retriever_state(
                 'Backward', self.backward_client, self.backward_params)
@@ -262,7 +271,7 @@ class ResourceFeeder(object):
             raise Exception('LB Server mismatch')
         while 1:
             while response.data:
-                self.handle_response_data(response.data)
+                self.handle_response_data(response.data, self.forward_priority)
                 self.forward_params['offset'] = response.next_page.offset
                 self.log_retriever_state(
                     'Forward', self.forward_client, self.forward_params)
