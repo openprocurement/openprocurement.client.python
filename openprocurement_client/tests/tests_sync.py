@@ -88,8 +88,8 @@ class GetResponseTestCase(unittest.TestCase):
         mock_client = TestTendersClientSync()
         response = get_response(mock_client, {})
         log_strings = self.log_capture_string.getvalue().split('\n')
-        self.assertEqual(log_strings[0], 'Request failed. Status code: 429')
-        self.assertEqual(log_strings[1], 'Request failed. Status code: 404')
+        self.assertEqual(log_strings[0], 'RequestFailed: Status code: 429')
+        self.assertEqual(log_strings[1], 'RequestFailed: Status code: 404')
         self.assertEqual(response, 'success')
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
@@ -112,8 +112,14 @@ class GetResponseTestCase(unittest.TestCase):
         mock_client = TestTendersClientSync()
         response = get_response(mock_client, {})
         log_strings = self.log_capture_string.getvalue().split('\n')
-        self.assertEqual(log_strings[0], 'Exception: invalid header')
-        self.assertEqual(log_strings[1], 'Exception: exception message')
+        self.assertEqual(
+            log_strings[0],
+            "Exception: InvalidHeader('invalid header',)"
+        )
+        self.assertEqual(
+            log_strings[1],
+            "Exception: Exception('exception message',)"
+        )
         self.assertEqual(response, 'success')
 
 
@@ -200,8 +206,8 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(self.resource_feeder.backward_params['offset'], self.response.next_page.offset)
         self.assertEqual(self.resource_feeder.forward_params['offset'], self.response.prev_page.offset)
         self.assertEqual(self.resource_feeder.forward_params['offset'], self.response.prev_page.offset)
-        self.assertEqual(mock_spawn.call_count, 2)
-        mock_spawn.assert_called_with(self.resource_feeder.retriever_forward)
+        self.assertEqual(mock_spawn.call_count, 3)
+        mock_spawn.assert_called_with(self.resource_feeder.workers_watcher)
         self.assertEqual(self.resource_feeder.backward_worker, 'spawn result')
         self.assertEqual(self.resource_feeder.forward_worker, 'spawn result')
 
@@ -215,7 +221,7 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.resource_feeder.init_api_clients()
         self.resource_feeder.start_sync()
         self.resource_feeder.restart_sync()
-        self.assertEqual(mock_spawn.return_value.kill.call_count, 2)
+        self.assertEqual(mock_spawn.return_value.kill.call_count, 3)
 
     @mock.patch('openprocurement_client.client.TendersClientSync.sync_tenders')
     @mock.patch('openprocurement_client.sync.spawn')
