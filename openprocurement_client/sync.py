@@ -25,7 +25,9 @@ DEFAULT_API_HOST = 'https://lb.api-sandbox.openprocurement.org/'
 DEFAULT_API_VERSION = '2.3'
 DEFAULT_API_KEY = ''
 DEFAULT_API_EXTRA_PARAMS = {
-    'opt_fields': 'status', 'mode': '_all_'}
+    'opt_fields': 'status', 'mode': '_all_'
+}
+DEFAULT_FORWARD_HEARTBEAT = 54000
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +133,7 @@ class ResourceFeeder(object):
 
     def workers_watcher(self):
         while True:
-            if time() - self.forward_heartbeat > 54000:
+            if time() - self.forward_heartbeat > DEFAULT_FORWARD_HEARTBEAT:
                 self.restart_sync()
                 logger.warning(
                     'Restart sync, reason: Last response from forward greater'
