@@ -25,7 +25,9 @@ DEFAULT_API_HOST = 'https://lb.api-sandbox.openprocurement.org/'
 DEFAULT_API_VERSION = '2.3'
 DEFAULT_API_KEY = ''
 DEFAULT_API_EXTRA_PARAMS = {
-    'opt_fields': 'status', 'mode': '_all_'}
+    'opt_fields': 'status', 'mode': '_all_'
+}
+DEFAULT_FORWARD_HEARTBEAT = 54000
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +60,8 @@ def get_response(client, params):
             sleep(sleep_interval)
             continue
         except RequestFailed as e:
-            logger.error('Request failed. Status code: {}'.format(
-                e.status_code), extra={'MESSAGE_ID': 'request_failed'})
+            logger.error('RequestFailed: Status code: {}'.format(e.status_code),
+                         extra={'MESSAGE_ID': 'request_failed'})
             if e.status_code == 429:
                 if sleep_interval > 120:
                     raise e
@@ -68,7 +70,7 @@ def get_response(client, params):
                         sleep_interval))
                 sleep_interval = sleep_interval * 2
                 sleep(sleep_interval)
-                continue
+            continue
         except ResourceNotFound as e:
             logger.error('Resource not found: {}'.format(e.message),
                          extra={'MESSAGE_ID': 'resource_not_found'})
@@ -77,7 +79,7 @@ def get_response(client, params):
             del params['offset']
             continue
         except Exception as e:
-            logger.error('Exception: {}'.format(e.message),
+            logger.error('Exception: {}'.format(repr(e)),
                          extra={'MESSAGE_ID': 'exceptions'})
             if sleep_interval > 300:
                 raise e
@@ -98,6 +100,7 @@ class ResourceFeeder(object):
                  extra_params=DEFAULT_API_EXTRA_PARAMS,
                  retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False):
         super(ResourceFeeder, self).__init__()
+        logger.info('Init Resource Feeder...')
         self.host = host
         self.version = version
         self.key = key
@@ -109,6 +112,7 @@ class ResourceFeeder(object):
         self.queue = Queue(maxsize=retrievers_params['queue_size'])
 
     def init_api_clients(self):
+        logger.debug('Init forward and backward clients...')
         self.backward_params = {'descending': True, 'feed': 'changes'}
         self.backward_params.update(self.extra_params)
         self.forward_params = {'feed': 'changes'}
@@ -127,8 +131,19 @@ class ResourceFeeder(object):
             # self.idle()
             self.queue.put(tender)
 
+    def workers_watcher(self):
+        while True:
+            if time() - self.forward_heartbeat > DEFAULT_FORWARD_HEARTBEAT:
+                self.restart_sync()
+                logger.warning(
+                    'Restart sync, reason: Last response from forward greater'
+                    'than 15 min ago.'
+                )
+            sleep(300)
+
     def start_sync(self):
         # self.init_api_clients()
+        logger.info('Start sync...')
 
         response = self.backward_client.sync_tenders(self.backward_params)
 
@@ -139,6 +154,8 @@ class ResourceFeeder(object):
 
         self.backward_worker = spawn(self.retriever_backward)
         self.forward_worker = spawn(self.retriever_forward)
+        self.forward_heartbeat = time()
+        self.watcher = spawn(self.workers_watcher)
 
     def restart_sync(self):
         """
@@ -148,6 +165,7 @@ class ResourceFeeder(object):
         logger.info('Restart workers')
         self.forward_worker.kill()
         self.backward_worker.kill()
+        self.watcher.kill()
         self.init_api_clients()
         self.start_sync()
 
@@ -181,7 +199,14 @@ class ResourceFeeder(object):
                 self.restart_sync()
                 check_down_worker = True
             while not self.queue.empty():
+                logger.debug(
+                    'Feeder queue size: {}'.format(self.queue.qsize()),
+                    extra={'FEEDER_QUEUE_SIZE': self.queue.qsize()})
+                logger.debug('Yield resource item', extra={'MESSAGE_ID': 'feeder_yield'})
                 yield self.queue.get()
+            logger.debug(
+                'Feeder queue size: {}'.format(self.queue.qsize()),
+                extra={'FEEDER_QUEUE_SIZE': self.queue.qsize()})
             try:
                 self.queue.peek(block=True, timeout=0.1)
             except Empty:
@@ -261,8 +286,10 @@ class ResourceFeeder(object):
         if self.cookies != self.forward_client.session.cookies:
             raise Exception('LB Server mismatch')
         while 1:
+            self.forward_heartbeat = time()
             while response.data:
                 self.handle_response_data(response.data)
+                self.forward_heartbeat = time()
                 self.forward_params['offset'] = response.next_page.offset
                 self.log_retriever_state(
                     'Forward', self.forward_client, self.forward_params)
