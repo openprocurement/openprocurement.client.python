@@ -2,13 +2,22 @@ from setuptools import find_packages, setup
 
 version = '2.0.0'
 
-tests_require = {
-    'test': [
-        'bottle',
-        'mock',
-        'nose'
-    ]
-}
+install_requires = [
+    'gevent',
+    'iso8601',
+    'munch',
+    'retrying',
+    'simplejson',
+    'requests',
+    'python-magic',
+]
+
+tests_require = [
+    'bottle',
+    'mock',
+    'nose',
+]
+
 setup(
     name='openprocurement_client',
     version=version,
@@ -30,18 +39,9 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        'gevent',
-        'iso8601',
-        'munch',
-        'retrying',
-        'simplejson',
-        'requests',
-        'python-magic'
-        # -*- Extra requirements: -*-
-    ],
+    install_requires=install_requires,
     tests_require=tests_require,
-    extras_require=tests_require,
+    extras_require={"test": tests_require},
     entry_points="""
     # -*- Entry points: -*-
     """,
