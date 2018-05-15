@@ -37,7 +37,9 @@ class ContractingClient(APIBaseClient):
     def get_contract(self, contract_id):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, contract_id))
 
-    def get_contracts(self, params={}, feed='changes'):
+    def get_contracts(self, params=None, feed='changes'):
+        if params is None:
+            params = {}
         params['feed'] = feed
         self._update_params(params)
         response = self.get(
