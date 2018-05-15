@@ -26,7 +26,7 @@ class ContractingClient(APIBaseClient):
                 self.prefix_path,
                 contract.data.id
             ),
-            data={"file": file_},
+            file_=file_,
             headers={'X-Access-Token':
                      getattr(getattr(contract, 'access', ''), 'token', '')}
         )
