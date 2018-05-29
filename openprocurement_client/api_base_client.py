@@ -165,7 +165,7 @@ class APIBaseClient(APITemplateClient):
         raise InvalidResponse(response_item)
 
     def _upload_resource_file(
-        self, url, file_=None, headers=None, method='POST',
+        self, url, file_=None, headers=None, doc_type=None, method='POST',
         use_ds_client=True, doc_registration=True
     ):
         if use_ds_client and self.ds_client:
@@ -178,6 +178,7 @@ class APIBaseClient(APITemplateClient):
                     file_=file_, headers=headers
                 )
             payload = {'data': response['data']}
+            payload['data']['documentType'] = doc_type
             response = self._create_resource_item(
                 url,
                 headers=headers,
@@ -225,7 +226,7 @@ class APIBaseClient(APITemplateClient):
         return self._patch_obj_resource_item(obj, document, 'documents')
 
     @verify_file
-    def upload_document(self, file_, obj, use_ds_client=True,
+    def upload_document(self, file_, obj, doc_type=None, use_ds_client=True,
                         doc_registration=True):
         return self._upload_resource_file(
             '{}/{}/documents'.format(
@@ -234,6 +235,7 @@ class APIBaseClient(APITemplateClient):
             ),
             file_=file_,
             headers={'X-Access-Token': self._get_access_token(obj)},
+            doc_type=doc_type,
             use_ds_client=use_ds_client,
             doc_registration=doc_registration
         )
