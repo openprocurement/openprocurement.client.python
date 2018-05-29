@@ -306,6 +306,9 @@ class TendersClient(APIBaseClient):
     def patch_item(self, tender, item):
         return self._patch_obj_resource_item(tender, item, 'items')
 
+    def patch_auction(self, tender, auction):
+        return self._patch_obj_resource_item(tender, auction, 'auctions')
+
     def patch_prolongation(self, tender, contract_id, prolongation_id, data):
         return self._patch_resource_item(
             '{}/{}/contracts/{}/prolongations/{}'.format(
@@ -483,6 +486,22 @@ class TendersClient(APIBaseClient):
                 contract_id
             ),
             file_=file_,
+            headers={'X-Access-Token': self._get_access_token(tender)},
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
+        )
+
+    @verify_file
+    def upload_auction_document(self, file_, tender, auction_id, doc_type,
+                                 use_ds_client=True, doc_registration=True):
+        return self._upload_resource_file(
+            '{}/{}/auctions/{}/documents'.format(
+                self.prefix_path,
+                tender.data.id,
+                auction_id
+            ),
+            file_=file_,
+            doc_type=doc_type,
             headers={'X-Access-Token': self._get_access_token(tender)},
             use_ds_client=use_ds_client,
             doc_registration=doc_registration
