@@ -139,6 +139,9 @@ class TendersClient(APIBaseClient):
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
 
+    def create_item(self, tender, item):
+        return self._create_tender_resource_item(tender, item, "items")
+
     def create_prolongation(self, tender, contract_id, prolongation_data):
         return self._create_resource_item(
             '{}/{}/{}'.format(self.prefix_path, tender.data.id,
@@ -299,6 +302,9 @@ class TendersClient(APIBaseClient):
 
     def patch_contract(self, tender, contract):
         return self._patch_obj_resource_item(tender, contract, 'contracts')
+
+    def patch_item(self, tender, item):
+        return self._patch_obj_resource_item(tender, item, 'items')
 
     def patch_prolongation(self, tender, contract_id, prolongation_id, data):
         return self._patch_resource_item(
