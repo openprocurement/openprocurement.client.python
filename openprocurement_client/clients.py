@@ -393,6 +393,16 @@ class APIResourceClient(APIBaseClient):
                                                resource_item_id)
         )
 
+    def change_ownership(self, obj_id, transfer, access_token=None):
+        try:
+            self.create_resource_item_subitem(
+                obj_id, transfer, 'ownership', access_token=access_token
+            )
+        except InvalidResponse as e:
+            if e.status_code == 200:
+                return munchify(loads(e.response.text))
+            raise e
+
 
 class APIResourceClientSync(APIResourceClient):
 
