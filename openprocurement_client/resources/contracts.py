@@ -37,3 +37,8 @@ class ContractingClient(APIResourceClient):
         return self.patch_resource_item_subitem(
             contract_id, data, CHANGES, change_id, access_token=access_token
         )
+
+    def patch_milestone(self, contract_id, milestone_id, access_token, data):
+        return self.patch_resource_item_subitem(
+            contract_id, data, 'milestones', milestone_id, access_token=access_token
+        )
