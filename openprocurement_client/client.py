@@ -113,6 +113,14 @@ class TendersClient(APIBaseClient):
     def create_question(self, tender, question):
         return self._create_tender_resource_item(tender, question, 'questions')
 
+    def change_ownership(self, tender, transfer):
+        try:
+            self._create_tender_resource_item(tender, transfer, 'ownership')
+        except InvalidResponse as e:
+            if e.status_code == 200:
+                return munchify(loads(e.response.text))
+            raise e
+
     def create_bid(self, tender, bid):
         return self._create_tender_resource_item(tender, bid, 'bids')
 
