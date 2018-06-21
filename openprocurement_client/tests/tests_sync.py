@@ -178,7 +178,8 @@ class ResourceFeederTestCase(unittest.TestCase):
         })
         self.assertIsInstance(self.resource_feeder.queue, Queue)
 
-    def test_init_api_clients(self):
+    @mock.patch('openprocurement_client.templates.Session')
+    def test_init_api_clients(self, mock_session):
         self.resource_feeder = ResourceFeeder()
         self.resource_feeder.init_api_clients()
         self.assertEqual(self.resource_feeder.backward_params, {
@@ -202,10 +203,11 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertIn('tender2', list(self.resource_feeder.queue.queue))
         self.assertNotIn('tender3', list(self.resource_feeder.queue.queue))
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.clients.APIResourceClientSync.'
                 'sync_resource_items')
     @mock.patch('openprocurement_client.resources.sync.spawn')
-    def test_start_sync(self, mock_spawn, mock_sync_resource_items):
+    def test_start_sync(self, mock_spawn, mock_sync_resource_items, mock_session):
         mock_spawn.return_value = 'spawn result'
         mock_sync_resource_items.return_value = self.response
         self.resource_feeder = ResourceFeeder()
@@ -222,10 +224,11 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(self.resource_feeder.backward_worker, 'spawn result')
         self.assertEqual(self.resource_feeder.forward_worker, 'spawn result')
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.clients.APIResourceClientSync.'
                 'sync_resource_items')
     @mock.patch('openprocurement_client.resources.sync.spawn')
-    def test_restart_sync(self, mock_spawn, mock_sync_resource_items):
+    def test_restart_sync(self, mock_spawn, mock_sync_resource_items, mock_session):
         mock_spawn.return_value = mock.MagicMock()
         mock_spawn.return_value.kill = mock.MagicMock('kill result')
         mock_sync_resource_items.return_value = self.response
@@ -235,11 +238,12 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.resource_feeder.restart_sync()
         self.assertEqual(mock_spawn.return_value.kill.call_count, 2)
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.clients.APIResourceClientSync.'
                 'sync_resource_items')
     @mock.patch('openprocurement_client.resources.sync.spawn')
     def test_get_resource_items_zero_value(self, mock_spawn,
-                                           mock_sync_resource_items):
+                                           mock_sync_resource_items, mock_session):
         mock_sync_resource_items.side_effect = [self.response, munchify(
             {'data': {},
              'next_page': {'offset': 'next_page'},
@@ -253,11 +257,12 @@ class ResourceFeederTestCase(unittest.TestCase):
             result = self.resource_feeder.get_resource_items()
         self.assertEqual(tuple(result), tuple(self.response.data))
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.clients.APIResourceClientSync.'
                 'sync_resource_items')
     @mock.patch('openprocurement_client.resources.sync.spawn')
     def test_get_resource_items_non_zero_value(self, mock_spawn,
-                                               mock_sync_resource_items):
+                                               mock_sync_resource_items, mock_session):
         mock_sync_resource_items.side_effect = [self.response, munchify(
             {'data': {},
              'next_page': {'offset': 'next_page'},
@@ -271,12 +276,13 @@ class ResourceFeederTestCase(unittest.TestCase):
             result = self.resource_feeder.get_resource_items()
         self.assertEqual(tuple(result), tuple(self.response.data))
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.clients.APIResourceClientSync.'
                 'sync_resource_items')
     @mock.patch('openprocurement_client.resources.sync.spawn')
     @mock.patch('openprocurement_client.resources.sync.sleep')
     def test_feeder_zero_value(self, mock_sleep, mock_spawn,
-                               mock_sync_resource_items):
+                               mock_sync_resource_items, mock_session):
         mock_sleep.return_value = 'sleeping'
         mock_sync_resource_items.side_effect = [self.response, self.response,
                                                 ConnectionError('conn error')]
@@ -289,11 +295,12 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(e.exception.message, 'conn error')
         self.assertEqual(mock_sleep.call_count, 1)
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.clients.APIResourceClientSync.'
                 'sync_resource_items')
     @mock.patch('openprocurement_client.resources.sync.spawn')
     @mock.patch('openprocurement_client.resources.sync.sleep')
-    def test_feeder(self, mock_sleep, mock_spawn, mock_sync_resource_items):
+    def test_feeder(self, mock_sleep, mock_spawn, mock_sync_resource_items, mock_session):
         mock_sleep.return_value = 'sleeping'
         mock_sync_resource_items.side_effect = [self.response, self.response,
                                                 ConnectionError('conn error')]
@@ -314,8 +321,9 @@ class ResourceFeederTestCase(unittest.TestCase):
         mock_spawn.assert_called_with(self.resource_feeder.feeder)
         self.assertEqual(result, self.resource_feeder.queue)
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_backward(self, mock_get_response):
+    def test_retriever_backward(self, mock_get_response, mock_session):
         mock_get_response.side_effect = [self.response, munchify({'data': {}})]
         self.resource_feeder = ResourceFeeder()
         self.resource_feeder.init_api_clients()
@@ -327,8 +335,9 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(self.resource_feeder.backward_params['offset'],
                          self.response.next_page.offset)
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_backward_wrong_cookies(self, mock_get_response):
+    def test_retriever_backward_wrong_cookies(self, mock_get_response, mock_session):
         mock_get_response.return_value = self.response
         self.resource_feeder = ResourceFeeder()
         self.resource_feeder.init_api_clients()
@@ -340,8 +349,9 @@ class ResourceFeederTestCase(unittest.TestCase):
             self.resource_feeder.retriever_backward()
         self.assertEqual(e.exception.message, 'LB Server mismatch')
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_forward_wrong_cookies(self, mock_get_response):
+    def test_retriever_forward_wrong_cookies(self, mock_get_response, mock_session):
         mock_get_response.return_value = self.response
         self.resource_feeder = ResourceFeeder()
         self.resource_feeder.init_api_clients()
@@ -353,8 +363,9 @@ class ResourceFeederTestCase(unittest.TestCase):
             self.resource_feeder.retriever_forward()
         self.assertEqual(e.exception.message, 'LB Server mismatch')
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_forward(self, mock_get_response):
+    def test_retriever_forward(self, mock_get_response, mock_session):
         mock_get_response.side_effect = [
             self.response,
             self.response,
@@ -372,8 +383,9 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(self.resource_feeder.forward_params['offset'],
                          self.response.next_page.offset)
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_forward_no_data(self, mock_get_response):
+    def test_retriever_forward_no_data(self, mock_get_response, mock_session):
         mock_get_response.side_effect = [
             munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
             ConnectionError('connection error')
@@ -390,8 +402,9 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(self.resource_feeder.forward_params['offset'],
                          'next_page')
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_forward_adaptive(self, mock_get_response):
+    def test_retriever_forward_adaptive(self, mock_get_response, mock_session):
         mock_get_response.side_effect = [
             self.response,
             munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
@@ -410,8 +423,9 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.assertEqual(self.resource_feeder.forward_params['offset'],
                          self.response.next_page.offset)
 
+    @mock.patch('openprocurement_client.templates.Session')
     @mock.patch('openprocurement_client.resources.sync.get_response')
-    def test_retriever_forward_no_data_adaptive(self, mock_get_response):
+    def test_retriever_forward_no_data_adaptive(self, mock_get_response, mock_session):
         mock_get_response.side_effect = [
             munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
             munchify({'data': {}, 'next_page': {'offset': 'next_page'}}),
