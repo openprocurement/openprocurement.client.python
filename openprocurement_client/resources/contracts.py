@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openprocurement_client.clients import APIResourceClient
-from openprocurement_client.constants import CHANGES, CONTRACTS
+from openprocurement_client.constants import CHANGES, CONTRACTS, MILESTONES
 
 
 class ContractingClient(APIResourceClient):
@@ -40,5 +40,5 @@ class ContractingClient(APIResourceClient):
 
     def patch_milestone(self, contract_id, milestone_id, access_token, data):
         return self.patch_resource_item_subitem(
-            contract_id, data, 'milestones', milestone_id, access_token=access_token
+            contract_id, data, MILESTONES, milestone_id, access_token=access_token
         )
