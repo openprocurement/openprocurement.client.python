@@ -58,3 +58,15 @@ def get_plan_id_by_uaid(ua_id, client, descending=True, id_field='planID'):
             if tender[id_field] == ua_id:
                 return tender.id
     raise IdNotFound
+
+
+def get_monitoring_id_by_uaid(ua_id, client, descending=True, id_field='monitoring_id'):
+    params = {'offset': '', 'opt_fields': id_field, 'descending': descending}
+    monitoring_list = True
+    client._update_params(params)
+    while monitoring_list:
+        monitoring_list = client.get_monitorings()
+        for monitoring in monitoring_list:
+            if monitoring[id_field] == ua_id:
+                return monitoring.id
+    raise IdNotFound
