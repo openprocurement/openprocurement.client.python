@@ -2,8 +2,9 @@ from gevent import monkey
 monkey.patch_all()
 
 import logging
-from .client import TendersClientSync
-from time import time
+from openprocurement_client.clients import APIResourceClientSync
+from openprocurement_client.utils import get_response
+
 from gevent import spawn, sleep, idle
 from gevent.queue import PriorityQueue, Empty
 from requests.exceptions import ConnectionError
@@ -123,10 +124,10 @@ class ResourceFeeder(object):
         self.backward_params.update(self.extra_params)
         self.forward_params = {'feed': 'changes'}
         self.forward_params.update(self.extra_params)
-        self.forward_client = TendersClientSync(
+        self.forward_client = APIResourceClientSync(
             self.key, resource=self.resource, host_url=self.host,
             api_version=self.version)
-        self.backward_client = TendersClientSync(
+        self.backward_client = APIResourceClientSync(
             self.key, resource=self.resource, host_url=self.host,
             api_version=self.version)
         self.cookies = self.forward_client.session.cookies =\
@@ -154,7 +155,8 @@ class ResourceFeeder(object):
         # self.init_api_clients()
         logger.info('Start sync...')
 
-        response = self.backward_client.sync_tenders(self.backward_params)
+        response = self.backward_client.sync_resource_items(
+            self.backward_params)
 
         self.handle_response_data(response.data, self.backward_priority)
 
@@ -171,7 +173,7 @@ class ResourceFeeder(object):
         Restart retrieving from Openprocurement API.
         """
 
-        logger.info('Restart workers')
+        LOGGER.info('Restart workers')
         self.forward_worker.kill()
         self.backward_worker.kill()
         self.watcher.kill()
@@ -183,14 +185,18 @@ class ResourceFeeder(object):
         Prepare iterator for retrieving from Openprocurement API.
 
         :param:
-            host (str): Url of Openprocurement API. Defaults is DEFAULT_API_HOST
-            version (str): Verion of Openprocurement API. Defaults is DEFAULT_API_VERSION
-            key(str): Access key of broker in Openprocurement API. Defaults is DEFAULT_API_KEY
+            host (str): Url of Openprocurement API.
+                Defaults is DEFAULT_API_HOST
+            version (str): Verion of Openprocurement API.
+                Defaults is DEFAULT_API_VERSION
+            key(str): Access key of broker in Openprocurement API.
+                Defaults is DEFAULT_API_KEY
                 (Empty string)
             extra_params(dict): Extra params of query
 
         :returns:
-            iterator of tender_object (Munch): object derived from the list of tenders
+            iterator of tender_object (Munch): object derived from the
+                list of tenders
 
         """
         self.init_api_clients()
@@ -199,7 +205,7 @@ class ResourceFeeder(object):
         while True:
             if check_down_worker and self.backward_worker.ready():
                 if self.backward_worker.value == 0:
-                    logger.info('Stop check backward worker')
+                    LOGGER.info('Stop check backward worker')
                     check_down_worker = False
                 else:
                     self.restart_sync()
@@ -226,14 +232,18 @@ class ResourceFeeder(object):
         Prepare iterator for retrieving from Openprocurement API.
 
         :param:
-            host (str): Url of Openprocurement API. Defaults is DEFAULT_API_HOST
-            version (str): Verion of Openprocurement API. Defaults is DEFAULT_API_VERSION
-            key(str): Access key of broker in Openprocurement API. Defaults is DEFAULT_API_KEY
+            host (str): Url of Openprocurement API.
+                Defaults is DEFAULT_API_HOST
+            version (str): Verion of Openprocurement API.
+                Defaults is DEFAULT_API_VERSION
+            key(str): Access key of broker in Openprocurement API.
+                Defaults is DEFAULT_API_KEY
                 (Empty string)
             extra_params(dict): Extra params of query
 
         :returns:
-            iterator of tender_object (Munch): object derived from the list of tenders
+            iterator of tender_object (Munch): object derived from the
+                list of tenders
 
         """
         self.init_api_clients()
@@ -242,7 +252,7 @@ class ResourceFeeder(object):
         while 1:
             if check_down_worker and self.backward_worker.ready():
                 if self.backward_worker.value == 0:
-                    logger.info('Stop check backward worker')
+                    LOGGER.info('Stop check backward worker')
                     check_down_worker = False
                 else:
                     self.restart_sync()
@@ -250,7 +260,7 @@ class ResourceFeeder(object):
             if self.forward_worker.ready():
                 self.restart_sync()
                 check_down_worker = True
-            logger.debug('Feeder queue size {} items'.format(
+            LOGGER.debug('Feeder queue size {} items'.format(
                 self.queue.qsize()),
                 extra={'FEEDER_QUEUE_SIZE': self.queue.qsize()})
             sleep(2)
@@ -260,9 +270,9 @@ class ResourceFeeder(object):
         return self.queue
 
     def retriever_backward(self):
-        logger.info('Backward: Start worker')
+        LOGGER.info('Backward: Start worker')
         response = get_response(self.backward_client, self.backward_params)
-        logger.debug('Backward response length {} items'.format(
+        LOGGER.debug('Backward response length {} items'.format(
             len(response.data)),
             extra={'BACKWARD_RESPONSE_LENGTH': len(response.data)})
         if self.cookies != self.backward_client.session.cookies:
@@ -273,23 +283,23 @@ class ResourceFeeder(object):
             self.backward_params['offset'] = response.next_page.offset
             self.log_retriever_state(
                 'Backward', self.backward_client, self.backward_params)
-            logger.debug('Backward: Start process request.')
+            LOGGER.debug('Backward: Start process request.')
             response = get_response(self.backward_client, self.backward_params)
-            logger.debug('Backward response length {} items'.format(
+            LOGGER.debug('Backward response length {} items'.format(
                 len(response.data)),
                 extra={'BACKWARD_RESPONSE_LENGTH': len(response.data)})
             if self.cookies != self.backward_client.session.cookies:
                 raise Exception('LB Server mismatch')
-            logger.info('Backward: pause between requests {} sec.'.format(
+            LOGGER.info('Backward: pause between requests {} sec.'.format(
                 self.retrievers_params.get('down_requests_sleep', 5)))
             sleep(self.retrievers_params.get('down_requests_sleep', 5))
-        logger.info('Backward: finished')
+        LOGGER.info('Backward: finished')
         return 0
 
     def retriever_forward(self):
-        logger.info('Forward: Start worker')
+        LOGGER.info('Forward: Start worker')
         response = get_response(self.forward_client, self.forward_params)
-        logger.debug('Forward response length {} items'.format(
+        LOGGER.debug('Forward response length {} items'.format(
             len(response.data)),
             extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
         if self.cookies != self.forward_client.session.cookies:
@@ -304,18 +314,18 @@ class ResourceFeeder(object):
                     'Forward', self.forward_client, self.forward_params)
                 response = get_response(self.forward_client,
                                         self.forward_params)
-                logger.debug('Forward response length {} items'.format(
+                LOGGER.debug('Forward response length {} items'.format(
                     len(response.data)),
                     extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
                 if self.cookies != self.forward_client.session.cookies:
                     raise Exception('LB Server mismatch')
                 if len(response.data) != 0:
-                    logger.info(
+                    LOGGER.info(
                         'Forward: pause between requests {} sec.'.format(
                             self.retrievers_params.get('up_requests_sleep',
                                                        5.0)))
                     sleep(self.retrievers_params.get('up_requests_sleep', 5.0))
-            logger.info('Forward: pause after empty response {} sec.'.format(
+            LOGGER.info('Forward: pause after empty response {} sec.'.format(
                 self.retrievers_params.get('up_wait_sleep', 30.0)),
                 extra={'FORWARD_WAIT_SLEEP':
                        self.retrievers_params.get('up_wait_sleep', 30.0)})
@@ -324,7 +334,7 @@ class ResourceFeeder(object):
             self.log_retriever_state(
                 'Forward', self.forward_client, self.forward_params)
             response = get_response(self.forward_client, self.forward_params)
-            logger.debug('Forward response length {} items'.format(
+            LOGGER.debug('Forward response length {} items'.format(
                 len(response.data)),
                 extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
             if self.adaptive:
@@ -341,52 +351,12 @@ class ResourceFeeder(object):
         return 1
 
     def log_retriever_state(self, name, client, params):
-        logger.debug('{}: offset {}'.format(name, params.get('offset', '')))
-        logger.debug('{}: AWSELB {}'.format(
+        LOGGER.debug('{}: offset {}'.format(name, params.get('offset', '')))
+        LOGGER.debug('{}: AWSELB {}'.format(
             name,
             client.session.cookies.get('AWSELB', ' ')
         ))
-        logger.debug('{}: SERVER_ID {}'.format(
+        LOGGER.debug('{}: SERVER_ID {}'.format(
             name, client.session.cookies.get('SERVER_ID', '')
         ))
-        logger.debug('{}: limit {}'.format(name, params.get('limit', '')))
-
-
-def get_resource_items(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
-                       key=DEFAULT_API_KEY,
-                       extra_params=DEFAULT_API_EXTRA_PARAMS,
-                       retrievers_params=DEFAULT_RETRIEVERS_PARAMS,
-                       resource='tenders'):
-    """
-    Prepare iterator for retrieving from Openprocurement API.
-
-    :param:
-        host (str): Url of Openprocurement API. Defaults is DEFAULT_API_HOST
-        version (str): Verion of Openprocurement API. Defaults is DEFAULT_API_VERSION
-        key(str): Access key of broker in Openprocurement API. Defaults is DEFAULT_API_KEY
-            (Empty string)
-        extra_params(dict): Extra params of query
-
-    :returns:
-        iterator of tender_object (Munch): object derived from the list of tenders
-
-    """
-    feeder = ResourceFeeder(
-        host=host, version=version,
-        key=key, extra_params=extra_params,
-        retrievers_params=retrievers_params, resource=resource
-    )
-    return feeder.get_resource_items()
-
-
-def get_tenders(host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
-                key=DEFAULT_API_KEY, extra_params=DEFAULT_API_EXTRA_PARAMS,
-                retrievers_params=DEFAULT_RETRIEVERS_PARAMS):
-    return get_resource_items(host=host, version=version, key=key,
-                              resource='tenders', extra_params=extra_params,
-                              retrievers_params=retrievers_params)
-
-
-if __name__ == '__main__':
-    for tender_item in get_tenders():
-        print('Tender {0[id]}'.format(tender_item))
+        LOGGER.debug('{}: limit {}'.format(name, params.get('limit', '')))
