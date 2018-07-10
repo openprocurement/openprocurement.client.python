@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from openprocurement_client.exceptions import InvalidResponse
-from openprocurement_client.templates import APITemplateClient
 from munch import munchify
 from simplejson import loads
+
+from openprocurement_client.exceptions import InvalidResponse
+from openprocurement_client.templates import APITemplateClient
 
 
 class EDRClient(APITemplateClient):
@@ -20,9 +21,7 @@ class EDRClient(APITemplateClient):
     def verify_member(self, edrpou, extra_headers=None):
         self.headers.update(extra_headers or {})
         response = self.request(
-            'GET',
-            '{}/api/{}/verify'.format(self.host_url, self.api_version),
-            params_dict={'id': edrpou}
+            'GET', '{}/api/{}/verify'.format(self.host_url, self.api_version), params_dict={'id': edrpou}
         )
         if response.status_code == 200:
             return munchify(loads(response.text))

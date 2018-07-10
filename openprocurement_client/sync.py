@@ -12,3 +12,7 @@ zope.deferredimport.deprecated(
     get_resource_items='openprocurement_client.resources.sync:get_resource_items',
     get_tenders='openprocurement_client.resources.sync:get_tenders'
 )
+zope.deferredimport.deprecated(
+    "Import from openprocurement_client.utils instead.",
+    get_response='openprocurement_client.utils:get_response'
+)

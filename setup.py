@@ -11,6 +11,7 @@ install_requires = [
     'requests',
     'python-magic',
     'zope.deferredimport',
+    'zope.deprecation',
 ]
 
 tests_require = [

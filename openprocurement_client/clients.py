@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
+
+from iso8601 import parse_date
+from munch import munchify
+from retrying import retry
+from simplejson import loads
+
 from openprocurement_client.constants import DOCUMENTS
 from openprocurement_client.exceptions import InvalidResponse
+from openprocurement_client.resources.document_service import DocumentServiceClient
 from openprocurement_client.templates import APITemplateClient
 from openprocurement_client.utils import verify_file
-from iso8601 import parse_date
-from simplejson import loads
-from retrying import retry
-from munch import munchify
-
-from openprocurement_client.resources.document_service import DocumentServiceClient
 
 
 LOGGER = logging.getLogger(__name__)
@@ -31,14 +32,18 @@ class APIBaseClient(APITemplateClient):
                  api_version=None,
                  params=None,
                  ds_config=None,
-                 user_agent=None):
+                 user_agent=None,
+                 ds_client=None):
 
         super(APIBaseClient, self).__init__(login_pass=(key, ''),
                                             headers=self.headers,
                                             user_agent=user_agent)
         if ds_config:
-            self.ds_client = DocumentServiceClient(ds_config['host_url'],
-                                                   ds_config['auth_ds'])
+            self.ds_client = DocumentServiceClient(ds_config['host_url'], ds_config['auth_ds'])
+        if ds_client:
+            self.ds_client = ds_client
+            LOGGER.warn("Positional argument 'ds_client' is deprecated, use 'ds_config' which receive "
+                        "dict with 'host_url' and 'auth_ds' keys")
         self.host_url = host_url or self.host_url
         self.api_version = api_version or self.api_version
 
@@ -52,21 +57,20 @@ class APIBaseClient(APITemplateClient):
             'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
         )
         response.raise_for_status()
-        # print (self.resource, resource)
         self.resource = self.resource or resource
-        self.prefix_path = '{}/api/{}/{}'.format(self.host_url,
-                                                 self.api_version, self.resource)
+        self.prefix_path = '{}/api/{}/{}'.format(self.host_url, self.api_version, self.resource)
+
+    @staticmethod
+    def _get_access_token(obj):
+        return getattr(getattr(obj, 'access', ''), 'token', '')
 
     def _create_resource_item(self, url, payload, headers=None, method='POST'):
         _headers = self.headers.copy()
         _headers.update(headers or {})
 
-        response_item = self.request(
-            method, url, headers=_headers, json=payload
-        )
+        response_item = self.request(method, url, headers=_headers, json=payload)
         if ((response_item.status_code == 201 and method == 'POST') or
-                (response_item.status_code in (200, 204) and
-                 method in ('PUT', 'DELETE'))):
+                (response_item.status_code in (200, 204) and method in ('PUT', 'DELETE'))):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
@@ -91,9 +95,7 @@ class APIBaseClient(APITemplateClient):
         _params = (params or {}).copy()
         _params['feed'] = feed
         self._update_params(_params)
-        response = self.request('GET',
-                                self.prefix_path,
-                                params_dict=self.params)
+        response = self.request('GET', self.prefix_path, params_dict=self.params)
         if response.status_code == 200:
             resource_items_list = munchify(loads(response.text))
             self._update_params(resource_items_list.next_page)
@@ -106,21 +108,34 @@ class APIBaseClient(APITemplateClient):
     def _patch_resource_item(self, url, payload, headers=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
-        response_item = self.request(
-            'PATCH', url, headers=_headers, json=payload
-        )
+        response_item = self.request('PATCH', url, headers=_headers, json=payload)
         if response_item.status_code == 200:
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
     def _patch_obj_resource_item(self, patched_obj, item_obj, items_name):
         return self._patch_resource_item(
-            '{}/{}/{}/{}'.format(
-                self.prefix_path, patched_obj.data.id,
-                items_name, item_obj['data']['id']
-            ),
+            '{}/{}/{}/{}'.format(self.prefix_path, patched_obj.data.id, items_name, item_obj['data']['id']),
             payload=item_obj,
             headers={'X-Access-Token': self._get_access_token(patched_obj)}
+        )
+
+    def patch_document(self, obj, document):
+        LOGGER.warn("'patch_document is deprecated method use 'APIResourceClient.patch_document' "
+                    "from 'openprocurement_client.clients' instead.")
+        return self._patch_obj_resource_item(obj, document, 'documents')
+
+    @verify_file
+    def upload_document(self, file_, obj, doc_type=None, use_ds_client=True, doc_registration=True):
+        LOGGER.warn("'upload_document is deprecated method use 'APIResourceClient.upload_document' "
+                    "from 'openprocurement_client.clients' instead.")
+        return self._upload_resource_file(
+            '{}/{}/documents'.format(self.prefix_path, obj.data.id),
+            file_=file_,
+            headers={'X-Access-Token': self._get_access_token(obj)},
+            doc_type=doc_type,
+            use_ds_client=use_ds_client,
+            doc_registration=doc_registration
         )
 
     def _update_params(self, params):
@@ -128,38 +143,41 @@ class APIBaseClient(APITemplateClient):
             if key not in IGNORE_PARAMS:
                 self.params[key] = params[key]
 
-    def _upload_resource_file(self, url, file_=None, headers=None,
-                              method='POST', doc_registration=True):
-        if hasattr(self, 'ds_client'):
+    def _upload_resource_file(self, url, file_=None, headers=None, doc_type=None, method='POST',
+                              use_ds_client=True, doc_registration=True):
+        if hasattr(self, 'ds_client') and use_ds_client:
             if doc_registration:
-                response = self.ds_client.document_upload_registered(
-                    file_=file_, headers=headers
-                )
+                response = self.ds_client.document_upload_registered(file_=file_, headers=headers)
             else:
-                response = self.ds_client.document_upload_not_registered(
-                    file_=file_, headers=headers
-                )
+                response = self.ds_client.document_upload_not_registered(file_=file_, headers=headers)
             payload = {'data': response['data']}
-            response = self._create_resource_item(
-                url,
-                headers=headers,
-                payload=payload,
-                method=method
-            )
+            payload['data']['documentType'] = doc_type
+            response = self._create_resource_item(url, headers=headers, payload=payload, method=method)
         else:
-            LOGGER.warning(
-                'File upload/download/delete outside of the Document Service '
-                'is deprecated'
-            )
-            response = self.request(
-                method, url, headers=headers, file_={'file': file_}
-            )
+            if use_ds_client:
+                LOGGER.warning(
+                    'use_ds_client parameter is True while DS-client is not passed to the client constructor.'
+                )
+            LOGGER.warning('File upload/download/delete outside of the Document Service is deprecated')
+            response = self.request(method, url, headers=headers, file_={'file': file_})
             if response.status_code in (201, 200):
                 response = munchify(loads(response.text))
             else:
                 raise InvalidResponse(response)
 
         return response
+
+    def get_resource_item(self, id, headers=None):
+        LOGGER.warn("'get_resource_item' method is deprecated use APIResoucreClient.get_resource_item from "
+                    "from 'openprocurement_client.clients'.")
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, id), headers=headers)
+
+    def patch_credentials(self, id, access_token):
+        LOGGER.warn("'pat' method is deprecated use APIResoucreClient.pat from "
+                    "from 'openprocurement_client.clients'.")
+        return self._patch_resource_item('{}/{}/credentials'.format(self.prefix_path, id),
+                                         payload=None,
+                                         headers={'X-Access-Token': access_token})
 
     def renew_cookies(self):
         old_cookies = 'Old cookies:\n'
@@ -169,9 +187,7 @@ class APIBaseClient(APITemplateClient):
 
         self.session.cookies.clear()
 
-        response = self.session.request(
-            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
-        )
+        response = self.session.request('HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version))
         response.raise_for_status()
 
         new_cookies = 'New cookies:\n'
@@ -196,6 +212,9 @@ class APIResourceClient(APIBaseClient):
         headers = None
         if access_token:
             headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
         if depth_path:
             url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id,
                                        depth_path, subitem_name)
@@ -215,14 +234,9 @@ class APIResourceClient(APIBaseClient):
         if access_token:
             headers = {'X-Access-Token': access_token}
         if depth_path:
-            url = '{}/{}/{}/{}/{}'.format(
-                self.prefix_path, resource_item_id, depth_path, subitem_name,
-                subitem_id
-            )
+            url = '{}/{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, subitem_name, subitem_id)
         else:
-            url = '{}/{}/{}/{}'.format(
-                self.prefix_path, resource_item_id, subitem_name, subitem_id
-            )
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, subitem_name, subitem_id)
         return self._delete_resource_item(url, headers=headers)
 
     ###########################################################################
@@ -239,6 +253,9 @@ class APIResourceClient(APIBaseClient):
         headers = None
         if access_token:
             headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
         if depth_path:
             url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id,
                                        depth_path, subitem_id_or_name)
@@ -274,8 +291,7 @@ class APIResourceClient(APIBaseClient):
         #     response_obj = request(response_item.headers['location'])
         if response_item.status_code == 200:
             return response_item.text, \
-                response_item.headers['Content-Disposition'] \
-                .split("; filename=")[1].strip('"')
+                response_item.headers['Content-Disposition'].split("; filename=")[1].strip('"')
         raise InvalidResponse(response_item)
 
     def get_file_properties(self, url, file_hash, access_token=None):
@@ -284,8 +300,7 @@ class APIResourceClient(APIBaseClient):
         response_item = self.request('GET', url, headers=headers)
         if response_item.status_code == 200:
             file_properties = {
-                'Content_Disposition':
-                    response_item.headers['Content-Disposition'],
+                'Content_Disposition': response_item.headers['Content-Disposition'],
                 'Content_Type': response_item.headers['Content-Type'],
                 'url': url,
                 'hash': file_hash
@@ -304,22 +319,29 @@ class APIResourceClient(APIBaseClient):
             headers={'X-Access-Token': access_token}
         )
 
-    def patch_resource_item(self, resource_item_id, patch_data,
-                            access_token=None):
+    def patch_resource_item(self, resource_item_id, patch_data={}, access_token=None):
         headers = None
         if access_token:
             headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            patch_data = {'data': resource_item_id['data']}
+            resource_item_id = resource_item_id['data']['id']
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, resource_item_id),
             payload=patch_data, headers=headers
         )
 
-    def patch_resource_item_subitem(self, resource_item_id, patch_data,
-                                    subitem_name, subitem_id=None,
+    def patch_resource_item_subitem(self, resource_item_id, patch_data, subitem_name, subitem_id=None,
                                     access_token=None, depth_path=None):
         headers = None
         if access_token:
             headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
+        if not subitem_id:
+            subitem_id = patch_data['data']['id']
         if depth_path:
             url = '{}/{}/{}/{}/{}'.format(
                 self.prefix_path, resource_item_id, depth_path, subitem_name,
@@ -343,61 +365,50 @@ class APIResourceClient(APIBaseClient):
     ###########################################################################
 
     @verify_file
-    def update_document(self, file_, resource_item_id, document_id,
-                        doc_registration=True, access_token=None,
-                        depth_path=None, doc_type=DOCUMENTS):
+    def update_document(self, file_, resource_item_id, document_id, doc_type=DOCUMENTS, use_ds_client=True,
+                        doc_registration=True, depth_path=None, access_token=None):
         headers = None
         if access_token:
             headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
+
         if depth_path:
-            url = '{}/{}/{}/{}/{}'.format(
-                self.prefix_path, resource_item_id, depth_path, doc_type,
-                document_id
-            )
+            url = '{}/{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, doc_type, document_id)
         else:
-            url = '{}/{}/{}/{}'.format(
-                self.prefix_path, resource_item_id, doc_type, document_id
-            )
-        return self._upload_resource_file(
-            url, file_=file_, headers=headers, method='PUT',
-            doc_registration=doc_registration
-        )
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, doc_type, document_id)
+        return self._upload_resource_file(url,
+                                          file_=file_, headers=headers, method='PUT', use_ds_client=use_ds_client,
+                                          doc_registration=doc_registration, doc_type=doc_type)
 
     ###########################################################################
     #                          UPLOAD CLIENT METHODS
     ###########################################################################
 
     @verify_file
-    def upload_document(self, file_, resource_item_id, doc_registration=True,
-                        access_token=None, depth_path=None,
-                        doc_type=DOCUMENTS):
+    def upload_document(self, file_, resource_item_id, doc_type=DOCUMENTS, use_ds_client=True, doc_registration=True,
+                        depth_path=None, access_token=None):
         headers = None
         if access_token:
             headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
         if depth_path:
-            url = '{}/{}/{}/{}'.format(
-                self.prefix_path, resource_item_id, depth_path, doc_type
-            )
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, doc_type)
         else:
-            url = '{}/{}/{}'.format(
-                self.prefix_path, resource_item_id, doc_type
-            )
-        return self._upload_resource_file(
-            url, file_=file_, headers=headers,
-            doc_registration=doc_registration
-        )
+            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id, doc_type)
+        return self._upload_resource_file(url,
+                                          file_=file_, headers=headers, doc_registration=doc_registration,
+                                          doc_type=doc_type, use_ds_client=use_ds_client)
 
     def extract_credentials(self, resource_item_id):
-        return self._get_resource_item(
-            '{}/{}/extract_credentials'.format(self.prefix_path,
-                                               resource_item_id)
-        )
+        return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, resource_item_id))
 
     def change_ownership(self, obj_id, transfer, access_token=None):
         try:
-            self.create_resource_item_subitem(
-                obj_id, transfer, 'ownership', access_token=access_token
-            )
+            self.create_resource_item_subitem(obj_id, transfer, 'ownership', access_token=access_token)
         except InvalidResponse as e:
             if e.status_code == 200:
                 return munchify(loads(e.response.text))
@@ -411,8 +422,7 @@ class APIResourceClientSync(APIResourceClient):
         _params['feed'] = 'changes'
         self.headers.update(extra_headers or {})
 
-        response = self.request('GET', self.prefix_path,
-                                params_dict=_params)
+        response = self.request('GET', self.prefix_path, params_dict=_params)
         if response.status_code == 200:
             tender_list = munchify(loads(response.text))
             return tender_list
@@ -420,5 +430,4 @@ class APIResourceClientSync(APIResourceClient):
     @retry(stop_max_attempt_number=5)
     def get_resource_item(self, resource_item_id, extra_headers=None):
         self.headers.update(extra_headers or {})
-        return super(APIResourceClientSync, self).get_resource_item(
-            resource_item_id)
+        return super(APIResourceClientSync, self).get_resource_item(resource_item_id)

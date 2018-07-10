@@ -107,8 +107,7 @@ class GetResponseTestCase(unittest.TestCase):
         mock_client.session.cookies.clear = mock.Mock()
         response = get_response(mock_client, params)
         log_strings = self.log_capture_string.getvalue().split('\n')
-        self.assertEqual(log_strings[0],
-                         'Resource not found: Not described error yet.')
+        self.assertEqual(log_strings[0], 'Resource not found: Not described error yet.')
         self.assertEqual(mock_client.session.cookies.clear.call_count, 1)
         self.assertEqual(params, {'some_data': 'data'})
         self.assertEqual(response, 'success')
@@ -123,14 +122,8 @@ class GetResponseTestCase(unittest.TestCase):
         mock_client = TestAPIResourceClientSync()
         response = get_response(mock_client, {})
         log_strings = self.log_capture_string.getvalue().split('\n')
-        self.assertEqual(
-            log_strings[0],
-            "Exception: InvalidHeader('invalid header',)"
-        )
-        self.assertEqual(
-            log_strings[1],
-            "Exception: Exception('exception message',)"
-        )
+        self.assertEqual(log_strings[0], "Exception: InvalidHeader('invalid header',)")
+        self.assertEqual(log_strings[1], "Exception: Exception('exception message',)")
         self.assertEqual(response, 'success')
 
 

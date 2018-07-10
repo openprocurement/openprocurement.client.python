@@ -1034,13 +1034,8 @@ class ContractingUserTestCase(BaseTestClass):
         patched_change = self.change.copy()
         patched_change['data'].update(patch_change_data['data'])
         patched_change = munchify(patched_change)
-        contract_id = self.contract.data.id
-        access_token = self.contract.access['token']
-        changes_id = self.change.data.id
-        response_change = self.client.patch_change(
-            self.contract.data.id, self.change.data.id,
-            '', data=patch_change_data
-        )
+        response_change = self.client.patch_change(self.contract.data.id, self.change.data.id, '',
+                                                   data=patch_change_data)
 
         self.assertEqual(response_change, patched_change)
 
@@ -1058,12 +1053,11 @@ class ContractingUserTestCase(BaseTestClass):
 
     def test_patch_contract(self):
         setup_routing(self.app, routes=["contract_patch"])
-        self.contract.data.description = 'test_patch_contract'
-        patched_contract = self.client.patch_contract(self.contract.data.id,
-                                                      '', self.contract)
+        patch_data = {'data': {'description': 'test_patch_contract'}}
+        access_token = self.contract.access['token']
+        patched_contract = self.client.patch_contract(self.contract.data.id, access_token, patch_data)
         self.assertEqual(patched_contract.data.id, self.contract.data.id)
-        self.assertEqual(patched_contract.data.description,
-                         patch_data['data']['description'])
+        self.assertEqual(patched_contract.data.description, patch_data['data']['description'])
 
 
 def suite():

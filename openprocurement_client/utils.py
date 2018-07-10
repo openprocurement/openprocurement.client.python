@@ -141,13 +141,12 @@ def get_response(client, params):
             sleep(sleep_interval)
             continue
         except RequestFailed as e:
-            LOGGER.error('Request failed. Status code: {}'.format(e.status_code),
+            LOGGER.error('RequestFailed: Status code: {}'.format(e.status_code),
                          extra={'MESSAGE_ID': 'request_failed'})
             if e.status_code == 429:
                 if sleep_interval > 120:
                     raise e
-                LOGGER.debug(
-                    'Client sleeping after RequestFailed {} sec.'.format(sleep_interval))
+                LOGGER.debug('Client sleeping after RequestFailed {} sec.'.format(sleep_interval))
                 sleep_interval = sleep_interval * 2
                 sleep(sleep_interval)
                 continue
@@ -158,7 +157,7 @@ def get_response(client, params):
             del params['offset']
             continue
         except Exception as e:
-            LOGGER.error('Exception: {}'.format(e.message), extra={'MESSAGE_ID': 'exceptions'})
+            LOGGER.error('Exception: {}'.format(repr(e)), extra={'MESSAGE_ID': 'exceptions'})
             if sleep_interval > 300:
                 raise e
             sleep_interval = sleep_interval * 2
