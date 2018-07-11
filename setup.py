@@ -10,6 +10,8 @@ install_requires = [
     'simplejson',
     'requests',
     'python-magic',
+    'zope.deferredimport',
+    'zope.deprecation',
 ]
 
 tests_require = [
@@ -45,5 +47,5 @@ setup(
     entry_points="""
     # -*- Entry points: -*-
     """,
-    test_suite="openprocurement_client.tests"
+    test_suite="openprocurement_client.tests.main:suite"
 )

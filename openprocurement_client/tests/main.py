@@ -1,12 +1,17 @@
 import unittest
 
-from openprocurement_client.tests import tests, tests_sync
+from openprocurement_client.tests import (
+    tests_resources,
+    tests_sync,
+    test_registry_client
+)
 
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(tests.suite())
     suite.addTest(tests_sync.suite())
+    suite.addTest(test_registry_client.suite())
+    suite.addTest(tests_resources.suite())
     return suite
 
 

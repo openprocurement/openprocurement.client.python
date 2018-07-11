@@ -1,9 +1,8 @@
 [run]
-omit =
-    *tests*
 source = openprocurement_client
 
 [report]
+omit = *tests*
 exclude_lines =
     pragma: no cover
     def __repr__
