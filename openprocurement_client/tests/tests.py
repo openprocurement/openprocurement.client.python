@@ -813,6 +813,17 @@ class ContractingUserTestCase(BaseTestClass):
 
         self.assertEqual(response_change, patched_change)
 
+    def test_patch_milestone(self):
+        setup_routing(self.app, routes=['contract_subpage_item_patch'])
+        patched_milestone = {'data': self.contract.data.milestones[0]}
+        patched_milestone['data']['amountPaid']['amount'] = 40
+
+        response_milestone = self.client.patch_milestone(
+            self.contract.data.id, '', data=patched_milestone
+        )
+
+        self.assertEqual(response_milestone, patched_milestone)
+
     def test_retrieve_contract_credentials(self):
         setup_routing(self.app, routes=['contract_patch_credentials'])
         patched_credentials = self.client.patch_credentials(

@@ -73,3 +73,11 @@ class ContractingClient(APIBaseClient):
             payload=data,
             headers={'X-Access-Token': access_token}
         )
+
+    def patch_milestone(self, contract_id, access_token, data):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}'.format(self.prefix_path, contract_id, 'milestones',
+                                data['data']['id']),
+            payload=data,
+            headers={'X-Access-Token': access_token}
+        )
