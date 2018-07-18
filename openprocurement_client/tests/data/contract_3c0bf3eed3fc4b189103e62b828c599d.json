@@ -90,6 +90,31 @@
             "amount": 238.0,
             "valueAddedTaxIncluded": true
             },
+        "milestones": [
+            {
+                "status": "pending",
+                "description": "Milestone #1 of year 2018",
+                "sequenceNumber": 1,
+                "title": "Milestone #1 of year 2018",
+                "period": {
+                    "startDate": "2016-03-18T18:47:47.155143+02:00",
+                    "endDate": "2017-03-18T18:47:47.155143+02:00"
+                },
+                "value": {
+                    "currency": "UAH",
+                    "amount": 74.38,
+                    "valueAddedTaxIncluded": true
+                },
+            "dateModified": "2016-03-18T18:47:47.155143+02:00",
+            "date": "2016-03-18T18:47:47.155143+02:00",
+            "amountPaid": {
+                "currency": "UAH",
+                "amount": 0,
+                "valueAddedTaxIncluded": true
+            },
+            "id": "1c3722d17b3542e79f7a9e691139bab1"
+            }
+        ],
         "dateSigned": "2016-03-18T18:48:05.762961+02:00",
         "awardID": "8481d7eb01694c25b18658036c236c5d",
         "id": "3c0bf3eed3fc4b189103e62b828c599d",
