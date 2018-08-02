@@ -3,7 +3,9 @@ from gevent import monkey; monkey.patch_all()
 
 from openprocurement_client.client import TendersClient
 from openprocurement_client.exceptions import IdNotFound
-from openprocurement_client.utils import tenders_feed, get_tender_id_by_uaid, get_tender_by_uaid
+from openprocurement_client.utils import tenders_feed,  \
+    get_tender_id_by_uaid, get_tender_by_uaid, get_monitoring_id_by_uaid
+from tests_dasu import TestDasuClient
 
 from munch import munchify
 
@@ -80,6 +82,17 @@ class TestUtilsFunctions(unittest.TestCase):
         with self.assertRaises(IdNotFound):
             result = get_tender_id_by_uaid('f3849ade33534174b8402579152a5f41', client, id_field='dateModified')
             self.assertEqual(result, self.response.data[0]['id'])
+
+    @mock.patch('openprocurement_client.dasu_client.DasuClient.get_monitorings')
+    @mock.patch('openprocurement_client.utils.get_monitoring_id_by_uaid')
+    def test_get_monitoring_id_by_uaid(self, mock_get_monitorings, mock_get_monitoring_id_by_uaid):
+        monitoring_id = 'f32f928d57d8485890b694cb2e02f864'
+        monitoring_uaid = 'UA-M-2018-07-31-000074'
+        monitorings = munchify({"monitoring_id": monitoring_uaid, "id": monitoring_id})
+        mock_get_monitoring_id_by_uaid.side_effect = [[monitorings]]
+        client = TestDasuClient()
+        result = get_monitoring_id_by_uaid(monitoring_uaid, client)
+        self.assertEqual(result, monitoring_id)
 
 
 def suite():

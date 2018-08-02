@@ -45,3 +45,13 @@ TEST_CONTRACT_KEYS = munchify({
     "patch_change_rationale": u'Друга і третя поставка має бути розфасована',
     "new_token": 'new0contract0token123412341234'
 })
+
+TEST_MONITORING_KEYS = munchify({
+    "monitoring_id": 'f32f928d57d8485890b694cb2e02f864',
+    "dialogue_id": '484e0eba91d348c9b372e7da7218a095',
+    "document_id": '330822cbbd724671a1d2ff7c3a51dd52',
+    "description": 'The procurement requirements have been fixed and the changes are attached',
+    "title": 'The procurement requirements have been fixed',
+    "name": 'The State Audit Service of Ukraine',
+    "roles": 'sas'
+})
