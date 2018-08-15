@@ -151,7 +151,10 @@ class APIBaseClient(APITemplateClient):
         _headers.update(headers or {})
         response_item = self.request('GET', url, headers=_headers)
         if response_item.status_code == 200:
-            return munchify(loads(response_item.text))
+            data = loads(response_item.text)
+            if "x-revision-n" in response_item.headers:
+                data["x_revision_n"] = response_item.headers.get("x-revision-n")
+            return munchify(data)
         raise InvalidResponse(response_item)
 
     def _patch_resource_item(self, url, payload, headers=None):
@@ -240,9 +243,15 @@ class APIBaseClient(APITemplateClient):
             doc_registration=doc_registration
         )
 
-    def get_resource_item(self, id, headers=None):
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id),
+    def get_resource_item(self, item_id, headers=None):
+        return self._get_resource_item('{}/{}'.format(self.prefix_path, item_id),
                                        headers=headers)
+
+    def get_resource_item_historical(self, item_id, revision="", headers=None):
+        _headers = {"x-revision-n": str(revision)}
+        if headers:
+            _headers.update(headers)
+        return self._get_resource_item('{}/{}/historical'.format(self.prefix_path, item_id), headers=_headers)
 
     def patch_credentials(self, id, access_token):
         return self._patch_resource_item(
