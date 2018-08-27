@@ -29,6 +29,8 @@ class ContractingClient(APIResourceClient):
         return self.patch_credentials(contract_id, access_token)
 
     def patch_contract(self, contract_id, access_token, data):
+        if access_token is None:
+            return self.patch_resource_item(contract_id, data)
         return self.patch_resource_item(
             contract_id, data, access_token
         )
