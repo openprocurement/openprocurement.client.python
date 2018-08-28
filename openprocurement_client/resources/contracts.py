@@ -2,7 +2,12 @@
 from zope.deprecation import deprecation
 
 from openprocurement_client.clients import APIResourceClient
-from openprocurement_client.constants import CHANGES, CONTRACTS, MILESTONES
+from openprocurement_client.constants import (
+    CHANGES,
+    CONTRACTS,
+    DOCUMENTS,
+    MILESTONES,
+)
 
 
 class ContractingClient(APIResourceClient):
@@ -42,4 +47,11 @@ class ContractingClient(APIResourceClient):
         return self.patch_resource_item_subitem(contract_id, data, CHANGES, change_id, access_token=access_token)
 
     def patch_milestone(self, contract_id, milestone_id, access_token, data):
-        return self.patch_resource_item_subitem(contract_id, data, MILESTONES, milestone_id, access_token=access_token)
+        return self.patch_resource_item_subitem(
+            contract_id, data, MILESTONES, milestone_id, access_token=access_token
+        )
+
+    def post_document(self, contract_id, access_token, data):
+        return self.create_resource_item_subitem(
+            contract_id, data, DOCUMENTS, access_token=access_token
+        )
