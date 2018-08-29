@@ -12,7 +12,9 @@ import mock
 import sys
 import unittest
 from openprocurement_client.constants import (
-    ELIGIBILITY_DOCUMENTS, FINANCIAL_DOCUMENTS, QUALIFICATION_DOCUMENTS
+    ELIGIBILITY_DOCUMENTS,
+    FINANCIAL_DOCUMENTS,
+    QUALIFICATION_DOCUMENTS,
 )
 from openprocurement_client.exceptions import InvalidResponse, ResourceNotFound
 from openprocurement_client.resources.contracts import ContractingClient
@@ -20,12 +22,27 @@ from openprocurement_client.resources.plans import PlansClient
 from openprocurement_client.resources.tenders import (
     TendersClient, TendersClientSync
 )
-from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
-    TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
-from openprocurement_client.tests._server import \
-    API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
-    HOST_URL, location_error, PORT, ROOT, setup_routing, setup_routing_ds, \
-    resource_partition, resource_filter
+from openprocurement_client.tests.data_dict import (
+    TEST_CONTRACT_KEYS,
+    TEST_PLAN_KEYS,
+    TEST_TENDER_KEYS,
+    TEST_TENDER_KEYS_LIMITED,
+)
+from openprocurement_client.tests._server import (
+    API_KEY,
+    API_VERSION,
+    AUTH_DS_FAKE,
+    DS_HOST_URL,
+    DS_PORT,
+    HOST_URL,
+    PORT,
+    ROOT,
+    location_error,
+    resource_filter,
+    resource_partition,
+    setup_routing,
+    setup_routing_ds,
+)
 
 
 def generate_file_obj(file_name, content):
@@ -958,6 +975,9 @@ class ContractingUserTestCase(BaseTestClass):
         with open(ROOT + 'contracts.json') as contracts:
             self.contracts = munchify(load(contracts))
 
+        with open(ROOT + 'milestone_' + TEST_CONTRACT_KEYS.milestone_id + '.json') as m:
+            self.milestone = munchify(load(m))
+
     def tearDown(self):
         self.server.stop()
 
@@ -1058,6 +1078,15 @@ class ContractingUserTestCase(BaseTestClass):
         patched_contract = self.client.patch_contract(self.contract.data.id, access_token, patch_data)
         self.assertEqual(patched_contract.data.id, self.contract.data.id)
         self.assertEqual(patched_contract.data.description, patch_data['data']['description'])
+
+
+    def test_patch_milestone(self):
+        setup_routing(self.app, routes=('contract_patch_milestone',))
+        patch_data = {'data': {'description': 'test_patch_contract_milestone'}}
+        access_token = self.contract.access['token']
+        patched_milestone = self.client.patch_milestone(self.contract.data.id, self.milestone.id, access_token, patch_data)
+        self.assertEqual(patched_milestone.data.id, self.milestone.id)
+        self.assertEqual(patched_milestone.data.description, patch_data['data']['description'])
 
 
 def suite():
