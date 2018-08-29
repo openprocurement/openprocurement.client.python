@@ -308,6 +308,13 @@ def contract_change_patch(contract_id, change_id):
     change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
     return dumps(change)
 
+
+def contract_patch_milestone(contract_id, milestone_id):
+    response.status = 200
+    milestone = resource_partition(milestone_id, resource_name='milestone')
+    milestone.update(request.json['data'])
+    return dumps({'data': milestone})
+
 # Routes
 
 
@@ -350,6 +357,7 @@ routes_dict = {
     "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
     "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
     "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
+    "contract_patch_milestone": (API_PATH.format('contracts') + '/<contract_id>/milestones/<milestone_id>', 'PATCH', contract_patch_milestone),
     "assets": (API_PATH.format('<resource_name:resource_filter:asset>'), 'GET', resource_page_get),
     "asset": (API_PATH.format('<resource_name:resource_filter:asset>') + '/<resource_id>', 'GET', resource_page),
     "asset_patch": (API_PATH.format('<resource_name:resource_filter:asset>') + "/<resource_id>", 'PATCH', resource_patch),

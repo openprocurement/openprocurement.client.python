@@ -43,7 +43,8 @@ TEST_CONTRACT_KEYS = munchify({
     "contract_token": '0fc58c83963d42a692db4987df86640a',
     "change_id": '3ba8592459904c73bf05d7bc48e7083c',
     "patch_change_rationale": u'Друга і третя поставка має бути розфасована',
-    "new_token": 'new0contract0token123412341234'
+    "new_token": 'new0contract0token123412341234',
+    "milestone_id": "7832794cb7474885a9e0536ce198ac88",
 })
 
 TEST_LOT_KEYS = munchify({

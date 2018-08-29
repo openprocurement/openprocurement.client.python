@@ -975,6 +975,9 @@ class ContractingUserTestCase(BaseTestClass):
         with open(ROOT + 'contracts.json') as contracts:
             self.contracts = munchify(load(contracts))
 
+        with open(ROOT + 'milestone_' + TEST_CONTRACT_KEYS.milestone_id + '.json') as m:
+            self.milestone = munchify(load(m))
+
     def tearDown(self):
         self.server.stop()
 
@@ -1075,6 +1078,15 @@ class ContractingUserTestCase(BaseTestClass):
         patched_contract = self.client.patch_contract(self.contract.data.id, access_token, patch_data)
         self.assertEqual(patched_contract.data.id, self.contract.data.id)
         self.assertEqual(patched_contract.data.description, patch_data['data']['description'])
+
+
+    def test_patch_milestone(self):
+        setup_routing(self.app, routes=('contract_patch_milestone',))
+        patch_data = {'data': {'description': 'test_patch_contract_milestone'}}
+        access_token = self.contract.access['token']
+        patched_milestone = self.client.patch_milestone(self.contract.data.id, self.milestone.id, access_token, patch_data)
+        self.assertEqual(patched_milestone.data.id, self.milestone.id)
+        self.assertEqual(patched_milestone.data.description, patch_data['data']['description'])
 
 
 def suite():
