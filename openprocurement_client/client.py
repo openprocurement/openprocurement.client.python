@@ -317,6 +317,15 @@ class TendersClient(APIBaseClient):
     def patch_agreement(self, tender, agreement):
         return self._patch_obj_resource_item(tender, agreement, 'agreements')
 
+    def patch_agreement_contract(self, tender, agreement_id, contract):
+        return self._patch_resource_item(
+             '{}/{}/agreements/{}/contracts/{}'.format(
+                self.prefix_path, tender.data.id, agreement_id, contract.data.id
+            ),
+            payload=contract,
+            headers={'X-Access-Token': self._get_access_token(tender)}
+        )
+
     def patch_auction(self, tender, auction):
         return self._patch_obj_resource_item(tender, auction, 'auctions')
 

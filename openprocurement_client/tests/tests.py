@@ -426,6 +426,16 @@ class UserTestCase(BaseTestClass):
         patched_agreement = self.client.patch_agreement(self.agreement_tender, agreement)
         self.assertEqual(patched_agreement['data']['status'], agreement['data']['status'])
 
+    def test_patch_agreement_contract(self):
+        setup_routing(self.app, routes=["tender_subpage_object_patch"])
+        contract = {}
+        contract['data'] = self.agreement_tender.data.agreements[0].contracts[0]
+        contract = munchify(contract)
+        contract.data.unitPrices[0].value.amount = TEST_TENDER_KEYS_AGREEMENT.amount
+        agreement_id = self.agreement_tender.data.agreements[0].id
+        patched_contract = self.client.patch_agreement_contract(self.agreement_tender, agreement_id, contract)
+        self.assertEqual(patched_contract, contract)
+
     def test_patch_document(self):
         setup_routing(self.app, routes=["tender_subpage_item_patch"])
         document = munchify({"data": {"id": TEST_TENDER_KEYS.document_id, "title": "test_patch_document.txt"}})
