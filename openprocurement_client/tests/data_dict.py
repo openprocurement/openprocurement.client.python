@@ -20,6 +20,12 @@ TEST_TENDER_KEYS = munchify({
     "new_token": '4fa3e89efbaa46f0a1b86b911bec76e7'
 })
 
+TEST_TENDER_KEYS_AGREEMENT = munchify({
+    "tender_id": 'c3f4116d38d34fe2b7d8de8aae8c0b32',
+    "agreement_id": 'f7ed93081786430bae54499e594d7018',
+    "amount": 2872000,
+})
+
 TEST_TENDER_KEYS_LIMITED = munchify({
     "tender_id": '668c3156c8cb496fb28359909cde6e96',
     "cancellation_id": "0dd6f9e8cc4f4d1c9c404d842b56d0d7",
