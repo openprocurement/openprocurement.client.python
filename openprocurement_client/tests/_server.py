@@ -224,6 +224,20 @@ def tender_subpage_document_patch(tender_id, subpage_name, subpage_id, document_
     return location_error(subpage_name)
 
 
+def tender_subpage_object_patch(tender_id, subpage_name, subpage_id, object_type, object_id):
+    response.status = 200
+    subpage = resource_partition(tender_id, part=subpage_name)
+    if not subpage:
+        return location_error("tender")
+    for unit in subpage:
+        if unit['id'] == subpage_id:
+            for obj in unit[object_type]:
+                if obj['id'] == object_id:
+                    obj.update(request.json['data'])
+                    return dumps({"data": obj})
+    return location_error(subpage_name)
+
+
 def get_file(filename):
     redirect("/download/" + filename, code=302)
 
@@ -330,6 +344,7 @@ routes_dict = {
         "contract_change_patch": (API_PATH.format('contracts') + '/<contract_id>/changes/<change_id>', 'PATCH', contract_change_patch),
         "contract_patch": (API_PATH.format('<resource_name:resource_filter:contract>') + "/<resource_id>", 'PATCH', resource_patch),
         "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
+        "tender_subpage_object_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<object_type>/<object_id>", 'PATCH', tender_subpage_object_patch),
         }
 
 
