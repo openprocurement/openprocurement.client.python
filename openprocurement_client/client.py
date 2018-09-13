@@ -314,6 +314,9 @@ class TendersClient(APIBaseClient):
     def patch_item(self, tender, item):
         return self._patch_obj_resource_item(tender, item, 'items')
 
+    def patch_agreement(self, tender, agreement):
+        return self._patch_obj_resource_item(tender, agreement, 'agreements')
+
     def patch_auction(self, tender, auction):
         return self._patch_obj_resource_item(tender, auction, 'auctions')
 
