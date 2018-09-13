@@ -16,7 +16,7 @@ from openprocurement_client.document_service_client \
 from openprocurement_client.exceptions import InvalidResponse, ResourceNotFound
 from openprocurement_client.plan import PlansClient
 from openprocurement_client.tests.data_dict import TEST_TENDER_KEYS, \
-    TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS
+    TEST_TENDER_KEYS_LIMITED, TEST_PLAN_KEYS, TEST_CONTRACT_KEYS, TEST_TENDER_KEYS_AGREEMENT
 from openprocurement_client.tests._server import \
     API_KEY, API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
     HOST_URL, location_error,  PORT, ROOT, setup_routing, setup_routing_ds, \
@@ -224,6 +224,8 @@ class UserTestCase(BaseTestClass):
             self.empty_tender = munchify(load(tender))
         with open(ROOT + 'tender_' + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') as tender:
             self.limited_tender = munchify(load(tender))
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS_AGREEMENT.tender_id + '.json') as tender:
+            self.agreement_tender = munchify(load(tender))
 
     def tearDown(self):
         self.server.stop()
@@ -415,6 +417,14 @@ class UserTestCase(BaseTestClass):
         patched_lot = self.client.patch_lot(self.tender, lot)
         self.assertEqual(patched_lot.data.id, lot.data.id)
         self.assertEqual(patched_lot.data.description, lot.data.description)
+
+    def test_patch_agreement(self):
+        setup_routing(self.app, routes=["tender_subpage_item_patch"])
+        agreement = {}
+        agreement['data'] = self.agreement_tender.data.agreements[0]
+        agreement['data']['status'] = 'active'
+        patched_agreement = self.client.patch_agreement(self.agreement_tender, agreement)
+        self.assertEqual(patched_agreement['data']['status'], agreement['data']['status'])
 
     def test_patch_document(self):
         setup_routing(self.app, routes=["tender_subpage_item_patch"])
