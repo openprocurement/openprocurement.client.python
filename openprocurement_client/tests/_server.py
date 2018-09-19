@@ -186,6 +186,11 @@ def tender_document_create(tender_id):
     document.id = TEST_TENDER_KEYS.new_document_id
     return dumps({"data": document})
 
+def tender_document_update(tender_id, document_id):
+    response.status = 200
+    document = resource_partition(tender_id, part='documents')[0]
+    document.title = get_doc_title_from_request(request)
+    return dumps({"data": document})
 
 def tender_subpage_document_create(tender_id, subpage_name, subpage_id,
                                    document_type):
@@ -330,6 +335,7 @@ routes_dict = {
         'GET', resource_page),
     "tender_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + "/<resource_id>", 'PATCH', resource_patch),
     "tender_document_create": (TENDERS_PATH + "/<tender_id>/documents", 'POST', tender_document_create),
+    "tender_document_update": (TENDERS_PATH + "/<tender_id>/documents/<document_id>", 'PUT', tender_document_update),
     "tender_subpage": (TENDERS_PATH + "/<tender_id>/<subpage_name>", 'GET', tender_subpage),
     "tender_subpage_item_create": (TENDERS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
     "tender_award_documents": (TENDERS_PATH + "/<tender_id>/awards/<award_id>/documents", 'GET', tender_award_documents),
