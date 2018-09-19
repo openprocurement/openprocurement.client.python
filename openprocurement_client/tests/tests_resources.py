@@ -709,6 +709,21 @@ class UserTestCase(BaseTestClass):
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_TENDER_KEYS.new_document_id)
 
+    def test_upload_resource_file(self):
+        setup_routing(self.app, routes=["tender_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        url = '{}/{}/{}/{}/{}/{}'.format(HOST_URL, 'api', API_VERSION, 'tenders', TEST_TENDER_KEYS.tender_id, 'documents')
+        doc = self.client._upload_resource_file(
+            url,
+            file_=file_,
+            doc_type='tenderNotice'
+        )
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_TENDER_KEYS.new_document_id)
+
     def test_upload_tender_document_path(self):
         setup_routing(self.app, routes=["tender_document_create"])
         file_name = "test_document.txt"
