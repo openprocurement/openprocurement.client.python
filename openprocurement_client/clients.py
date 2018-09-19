@@ -386,23 +386,6 @@ class APIResourceClient(APIBaseClient):
     #                          UPLOAD CLIENT METHODS
     ###########################################################################
 
-    @verify_file
-    def upload_document(self, file_, resource_item_id, doc_type=DOCUMENTS, use_ds_client=True, doc_registration=True,
-                        depth_path=None, access_token=None):
-        headers = None
-        if access_token:
-            headers = {'X-Access-Token': access_token}
-        if isinstance(resource_item_id, dict):
-            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
-            resource_item_id = resource_item_id['data']['id']
-        if depth_path:
-            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, doc_type)
-        else:
-            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id, doc_type)
-        return self._upload_resource_file(url,
-                                          file_=file_, headers=headers, doc_registration=doc_registration,
-                                          doc_type=doc_type, use_ds_client=use_ds_client)
-
     def extract_credentials(self, resource_item_id):
         return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, resource_item_id))
 
