@@ -703,8 +703,23 @@ class UserTestCase(BaseTestClass):
         file_.write("test upload tender document text data")
         file_.seek(0)
         doc = self.client.upload_document(
-            file_, self.tender.data.id,
-            access_token=self.tender.access['token']
+            file_, self.tender,
+            doc_type='tenderNotice'
+        )
+        self.assertEqual(doc.data.title, file_.name)
+        self.assertEqual(doc.data.id, TEST_TENDER_KEYS.new_document_id)
+
+    def test_upload_resource_file(self):
+        setup_routing(self.app, routes=["tender_document_create"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        url = '{}/{}/{}/{}/{}/{}'.format(HOST_URL, 'api', API_VERSION, 'tenders', TEST_TENDER_KEYS.tender_id, 'documents')
+        doc = self.client._upload_resource_file(
+            url,
+            file_=file_,
+            doc_type='tenderNotice'
         )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id, TEST_TENDER_KEYS.new_document_id)
@@ -843,6 +858,19 @@ class UserTestCase(BaseTestClass):
             TypeError, self.client.upload_document, (object, self.tender)
         )
 
+    def test_update_tender_document(self):
+        setup_routing(self.app, routes=["tender_document_update"])
+        file_ = StringIO()
+        file_.name = 'test_document.txt'
+        file_.write("test upload tender document text data")
+        file_.seek(0)
+        doc = self.client.update_document(
+            file_, self.limited_tender,
+            TEST_TENDER_KEYS_LIMITED.document_id,
+            doc_type='tenderNotice'
+        )
+        self.assertEqual(doc.data.title, file_.name)
+
     def test_update_bid_document(self):
         setup_routing(self.app, routes=["tender_subpage_document_update"])
         file_ = StringIO()
@@ -862,11 +890,11 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender qualification_document text data")
         file_.seek(0)
-        document_type = QUALIFICATION_DOCUMENTS
+        subitem_name = QUALIFICATION_DOCUMENTS
         doc = self.client.update_bid_document(
             file_, self.tender.data.id, TEST_TENDER_KEYS.bid_id,
             TEST_TENDER_KEYS.bid_qualification_document_id,
-            doc_type=document_type
+            subitem_name=subitem_name
         )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id,
@@ -878,10 +906,11 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender financial_document text data")
         file_.seek(0)
-        document_type = FINANCIAL_DOCUMENTS
+        subitem_name = FINANCIAL_DOCUMENTS
         doc = self.client.update_bid_document(
             file_, self.tender.data.id, TEST_TENDER_KEYS.bid_id,
-            TEST_TENDER_KEYS.bid_financial_document_id, doc_type=document_type
+            TEST_TENDER_KEYS.bid_financial_document_id,
+            subitem_name=subitem_name
         )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id,
@@ -893,11 +922,12 @@ class UserTestCase(BaseTestClass):
         file_.name = 'test_document.txt'
         file_.write("test upload tender eligibility_document text data")
         file_.seek(0)
-        document_type = ELIGIBILITY_DOCUMENTS
+        subitem_name = ELIGIBILITY_DOCUMENTS
         doc = self.client.update_bid_document(
-            file_, self.tender.data.id, TEST_TENDER_KEYS.bid_id,
+            file_, self.tender, TEST_TENDER_KEYS.bid_id,
             TEST_TENDER_KEYS.bid_eligibility_document_id,
-            doc_type=document_type
+            subitem_name=subitem_name,
+            doc_type='eligibilityCriteria'
         )
         self.assertEqual(doc.data.title, file_.name)
         self.assertEqual(doc.data.id,

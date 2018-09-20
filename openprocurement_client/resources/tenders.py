@@ -311,7 +311,7 @@ class TendersClient(APIResourceClient):
                                     doc_registration=doc_registration,
                                     depth_path=depth_path, access_token=access_token)
 
-    def upload_bid_document(self, file_, tender_id, bid_id, doc_type=DOCUMENTS, use_ds_client=True,
+    def upload_bid_document(self, file_, tender_id, bid_id, doc_type=None, use_ds_client=True,
                             doc_registration=True, access_token=None):
         depth_path = '{}/{}'.format(BIDS, bid_id)
         return self.upload_document(file_, tender_id,
@@ -364,16 +364,18 @@ class TendersClient(APIResourceClient):
     #                            UPDATE FILE API METHODS
     ###########################################################################
 
-    def update_bid_document(self, file_, tender_id, bid_id, document_id, doc_type=DOCUMENTS, use_ds_client=True,
-                            doc_registration=True, access_token=None):
+    def update_bid_document(self, file_, tender_id, bid_id, document_id, doc_type=None, use_ds_client=True,
+                            doc_registration=True, access_token=None, subitem_name=DOCUMENTS):
         depth_path = '{}/{}'.format(BIDS, bid_id)
         return self.update_document(file_, tender_id, document_id,
                                     doc_type=doc_type,
                                     use_ds_client=use_ds_client,
                                     doc_registration=doc_registration,
-                                    depth_path=depth_path, access_token=access_token)
+                                    depth_path=depth_path,
+                                    access_token=access_token,
+                                    subitem_name=subitem_name)
 
-    def update_cancellation_document(self, file_, tender_id, cancellation_id, document_id, doc_type=DOCUMENTS,
+    def update_cancellation_document(self, file_, tender_id, cancellation_id, document_id, doc_type=None,
                                      use_ds_client=True, doc_registration=True, access_token=None):
         depth_path = '{}/{}'.format(CANCELLATIONS, cancellation_id)
         return self.update_document(file_, tender_id, document_id,

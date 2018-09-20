@@ -207,7 +207,7 @@ class AuctionsClient(APIResourceClient):
 
     def update_bid_document(self, file_, auction_id, bid_id, document_id,
                             doc_registration=True, access_token=None,
-                            doc_type=DOCUMENTS):
+                            doc_type=None):
         depth_path = '{}/{}'.format(BIDS, bid_id)
         return self.update_document(
             file_, auction_id, document_id, doc_registration,

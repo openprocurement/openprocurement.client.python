@@ -126,17 +126,21 @@ class APIBaseClient(APITemplateClient):
         return self._patch_obj_resource_item(obj, document, 'documents')
 
     @verify_file
-    def upload_document(self, file_, obj, doc_type=None, use_ds_client=True, doc_registration=True):
-        LOGGER.warn("'upload_document is deprecated method use 'APIResourceClient.upload_document' "
-                    "from 'openprocurement_client.clients' instead.")
-        return self._upload_resource_file(
-            '{}/{}/documents'.format(self.prefix_path, obj.data.id),
-            file_=file_,
-            headers={'X-Access-Token': self._get_access_token(obj)},
-            doc_type=doc_type,
-            use_ds_client=use_ds_client,
-            doc_registration=doc_registration
-        )
+    def upload_document(self, file_, resource_item_id, subitem_name=DOCUMENTS, doc_type=None, use_ds_client=True,
+                        doc_registration=True, depth_path=None, access_token=None):
+        headers = None
+        if access_token:
+            headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
+        if depth_path:
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, subitem_name)
+        else:
+            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id, subitem_name)
+        return self._upload_resource_file(url,
+                                          file_=file_, headers=headers, doc_registration=doc_registration,
+                                          doc_type=doc_type, use_ds_client=use_ds_client)
 
     def _update_params(self, params):
         for key in params:
@@ -151,7 +155,8 @@ class APIBaseClient(APITemplateClient):
             else:
                 response = self.ds_client.document_upload_not_registered(file_=file_, headers=headers)
             payload = {'data': response['data']}
-            payload['data']['documentType'] = doc_type
+            if doc_type:
+                payload['data']['documentType'] = doc_type
             response = self._create_resource_item(url, headers=headers, payload=payload, method=method)
         else:
             if use_ds_client:
@@ -365,7 +370,7 @@ class APIResourceClient(APIBaseClient):
     ###########################################################################
 
     @verify_file
-    def update_document(self, file_, resource_item_id, document_id, doc_type=DOCUMENTS, use_ds_client=True,
+    def update_document(self, file_, resource_item_id, document_id, subitem_name=DOCUMENTS, doc_type=None, use_ds_client=True,
                         doc_registration=True, depth_path=None, access_token=None):
         headers = None
         if access_token:
@@ -375,9 +380,9 @@ class APIResourceClient(APIBaseClient):
             resource_item_id = resource_item_id['data']['id']
 
         if depth_path:
-            url = '{}/{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, doc_type, document_id)
+            url = '{}/{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, subitem_name, document_id)
         else:
-            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, doc_type, document_id)
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, subitem_name, document_id)
         return self._upload_resource_file(url,
                                           file_=file_, headers=headers, method='PUT', use_ds_client=use_ds_client,
                                           doc_registration=doc_registration, doc_type=doc_type)
@@ -385,23 +390,6 @@ class APIResourceClient(APIBaseClient):
     ###########################################################################
     #                          UPLOAD CLIENT METHODS
     ###########################################################################
-
-    @verify_file
-    def upload_document(self, file_, resource_item_id, doc_type=DOCUMENTS, use_ds_client=True, doc_registration=True,
-                        depth_path=None, access_token=None):
-        headers = None
-        if access_token:
-            headers = {'X-Access-Token': access_token}
-        if isinstance(resource_item_id, dict):
-            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
-            resource_item_id = resource_item_id['data']['id']
-        if depth_path:
-            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, doc_type)
-        else:
-            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id, doc_type)
-        return self._upload_resource_file(url,
-                                          file_=file_, headers=headers, doc_registration=doc_registration,
-                                          doc_type=doc_type, use_ds_client=use_ds_client)
 
     def extract_credentials(self, resource_item_id):
         return self._get_resource_item('{}/{}/extract_credentials'.format(self.prefix_path, resource_item_id))
