@@ -265,6 +265,18 @@ class TendersClient(APIResourceClient):
             tender_id, item, ITEMS, subitem_id=item_id, access_token=access_token
         )
 
+    def patch_agreement(self, tender, agreement):
+        return self._patch_obj_resource_item(tender, agreement, 'agreements')
+
+    def patch_agreement_contract(self, tender, agreement_id, contract):
+        return self._patch_resource_item(
+             '{}/{}/agreements/{}/contracts/{}'.format(
+                self.prefix_path, tender.data.id, agreement_id, contract.data.id
+            ),
+            payload=contract,
+            headers={'X-Access-Token': self._get_access_token(tender)}
+        )
+
     def patch_prolongation(self, tender_id, contract_id, prolongation_id, data, access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, data, PROLONGATIONS,

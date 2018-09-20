@@ -27,6 +27,7 @@ from openprocurement_client.tests.data_dict import (
     TEST_PLAN_KEYS,
     TEST_TENDER_KEYS,
     TEST_TENDER_KEYS_LIMITED,
+    TEST_TENDER_KEYS_AGREEMENT,
 )
 from openprocurement_client.tests._server import (
     API_KEY,
@@ -258,6 +259,9 @@ class UserTestCase(BaseTestClass):
             ROOT + 'tender_' + TEST_TENDER_KEYS_LIMITED.tender_id + '.json') \
                 as tender:
             self.limited_tender = munchify(load(tender))
+        with open(ROOT + 'tender_' + TEST_TENDER_KEYS_AGREEMENT.tender_id + '.json') \
+                as tender:
+            self.agreement_tender = munchify(load(tender))
 
     def tearDown(self):
         self.server.stop()
@@ -665,6 +669,24 @@ class UserTestCase(BaseTestClass):
                             self.tender.access['token'])
         self.assertEqual(patched_credentials.access.token,
                          TEST_TENDER_KEYS['new_token'])
+
+    def test_patch_agreement(self):
+        setup_routing(self.app, routes=["tender_subpage_item_patch"])
+        agreement = {}
+        agreement['data'] = self.agreement_tender.data.agreements[0]
+        agreement['data']['status'] = 'active'
+        patched_agreement = self.client.patch_agreement(self.agreement_tender, agreement)
+        self.assertEqual(patched_agreement['data']['status'], agreement['data']['status'])
+
+    def test_patch_agreement_contract(self):
+        setup_routing(self.app, routes=["tender_subpage_object_patch"])
+        contract = {}
+        contract['data'] = self.agreement_tender.data.agreements[0].contracts[0]
+        contract = munchify(contract)
+        contract.data.unitPrices[0].value.amount = TEST_TENDER_KEYS_AGREEMENT.amount
+        agreement_id = self.agreement_tender.data.agreements[0].id
+        patched_contract = self.client.patch_agreement_contract(self.agreement_tender, agreement_id, contract)
+        self.assertEqual(patched_contract, contract)
 
     ###########################################################################
     #             DOCUMENTS FILE TEST

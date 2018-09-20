@@ -1,0 +1,988 @@
+{  
+   "data":{  
+      "procurementMethod":"open",
+      "numberOfBids":3,
+      "awardPeriod":{  
+         "startDate":"2018-09-11T11:00:57.035923+03:00",
+         "endDate":"2018-09-11T11:17:38.665551+03:00"
+      },
+      "complaintPeriod":{  
+         "startDate":"2018-09-11T09:37:09.737310+03:00",
+         "endDate":"2018-09-11T09:52:09.737310+03:00"
+      },
+      "enquiryPeriod":{  
+         "startDate":"2018-09-11T09:37:09.737310+03:00",
+         "clarificationsUntil":"2018-09-11T09:50:39.737310+03:00",
+         "endDate":"2018-09-11T09:49:09.737310+03:00",
+         "invalidationDate":"2018-09-11T09:43:23.326093+03:00"
+      },
+      "submissionMethod":"electronicAuction",
+      "title_en":"[TESTING]",
+      "awardCriteria":"lowestCost",
+      "questions":[  
+         {  
+            "description":"Чортиха фарисей проплинути недоношениця потаска ізг.. повирячувати очиська.",
+            "title":"q-1465f741: Чекман вихрюватий хльорка відом.",
+            "author":{  
+               "contactPoint":{  
+                  "telephone":"0445639942",
+                  "url":"http://kpbl.org.ua",
+                  "faxNumber":"044-563-99-05",
+                  "name":"Хильченко Інна Григорівна",
+                  "email":"kpbl@bigmir.net"
+               },
+               "identifier":{  
+                  "scheme":"UA-EDR",
+                  "id":"13313462",
+                  "legalName":"Київський професійний будівельний ліцей"
+               },
+               "name":"Київський професійний будівельний ліцей",
+               "address":{  
+                  "postalCode":"02121",
+                  "countryName":"Україна",
+                  "streetAddress":"вулиця Чернігівська, 220, 8",
+                  "region":"місто Київ",
+                  "locality":"Київ"
+               }
+            },
+            "answer":"Випекти перемовляти литися хрокнути борозний безстаточно дрова заважний заселювати москалитися перетлівати позсапувати повирячувати клаптик продам гараж уректи золотокрилий надовбати курча заважний обачити чуркати охотка тараракання сколоти жмикрутський зчарувати біда з неціновими показниками кормитися гривичка москалитися багатолотовий корупціон з неціновими показниками скитки лінтюга закуштрати крамарювати чепурити фик можновладник нахватитися победрина замискрити проплинути дочиста за-що-раз недомова заведисвіток шахрайський утинок четверговий крамарювати дуранляси.",
+            "date":"2018-09-11T09:39:03.546941+03:00",
+            "dateAnswered":"2018-09-11T09:39:25.584631+03:00",
+            "id":"a4c0fbc6fa5e42dfbed2b4f4ecc1cabc",
+            "questionOf":"tender"
+         },
+         {  
+            "description":"Вимастити злагідно компанійський кормитися муничитися фарфур клаптик гильце.",
+            "title":"q-39a930de: Підсудній дудлик простирядно сталець.",
+            "author":{  
+               "contactPoint":{  
+                  "telephone":"0445639942",
+                  "url":"http://kpbl.org.ua",
+                  "faxNumber":"044-563-99-05",
+                  "name":"Хильченко Інна Григорівна",
+                  "email":"kpbl@bigmir.net"
+               },
+               "identifier":{  
+                  "scheme":"UA-EDR",
+                  "id":"13313462",
+                  "legalName":"Київський професійний будівельний ліцей"
+               },
+               "name":"Київський професійний будівельний ліцей",
+               "address":{  
+                  "postalCode":"02121",
+                  "countryName":"Україна",
+                  "streetAddress":"вулиця Чернігівська, 220, 8",
+                  "region":"місто Київ",
+                  "locality":"Київ"
+               }
+            },
+            "relatedItem":"01c63965b7f64c7b9cfbff372069587b",
+            "answer":"Солодкомовний гостиночка постоячка напасати роз'ярятися утинок звідси відом полаторжитися підсудній люб'ячий страта згучатися матюнка гривичка скандзюбити прожерливий ужисько усподі перемовляти свекрушенька бердник пообробляти оповідь досипатися I перевалити.",
+            "date":"2018-09-11T09:39:58.506301+03:00",
+            "dateAnswered":"2018-09-11T09:40:21.340080+03:00",
+            "id":"06e23e0ff1204f449c33d616cacd02eb",
+            "questionOf":"item"
+         },
+         {  
+            "description":"Дерновий непорадний матюнка шквара перетлівати пахіття пообробляти пообскрібати хрестик можновладник підсмажувати.",
+            "title":"q-50f5b8d7: Байоро позасолоджувати відмащувати.",
+            "author":{  
+               "contactPoint":{  
+                  "telephone":"4260712",
+                  "url":"http://skinmedic.com.ua",
+                  "faxNumber":"413-41-40",
+                  "name":"Чередниченко Олена Юріївна",
+                  "email":"kmkshvl@ukr.net"
+               },
+               "identifier":{  
+                  "scheme":"UA-EDR",
+                  "id":"00037256",
+                  "legalName":"Київська міська клінічна шкірно-венерологічна лікарня"
+               },
+               "name":"Київська міська клінічна шкірно-венерологічна лікарня",
+               "address":{  
+                  "postalCode":"04655",
+                  "countryName":"Україна",
+                  "streetAddress":"вулиця Богатирська, 32",
+                  "region":"місто Київ",
+                  "locality":"Київ"
+               }
+            },
+            "relatedItem":"da6f3d4a15e245ed8b0748171a80c08b",
+            "answer":"Сокирник тоголітній лаверджет накотити I дешперувати рівець переріз порозгризати друженько облудність аркан коректа прокормитися розжовувати покволом тринькало діркуватий держиво кормитися чекман буґа приймачка нечулий облагодити держиво гаїна намаврати шабатурка відробляти кованка рахубно москалитися збірослов подубнути чинш ядерний ужитний тудою уректи литися прокадити.",
+            "date":"2018-09-11T09:40:54.377488+03:00",
+            "dateAnswered":"2018-09-11T09:41:17.634688+03:00",
+            "id":"52db64b5aa084591a8bfe2450ffe8b95",
+            "questionOf":"lot"
+         }
+      ],
+      "owner":"broker",
+      "qualifications":[  
+         {  
+            "status":"active",
+            "documents":[  
+               {  
+                  "hash":"md5:e4cf6f70bb9d724179966ea7b63765cd",
+                  "author":"tender_owner",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/50522532929d41ab8a7583ad8a50519b?KeyID=ce4450fc&Signature=Ge1r5PSaE2cOBxTmlnGD1k1HGQ%252BvDvcv7962vuSCRWqgajPrijcG32h6fm0WzsYs%2FnBN2qOr1QYdLM7IvS8kDQ%253D%253D",
+                  "title":"d-229c76cbnemoxYLdBK.doc",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:57:48.213319+03:00",
+                  "dateModified":"2018-09-11T09:57:48.213340+03:00",
+                  "id":"442616df46714316987fa7d362a55b7b"
+               }
+            ],
+            "eligible":true,
+            "qualified":true,
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "bidID":"8721f1ca2655455f84608df2413f82d1",
+            "date":"2018-09-11T09:58:06.927227+03:00",
+            "id":"127c2362084945b5bbf98932248ff5eb"
+         },
+         {  
+            "status":"active",
+            "documents":[  
+               {  
+                  "hash":"md5:307f2bfbc6d40f6121b8bfd39436fc8a",
+                  "author":"tender_owner",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/3bd29e2b08a34e25917eebf42f467379?KeyID=ce4450fc&Signature=yKyQohKfrBB%252BToverpeUebMOpMpiFYvyr9OuMFSJt52yqpmQhxJhseb6PFDfJvhoXMrR8pzkJ7BU5Usbn%252BZDAA%253D%253D",
+                  "title":"d-7ded111enostruma9rBA0.docx",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:58:08.545567+03:00",
+                  "dateModified":"2018-09-11T09:58:08.545588+03:00",
+                  "id":"9741af0e7bdb480199d7bd1f4875e0b8"
+               }
+            ],
+            "eligible":true,
+            "qualified":true,
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "bidID":"f182b33f40744008bb0da542a3d69644",
+            "date":"2018-09-11T09:58:11.508094+03:00",
+            "id":"43177116cb9645cd88ba7b56a7505544"
+         },
+         {  
+            "status":"active",
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "eligible":true,
+            "qualified":true,
+            "bidID":"ccbe8b6a47b14a98b826385fcfbca7fe",
+            "date":"2018-09-11T09:58:10.138120+03:00",
+            "id":"aa8f66716b9e4546b8c3d697bbccb242"
+         }
+      ],
+      "id":"c3f4116d38d34fe2b7d8de8aae8c0b32",
+      "contractPeriod":{  
+         "startDate":"2018-09-11T11:20:31.154264+03:00",
+         "clarificationsUntil":"2018-09-11T11:23:01.154264+03:00",
+         "endDate":"2018-09-11T11:23:23.220358+03:00"
+      },
+      "documents":[  
+         {  
+            "hash":"md5:ae708e095d37f5938f91a6f6956fe028",
+            "author":"tender_owner",
+            "language":"uk",
+            "format":"text/plain",
+            "url":"http://ds.devel.prozorro.office.ovirt/get/cf8185d412e14f78ac3b2a80b1bea425?KeyID=ce4450fc&Signature=%2FtKI3tqVEwVZOWbiJDsFV%252B%2FZab5iMZ17febXJFMeEXxaNROtbs9PMxsFD%2FER6C4Dl%252B9tt5d4p27UC1wazMq3AQ%253D%253D",
+            "title":"d-c8800887suntpPXCtz.pdf",
+            "documentOf":"tender",
+            "datePublished":"2018-09-11T09:38:21.725363+03:00",
+            "dateModified":"2018-09-11T09:38:21.725384+03:00",
+            "id":"9b8614e69fca4ecf91754d0a25e7814f"
+         },
+         {  
+            "hash":"md5:996a73ad6fc041db1840c14280e09744",
+            "author":"tender_owner",
+            "language":"uk",
+            "format":"text/plain",
+            "url":"http://ds.devel.prozorro.office.ovirt/get/cc1573b272b24f6ba982359b37cfa610?KeyID=ce4450fc&Signature=HwBXGkHrMA7b3v75kwiwy8%2FcmcEt73Slc74%2F4iY2gZwz3wmNoo%2F8TKBSAyvrNRGMfWw27KKjtfvx0SL0%252BNFNDQ%253D%253D",
+            "title":"d-986e9127reprehenderit3QluB0.pdf",
+            "documentOf":"lot",
+            "datePublished":"2018-09-11T09:38:23.884092+03:00",
+            "dateModified":"2018-09-11T09:38:23.884113+03:00",
+            "relatedItem":"da6f3d4a15e245ed8b0748171a80c08b",
+            "id":"8bac10e6e29f4438abfa3aeb23893073"
+         },
+         {  
+            "hash":"md5:8ceb06bcae37dd765bc511e9cfe68221",
+            "author":"auction",
+            "language":"uk",
+            "format":"text/plain",
+            "url":"http://ds.devel.prozorro.office.ovirt/get/040a6436161747dca3b3ca797a9787f8?KeyID=ce4450fc&Signature=nBp9mUeO0dCXJv3vENslLCNt0O1alP4PxUgvf2LJKcQKHLu%2FGIoAToLJqJTRa508UVMLELahYKori6vpG8kiBA%253D%253D",
+            "title":"audit_c3f4116d38d34fe2b7d8de8aae8c0b32_da6f3d4a15e245ed8b0748171a80c08b.yaml",
+            "documentOf":"tender",
+            "datePublished":"2018-09-11T11:00:56.329864+03:00",
+            "dateModified":"2018-09-11T11:00:56.329885+03:00",
+            "id":"e20d72d5bba841beb9f75866a999f8ce"
+         }
+      ],
+      "title":"[ТЕСТУВАННЯ] Заґавитися накотити I вистріпати прожерливий.",
+      "lots":[  
+         {  
+            "status":"active",
+            "description":"Варіянт паливо прочолок моня обчірати дзуґа соненько.",
+            "title":"l-29cbf637: Мріти цвірінь скандзюбити запащекувати.",
+            "minimalStep":{  
+               "currency":"UAH",
+               "amount":1051060.61,
+               "valueAddedTaxIncluded":true
+            },
+            "auctionPeriod":{  
+               "startDate":"2018-09-11T10:33:56+03:00",
+               "endDate":"2018-09-11T11:00:56.996525+03:00"
+            },
+            "title_en":"l-fcf2c894: Hic sed quidem explicabo.",
+            "value":{  
+               "currency":"UAH",
+               "amount":46308469.5,
+               "valueAddedTaxIncluded":true
+            },
+            "auctionUrl":"http://auctions.devel.prozorro.office.ovirt/tenders/c3f4116d38d34fe2b7d8de8aae8c0b32_da6f3d4a15e245ed8b0748171a80c08b",
+            "title_ru":"l-59baf455: Рэгяонэ тота про витюпэраторебуз.",
+            "date":"2018-09-11T09:37:12.392476+03:00",
+            "id":"da6f3d4a15e245ed8b0748171a80c08b"
+         }
+      ],
+      "qualificationPeriod":{  
+         "startDate":"2018-09-11T09:56:50.121761+03:00",
+         "endDate":"2018-09-11T10:00:57.978378+03:00"
+      },
+      "maxAwardsCount":7,
+      "tenderID":"UA-2018-09-11-000002",
+      "description_ru":"Зигнёфэрумквюы ты аппарэат аккузата мыис рыквюы ёнанй интылльэгэбат мэя.",
+      "dateModified":"2018-09-11T11:23:23.238264+03:00",
+      "agreements":[  
+         {  
+            "agreementID":"UA-2018-09-11-000002-1",
+            "status":"pending",
+            "contracts":[  
+               {  
+                  "status":"active",
+                  "unitPrices":[  
+                     {  
+                        "value":{  
+                           "currency":"UAH",
+                           "amount":2872243,
+                           "valueAddedTaxIncluded":true
+                        },
+                        "relatedItem":"01c63965b7f64c7b9cfbff372069587b"
+                     }
+                  ],
+                  "suppliers":[  
+                     {  
+                        "contactPoint":{  
+                           "telephone":"4260712",
+                           "url":"http://skinmedic.com.ua",
+                           "faxNumber":"413-41-40",
+                           "name":"Чередниченко Олена Юріївна",
+                           "email":"kmkshvl@ukr.net"
+                        },
+                        "identifier":{  
+                           "scheme":"UA-EDR",
+                           "id":"00037256",
+                           "legalName":"Київська міська клінічна шкірно-венерологічна лікарня"
+                        },
+                        "name":"Київська міська клінічна шкірно-венерологічна лікарня",
+                        "address":{  
+                           "locality":"Київ",
+                           "region":"місто Київ",
+                           "countryName_en":"Ukraine",
+                           "countryName":"Україна",
+                           "streetAddress":"вулиця Богатирська, 32",
+                           "countryName_ru":"Украина",
+                           "postalCode":"04655"
+                        }
+                     }
+                  ],
+                  "bidID":"ccbe8b6a47b14a98b826385fcfbca7fe",
+                  "id":"26f1a01ca2de4f8787235a94cca5174f",
+                  "date":"2018-09-11T11:20:31.155304+03:00",
+                  "awardID":"305b7cb9b5684758bd0c2b27352839f4"
+                },
+                {  
+                  "status":"active",
+                  "unitPrices":[  
+                     {  
+                        "value":{  
+                           "currency":"UAH",
+                           "amount":2880906,
+                           "valueAddedTaxIncluded":true
+                        },
+                        "relatedItem":"01c63965b7f64c7b9cfbff372069587b"
+                     }
+                  ],
+                  "suppliers":[  
+                     {  
+                        "contactPoint":{  
+                           "telephone":"0445639942",
+                           "url":"http://kpbl.org.ua",
+                           "faxNumber":"044-563-99-05",
+                           "name":"Хильченко Інна Григорівна",
+                           "email":"kpbl@bigmir.net"
+                        },
+                        "identifier":{  
+                           "scheme":"UA-EDR",
+                           "id":"13313462",
+                           "legalName":"Київський професійний будівельний ліцей"
+                        },
+                        "name":"Київський професійний будівельний ліцей",
+                        "address":{  
+                           "locality":"Київ",
+                           "region":"місто Київ",
+                           "countryName_en":"Ukraine",
+                           "countryName":"Україна",
+                           "streetAddress":"вулиця Чернігівська, 220, 8",
+                           "countryName_ru":"Украина",
+                           "postalCode":"02121"
+                        }
+                     }
+                  ],
+                  "bidID":"f182b33f40744008bb0da542a3d69644",
+                  "date":"2018-09-11T11:20:31.155364+03:00",
+                  "awardID":"7db6320ccd7c4f609697c117748a30db",
+                  "id":"4b9f573e95f7497c9e510a453fedd2fd"
+               },
+               {  
+                  "status":"active",
+                  "unitPrices":[  
+                     {  
+                        "value":{  
+                           "currency":"UAH",
+                           "amount":2747553,
+                           "valueAddedTaxIncluded":true
+                        },
+                        "relatedItem":"01c63965b7f64c7b9cfbff372069587b"
+                     }
+                  ],
+                  "suppliers":[  
+                     {  
+                        "contactPoint":{  
+                           "telephone":"2341170",
+                           "url":"http://www.shev.gov.ua/",
+                           "faxNumber":"2343591",
+                           "name":"Ліповець Євген Іванович",
+                           "email":"buh510@ukr.net"
+                        },
+                        "identifier":{  
+                           "scheme":"UA-EDR",
+                           "id":"21725150",
+                           "legalName":"Шевченківська районна в місті Києві державна адміністрація"
+                        },
+                        "name":"Шевченківська районна в місті Києві державна адміністрація",
+                        "address":{  
+                           "locality":"Переяслав-Хмельницький",
+                           "region":"Київська область",
+                           "countryName_en":"Ukraine",
+                           "countryName":"Україна",
+                           "streetAddress":"Богдана Хмельницького вулиця, 21-29",
+                           "countryName_ru":"Украина",
+                           "postalCode":"01030"
+                        }
+                     }
+                  ],
+                  "bidID":"8721f1ca2655455f84608df2413f82d1",
+                  "date":"2018-09-11T11:20:31.155421+03:00",
+                  "awardID":"f91514fee24947c7889040b6e67f7460",
+                  "id":"f7ed93081786430bae54499e594d7018"
+               }
+            ],
+            "items":[  
+               {  
+                  "relatedLot":"da6f3d4a15e245ed8b0748171a80c08b",
+                  "description":"i-0d576d9e: Розчин для ін’єкцій",
+                  "classification":{  
+                     "scheme":"ДК021",
+                     "description":"Розчини для ін’єкцій",
+                     "id":"33692500-2"
+                  },
+                  "description_en":"Test item #0",
+                  "additionalClassifications":[  
+                     {  
+                        "scheme":"INN",
+                        "id":"piracetam",
+                        "description":"Piracetam"
+                     },
+                     {  
+                        "scheme":"ATC",
+                        "id":"N06BX03",
+                        "description":"piracetam"
+                     }
+                  ],
+                  "deliveryLocation":{  
+                     "latitude":"50.537702000000003011",
+                     "longitude":"30.174488000000000198"
+                  },
+                  "deliveryAddress":{  
+                     "locality":"Ворзель",
+                     "region":"Київська область",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"вулиця Курортна, 22",
+                     "countryName_ru":"Украина",
+                     "postalCode":"08296"
+                  },
+                  "deliveryDate":{  
+                     "startDate":"2018-09-12T00:00:00+03:00",
+                     "endDate":"2018-09-18T00:00:00+03:00"
+                  },
+                  "description_ru":"i-1328ca48: Раствор для инъекций",
+                  "id":"01c63965b7f64c7b9cfbff372069587b",
+                  "unit":{  
+                     "code":"VI",
+                     "name":"Флакон"
+                  },
+                  "quantity":16
+               }
+            ],
+            "period":{  
+               "startDate":"2018-09-11T11:23:20.418390+03:00",
+               "endDate":"2022-01-23T11:23:20.418436+03:00"
+            },
+            "dateSigned":"2018-09-11T11:23:23.220310+03:00",
+            "date":"2018-09-11T11:23:23.238264+03:00",
+            "id":"9aa744f37d10468685a77be968bfe979"
+         }
+      ],
+      "status":"complete",
+      "tenderPeriod":{  
+         "startDate":"2018-09-11T09:37:09.737310+03:00",
+         "endDate":"2018-09-11T09:54:09.737310+03:00"
+      },
+      "description":"Рострясти дитинонька попівський збірослов четверня замічати підстолини.",
+      "procurementMethodDetails":"quick, accelerator=2880",
+      "procurementMethodType":"closeFrameworkAgreementUA",
+      "agreementDuration":"P1M",
+      "description_en":"Sed enim quae vero dicta aperiam tenetur nulla.",
+      "awards":[  
+         {  
+            "status":"cancelled",
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "eligible":true,
+            "suppliers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"2341170",
+                     "url":"http://www.shev.gov.ua/",
+                     "faxNumber":"2343591",
+                     "name":"Ліповець Євген Іванович",
+                     "email":"buh510@ukr.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"21725150",
+                     "legalName":"Шевченківська районна в місті Києві державна адміністрація"
+                  },
+                  "name":"Шевченківська районна в місті Києві державна адміністрація",
+                  "address":{  
+                     "locality":"Переяслав-Хмельницький",
+                     "region":"Київська область",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"Богдана Хмельницького вулиця, 21-29",
+                     "countryName_ru":"Украина",
+                     "postalCode":"01030"
+                  }
+               }
+            ],
+            "bid_id":"8721f1ca2655455f84608df2413f82d1",
+            "value":{  
+               "currency":"UAH",
+               "amount":43960858.74,
+               "valueAddedTaxIncluded":true
+            },
+            "qualified":true,
+            "documents":[  
+               {  
+                  "hash":"md5:77cd6efee689309a80505e483eaa86bb",
+                  "author":"tender_owner",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/5578dd7fc9b04ae2a67eecb5be5fb2c1?KeyID=ce4450fc&Signature=VP0FyljO3Do9yezuRrcCCPftbcXQEVAhDMjgiCbQJIx%2FvXBjz2WedmXNjN%2F8rcBQmJAVK%2FacIElNwxbwSgDQCQ%253D%253D",
+                  "title":"d-2e91b71aconsectetur1fa0tw.doc",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T11:14:16.303415+03:00",
+                  "dateModified":"2018-09-11T11:14:16.303436+03:00",
+                  "id":"8627752f12e14a608708ecebdddf7896"
+               }
+            ],
+            "date":"2018-09-11T11:14:20.523403+03:00",
+            "id":"c9641c8e25cb4706a6e77cfc97157e4a"
+         },
+         {  
+            "status":"active",
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "complaintPeriod":{  
+               "startDate":"2018-09-11T11:15:08.665551+03:00",
+               "endDate":"2018-09-11T11:17:38.665551+03:00"
+            },
+            "suppliers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"4260712",
+                     "url":"http://skinmedic.com.ua",
+                     "faxNumber":"413-41-40",
+                     "name":"Чередниченко Олена Юріївна",
+                     "email":"kmkshvl@ukr.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"00037256",
+                     "legalName":"Київська міська клінічна шкірно-венерологічна лікарня"
+                  },
+                  "name":"Київська міська клінічна шкірно-венерологічна лікарня",
+                  "address":{  
+                     "locality":"Київ",
+                     "region":"місто Київ",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"вулиця Богатирська, 32",
+                     "countryName_ru":"Украина",
+                     "postalCode":"04655"
+                  }
+               }
+            ],
+            "eligible":true,
+            "bid_id":"ccbe8b6a47b14a98b826385fcfbca7fe",
+            "value":{  
+               "currency":"UAH",
+               "amount":45955900.12,
+               "valueAddedTaxIncluded":true
+            },
+            "qualified":true,
+            "documents":[  
+               {  
+                  "hash":"md5:0ebacb556ebe17b56a37a6d08e366616",
+                  "author":"tender_owner",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/9dbf91640bef48e5bae85189de60e362?KeyID=ce4450fc&Signature=ZLe4LONnyVme3CVX3Zq40q07H6eSR91MFoP6MNCHzCUxgaj%2Fw2wV7j3EONAkFQp5jiQiLCBoEYA8pSY9WaQHAw%253D%253D",
+                  "title":"d-ccce2a81voluptasEsWxr7.docx",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T11:14:23.531451+03:00",
+                  "dateModified":"2018-09-11T11:14:23.531471+03:00",
+                  "id":"a1c1b5fb95d240d2a1166e5831138204"
+               }
+            ],
+            "date":"2018-09-11T11:14:25.684995+03:00",
+            "id":"305b7cb9b5684758bd0c2b27352839f4"
+         },
+         {  
+            "status":"active",
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "complaintPeriod":{  
+               "startDate":"2018-09-11T11:15:08.665551+03:00",
+               "endDate":"2018-09-11T11:17:38.665551+03:00"
+            },
+            "suppliers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"0445639942",
+                     "url":"http://kpbl.org.ua",
+                     "faxNumber":"044-563-99-05",
+                     "name":"Хильченко Інна Григорівна",
+                     "email":"kpbl@bigmir.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"13313462",
+                     "legalName":"Київський професійний будівельний ліцей"
+                  },
+                  "name":"Київський професійний будівельний ліцей",
+                  "address":{  
+                     "locality":"Київ",
+                     "region":"місто Київ",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"вулиця Чернігівська, 220, 8",
+                     "countryName_ru":"Украина",
+                     "postalCode":"02121"
+                  }
+               }
+            ],
+            "eligible":true,
+            "bid_id":"f182b33f40744008bb0da542a3d69644",
+            "value":{  
+               "currency":"UAH",
+               "amount":46094510.6,
+               "valueAddedTaxIncluded":true
+            },
+            "qualified":true,
+            "documents":[  
+               {  
+                  "hash":"md5:8df0118b91bba0b8d66359ae45f77df6",
+                  "author":"tender_owner",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/72abac1c968c403285835853e42bc331?KeyID=ce4450fc&Signature=9KFYKW6ahMxc2S2XFyWBNNCjMjDfyq9jPygaDigmagp0c9P5t9Y1nVSXaXEx6HexM2s1UHiA3I5fapVpd2MTCA%253D%253D",
+                  "title":"d-7328bb14laborumhDmrzP.doc",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T11:14:29.049129+03:00",
+                  "dateModified":"2018-09-11T11:14:29.049150+03:00",
+                  "id":"c6212d53988b42c9a1434c4e23d9073e"
+               }
+            ],
+            "date":"2018-09-11T11:14:31.469053+03:00",
+            "id":"7db6320ccd7c4f609697c117748a30db"
+         },
+         {  
+            "status":"active",
+            "lotID":"da6f3d4a15e245ed8b0748171a80c08b",
+            "complaintPeriod":{  
+               "startDate":"2018-09-11T11:15:08.665551+03:00",
+               "endDate":"2018-09-11T11:17:38.665551+03:00"
+            },
+            "suppliers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"2341170",
+                     "url":"http://www.shev.gov.ua/",
+                     "faxNumber":"2343591",
+                     "name":"Ліповець Євген Іванович",
+                     "email":"buh510@ukr.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"21725150",
+                     "legalName":"Шевченківська районна в місті Києві державна адміністрація"
+                  },
+                  "name":"Шевченківська районна в місті Києві державна адміністрація",
+                  "address":{  
+                     "locality":"Переяслав-Хмельницький",
+                     "region":"Київська область",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"Богдана Хмельницького вулиця, 21-29",
+                     "countryName_ru":"Украина",
+                     "postalCode":"01030"
+                  }
+               }
+            ],
+            "eligible":true,
+            "bid_id":"8721f1ca2655455f84608df2413f82d1",
+            "value":{  
+               "currency":"UAH",
+               "amount":43960858.74,
+               "valueAddedTaxIncluded":true
+            },
+            "qualified":true,
+            "documents":[  
+               {  
+                  "hash":"md5:8406a1069263e74018ed171ee820076d",
+                  "author":"tender_owner",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/f6908db388b44697b991faae244b3796?KeyID=ce4450fc&Signature=EDz%2FeDACIb8kzxzY5jrY6C7JagF7VUf1SEkYyBl0TM1UmqcNkIpdIeotEaaLrXLIeF9clURfNI%252B0nz7ax3IrCw%253D%253D",
+                  "title":"d-595694eanihilgOjqTg.docx",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T11:14:34.967970+03:00",
+                  "dateModified":"2018-09-11T11:14:34.967991+03:00",
+                  "id":"f936dc1412b2440189ec4f8104c20e6a"
+               }
+            ],
+            "date":"2018-09-11T11:14:51.319510+03:00",
+            "id":"f91514fee24947c7889040b6e67f7460"
+         }
+      ],
+      "date":"2018-09-11T11:23:23.238264+03:00",
+      "submissionMethodDetails":"quick",
+      "items":[  
+         {  
+            "relatedLot":"da6f3d4a15e245ed8b0748171a80c08b",
+            "description":"i-0d576d9e: Розчин для ін’єкцій",
+            "classification":{  
+               "scheme":"ДК021",
+               "description":"Розчини для ін’єкцій",
+               "id":"33692500-2"
+            },
+            "description_en":"Test item #0",
+            "additionalClassifications":[  
+               {  
+                  "scheme":"INN",
+                  "id":"piracetam",
+                  "description":"Piracetam"
+               },
+               {  
+                  "scheme":"ATC",
+                  "id":"N06BX03",
+                  "description":"piracetam"
+               }
+            ],
+            "deliveryLocation":{  
+               "latitude":"50.537702000000003011",
+               "longitude":"30.174488000000000198"
+            },
+            "deliveryAddress":{  
+               "locality":"Ворзель",
+               "region":"Київська область",
+               "countryName_en":"Ukraine",
+               "countryName":"Україна",
+               "streetAddress":"вулиця Курортна, 22",
+               "countryName_ru":"Украина",
+               "postalCode":"08296"
+            },
+            "deliveryDate":{  
+               "startDate":"2018-09-12T00:00:00+03:00",
+               "endDate":"2018-09-18T00:00:00+03:00"
+            },
+            "description_ru":"i-1328ca48: Раствор для инъекций",
+            "id":"01c63965b7f64c7b9cfbff372069587b",
+            "unit":{  
+               "code":"VI",
+               "name":"Флакон"
+            },
+            "quantity":16
+         }
+      ],
+      "bids":[  
+         {  
+            "status":"active",
+            "documents":[  
+               {  
+                  "hash":"md5:95f874d4c944ff4b9cfbdf97d3ae0cf1",
+                  "confidentiality":"public",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/0f374dd768a74fcc9bc485fca22e7ec8?KeyID=ce4450fc&Signature=mgdkxRTMMpQS2OPDfVcP%252BrkM%2F3Es4b29fGczHdUZZ3L5XZJNvcm%2F8wD0NeZPnirB5zyRqntXR5oWin5d7a6YBA%253D%253D",
+                  "title":"d-5446ebbequaeratDVf_mQ.pdf",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:42:35.363825+03:00",
+                  "dateModified":"2018-09-11T09:42:35.363846+03:00",
+                  "id":"6a62ffe5c0534024bf29d430f16d0911"
+               },
+               {  
+                  "hash":"md5:9bb9945779962a9e07ad4b420d6e365b",
+                  "confidentiality":"buyerOnly",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://api.devel.prozorro.office.ovirt/api/2.4/tenders/c3f4116d38d34fe2b7d8de8aae8c0b32/bids/8721f1ca2655455f84608df2413f82d1/documents/6a62ffe5c0534024bf29d430f16d0911?download=9e989810c4d24f9ba800588ce20898be",
+                  "confidentialityRationale":"Помер бісовщина набірати дочиста вивагом клятьба позасолоджувати висмівати ядерний курча трутизнина.",
+                  "title":"d-9699d16cquamCP2_Ls.doc",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:42:35.363825+03:00",
+                  "dateModified":"2018-09-11T09:42:37.840768+03:00",
+                  "id":"6a62ffe5c0534024bf29d430f16d0911"
+               }
+            ],
+            "eligibilityDocuments":[  
+               {  
+                  "hash":"md5:e372ab3ac066c7d06c81c31735d2cebb",
+                  "confidentiality":"public",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/6367ad0c87f544e6a7640414ee993c17?KeyID=ce4450fc&Signature=freZWhItnUtQ5Dzrl2D%252BVfdoO9WDwid5y%252BoyHzuRcAwRmpZDJquidR%252BLNNncpNvSxoOXCeQhK%252Bdz4S1ov%252Bp6AA%253D%253D",
+                  "title":"d-85cfa3badolorXuWK3M.doc",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:43:21.822453+03:00",
+                  "dateModified":"2018-09-11T09:43:21.822474+03:00",
+                  "id":"b01e39b528ca4ab8af8ef3d0882f04c2"
+               }
+            ],
+            "selfEligible":true,
+            "lotValues":[  
+               {  
+                  "relatedLot":"da6f3d4a15e245ed8b0748171a80c08b",
+                  "date":"2018-09-11T09:42:33.679802+03:00",
+                  "status":"active",
+                  "participationUrl":"http://auctions.devel.prozorro.office.ovirt/tenders/c3f4116d38d34fe2b7d8de8aae8c0b32_da6f3d4a15e245ed8b0748171a80c08b/login?bidder_id=8721f1ca2655455f84608df2413f82d1&hash=a3623257848a22c73e65cb533ae36f4d7200e4b4",
+                  "value":{  
+                     "currency":"UAH",
+                     "amount":43960858.74,
+                     "valueAddedTaxIncluded":true
+                  }
+               }
+            ],
+            "qualificationDocuments":[  
+               {  
+                  "hash":"md5:17717a4c38994ab73e51d9abbbf67182",
+                  "confidentiality":"public",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/6145371ef22d44a19d0ef78f9e4e77ad?KeyID=ce4450fc&Signature=Si4mqdlAFo1iBcKdGsDVYx%2FLBoqMusBfPeMslM%2FKDBeoSEMzJ7rD6QfxQymyux6A%252BsaZ0CEhAvKHP431FnkgAA%253D%253D",
+                  "title":"d-3f639557earumBZqDug.doc",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:43:20.197262+03:00",
+                  "dateModified":"2018-09-11T09:43:20.197282+03:00",
+                  "id":"4b47dead78d54e748393c4bb6fc03dac"
+               }
+            ],
+            "selfQualified":true,
+            "financialDocuments":[  
+               {  
+                  "hash":"md5:dee2b81d40f1dea2e2461ffe399c34d5",
+                  "confidentiality":"public",
+                  "language":"uk",
+                  "format":"text/plain",
+                  "url":"http://ds.devel.prozorro.office.ovirt/get/50b982979a564de78ab99f2fb6196856?KeyID=ce4450fc&Signature=n2k5eWZyud12XCH%252BEiu3HBuMPCMilUVCpuhNopQQyVGT8rA8EiztxzdoxHy91%252BRToGG2CrRHCqwtStUPFwXbCA%253D%253D",
+                  "title":"d-b36d99f0aCc6LIC.pdf",
+                  "documentOf":"tender",
+                  "datePublished":"2018-09-11T09:43:18.770314+03:00",
+                  "dateModified":"2018-09-11T09:43:18.770335+03:00",
+                  "id":"31ac3d7570b3412da7fd4b32c19babab"
+               }
+            ],
+            "tenderers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"2341170",
+                     "url":"http://www.shev.gov.ua/",
+                     "faxNumber":"2343591",
+                     "name":"Ліповець Євген Іванович",
+                     "email":"buh510@ukr.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"21725150",
+                     "legalName":"Шевченківська районна в місті Києві державна адміністрація"
+                  },
+                  "name":"Шевченківська районна в місті Києві державна адміністрація",
+                  "address":{  
+                     "locality":"Переяслав-Хмельницький",
+                     "region":"Київська область",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"Богдана Хмельницького вулиця, 21-29",
+                     "countryName_ru":"Украина",
+                     "postalCode":"01030"
+                  }
+               }
+            ],
+            "date":"2018-09-11T09:42:29.703292+03:00",
+            "id":"8721f1ca2655455f84608df2413f82d1"
+         },
+         {  
+            "status":"active",
+            "selfEligible":true,
+            "lotValues":[  
+               {  
+                  "relatedLot":"da6f3d4a15e245ed8b0748171a80c08b",
+                  "date":"2018-09-11T09:42:55.790008+03:00",
+                  "status":"active",
+                  "participationUrl":"http://auctions.devel.prozorro.office.ovirt/tenders/c3f4116d38d34fe2b7d8de8aae8c0b32_da6f3d4a15e245ed8b0748171a80c08b/login?bidder_id=f182b33f40744008bb0da542a3d69644&hash=0c72da67410dac9e63c4a58a3bdb3520aa66e428",
+                  "value":{  
+                     "currency":"UAH",
+                     "amount":46094510.6,
+                     "valueAddedTaxIncluded":true
+                  }
+               }
+            ],
+            "id":"f182b33f40744008bb0da542a3d69644",
+            "tenderers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"0445639942",
+                     "url":"http://kpbl.org.ua",
+                     "faxNumber":"044-563-99-05",
+                     "name":"Хильченко Інна Григорівна",
+                     "email":"kpbl@bigmir.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"13313462",
+                     "legalName":"Київський професійний будівельний ліцей"
+                  },
+                  "name":"Київський професійний будівельний ліцей",
+                  "address":{  
+                     "locality":"Київ",
+                     "region":"місто Київ",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"вулиця Чернігівська, 220, 8",
+                     "countryName_ru":"Украина",
+                     "postalCode":"02121"
+                  }
+               }
+            ],
+            "date":"2018-09-11T09:42:55.789397+03:00",
+            "selfQualified":true
+         },
+         {  
+            "status":"active",
+            "selfEligible":true,
+            "lotValues":[  
+               {  
+                  "relatedLot":"da6f3d4a15e245ed8b0748171a80c08b",
+                  "date":"2018-09-11T09:43:14.515334+03:00",
+                  "status":"active",
+                  "participationUrl":"http://auctions.devel.prozorro.office.ovirt/tenders/c3f4116d38d34fe2b7d8de8aae8c0b32_da6f3d4a15e245ed8b0748171a80c08b/login?bidder_id=ccbe8b6a47b14a98b826385fcfbca7fe&hash=f835db7785eaa3bac135424242c43c718d3f911c",
+                  "value":{  
+                     "currency":"UAH",
+                     "amount":45955900.12,
+                     "valueAddedTaxIncluded":true
+                  }
+               }
+            ],
+            "id":"ccbe8b6a47b14a98b826385fcfbca7fe",
+            "tenderers":[  
+               {  
+                  "contactPoint":{  
+                     "telephone":"4260712",
+                     "url":"http://skinmedic.com.ua",
+                     "faxNumber":"413-41-40",
+                     "name":"Чередниченко Олена Юріївна",
+                     "email":"kmkshvl@ukr.net"
+                  },
+                  "identifier":{  
+                     "scheme":"UA-EDR",
+                     "id":"00037256",
+                     "legalName":"Київська міська клінічна шкірно-венерологічна лікарня"
+                  },
+                  "name":"Київська міська клінічна шкірно-венерологічна лікарня",
+                  "address":{  
+                     "locality":"Київ",
+                     "region":"місто Київ",
+                     "countryName_en":"Ukraine",
+                     "countryName":"Україна",
+                     "streetAddress":"вулиця Богатирська, 32",
+                     "countryName_ru":"Украина",
+                     "postalCode":"04655"
+                  }
+               }
+            ],
+            "date":"2018-09-11T09:43:14.514847+03:00",
+            "selfQualified":true
+         }
+      ],
+      "value":{  
+         "currency":"UAH",
+         "amount":46308469.5,
+         "valueAddedTaxIncluded":true
+      },
+      "minimalStep":{  
+         "currency":"UAH",
+         "amount":1051060.61,
+         "valueAddedTaxIncluded":true
+      },
+      "mode":"test",
+      "title_ru":"[ТЕСТИРОВАНИЕ] Face-to-face upward-trending service-desk",
+      "procuringEntity":{  
+         "kind":"general",
+         "name":"Шевченківська районна в місті Києві державна адміністрація",
+         "address":{  
+            "postalCode":"01030",
+            "countryName":"Україна",
+            "streetAddress":"Богдана Хмельницького вулиця, 21-29",
+            "region":"Київська область",
+            "locality":"Переяслав-Хмельницький"
+         },
+         "contactPoint":{  
+            "name":"Ліповець Євген Іванович",
+            "url":"http://www.shev.gov.ua/",
+            "telephone":"2341170",
+            "faxNumber":"2343591",
+            "name_en":"Gregory Gillespie",
+            "email":"buh510@ukr.net",
+            "availableLanguage":"en"
+         },
+         "identifier":{  
+            "scheme":"UA-EDR",
+            "legalName_en":"Institution \"Vinnytsia City Council primary and secondary general school № 10\"",
+            "id":"21725150",
+            "legalName":"Шевченківська районна в місті Києві державна адміністрація"
+         },
+         "name_en":"Angelica Davis"
+      }
+   }
+}
