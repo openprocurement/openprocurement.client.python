@@ -9,7 +9,7 @@ from openprocurement_client.clients import (APIResourceClient,
 from openprocurement_client.constants import (AUCTIONS, AWARDS, BIDS, CANCELLATIONS,
                                               COMPLAINTS, CONTRACTS, DOCUMENTS, ITEMS,
                                               LOTS, PROLONGATIONS, QUALIFICATIONS, QUESTIONS,
-                                              TENDERS)
+                                              TENDERS, AGREEMENTS)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -263,6 +263,21 @@ class TendersClient(APIResourceClient):
     def patch_item(self, tender_id, item, item_id='', access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, item, ITEMS, subitem_id=item_id, access_token=access_token
+        )
+
+    def patch_agreement(self, tender_id, agreement, agreement_id='', access_token=None):
+        return self.patch_resource_item_subitem(
+            tender_id, agreement, AGREEMENTS,
+            subitem_id=agreement_id,
+            access_token=access_token
+        )
+
+    def patch_agreement_contract(self, tender_id, agreement_id, contract, contract_id='', access_token=None):
+        return self.patch_resource_item_subitem(
+            tender_id, contract, CONTRACTS,
+            subitem_id=contract_id,
+            depth_path='{}/{}'.format(AGREEMENTS, agreement_id),
+            access_token=access_token
         )
 
     def patch_prolongation(self, tender_id, contract_id, prolongation_id, data, access_token=None):

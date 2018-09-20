@@ -236,6 +236,18 @@ def tender_subpage_document_patch(tender_id, subpage_name, subpage_id,
                     return dumps({"data": document})
     return location_error(subpage_name)
 
+def tender_subpage_object_patch(tender_id, subpage_name, subpage_id, object_type, object_id):
+    response.status = 200
+    subpage = resource_partition(tender_id, part=subpage_name)
+    if not subpage:
+        return location_error("tender")
+    for unit in subpage:
+        if unit['id'] == subpage_id:
+            for obj in unit[object_type]:
+                if obj['id'] == object_id:
+                    obj.update(request.json['data'])
+                    return dumps({"data": obj})
+    return location_error(subpage_name)
 
 def get_file(filename):
     redirect("/download/" + filename, code=302)
@@ -346,6 +358,7 @@ routes_dict = {
     "tender_subpage_item": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'GET', tender_subpage_item),
     "tender_subpage_item_patch": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<obj_id>/<subpage_name>/<subpage_id>', 'PATCH', object_subpage_item_patch),
     "tender_subpage_item_delete": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>", 'DELETE', tender_subpage_item_delete),
+    "tender_subpage_object_patch": (TENDERS_PATH + "/<tender_id>/<subpage_name>/<subpage_id>/<object_type>/<object_id>", 'PATCH', tender_subpage_object_patch),
     "tender_patch_credentials": (API_PATH.format('<resource_name:resource_filter:tender>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
     "redirect": ('/redirect/<filename:path>', 'GET', get_file),
     "download": ('/download/<filename:path>', 'GET', download_file),
