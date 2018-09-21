@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = '2.1.3+sale'
+version = '2.1.4+sale'
 
 extras_require = {
     'test': [
