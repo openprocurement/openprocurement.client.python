@@ -1,7 +1,9 @@
 import logging
 
-from .api_base_client import APIBaseClient, APITemplateClient, verify_file
-from .exceptions import InvalidResponse
+from openprocurement_client.templates import APITemplateClient
+from openprocurement_client.clients import APIBaseClient
+from openprocurement_client.utils import verify_file
+from openprocurement_client.exceptions import InvalidResponse
 
 from munch import munchify
 from retrying import retry
