@@ -1,0 +1,312 @@
+{
+    "access": {
+        "token": "0fc58c83963d42a692db4987df86640a"
+    },  
+    "data":{  
+        "agreementID":"UA-2018-10-08-000001-1",
+        "status":"active",
+        "documents":[  
+            {  
+                "hash":"md5:0a8bb9ff6aaf39b6ff556eec51591a90",
+                "format":"text/plain",
+                "url":"http://ds.devel.prozorro.office.ovirt/get/0413029e79e34999bc2384aab310e425?KeyID=ce4450fc&Signature=7BPm8hu7z187YB1fyorh3iIvfDwSmBnEroe2Vs4lMevr%252BkEkhP6%252BvABPMUJSnibFY%2FuVr9mftzDScwQWymnWCg%253D%253D",
+                "title":"d-de3f5cb7earum3kGs4Q.pdf",
+                "documentOf":"agreement",
+                "datePublished":"2018-10-08T16:33:23.365612+03:00",
+                "dateModified":"2018-10-08T16:33:23.365646+03:00",
+                "id":"fdf7279ff77d4f7fb307e71a050c687d"
+            },
+            {  
+                "hash":"md5:77cc43a6cc244786f13b7f29f1b4d64c",
+                "format":"text/plain",
+                "url":"http://ds.devel.prozorro.office.ovirt/get/56f78164f9dd4244964b69e3d660d97d?KeyID=ce4450fc&Signature=ZLWW%252BA%252Byu1AyovB%2FHrnYzmCZWQ%252Bh4dLSdnn%252BHOQpkaZkq%2FM7BiZfQK4VcfoZwr7HZUSSrUOeQcHaWLycMKMGCg%253D%253D",
+                "title":"d-6787e124consequuntur6nHRFP.doc",
+                "documentOf":"change",
+                "datePublished":"2018-10-08T16:34:21.629038+03:00",
+                "dateModified":"2018-10-08T16:34:21.629059+03:00",
+                "relatedItem":"c4cda3292cd04b6da5bc311a3d0c963f",
+                "id":"1d0c168157bc48e297dc194932b5fa79"
+            }
+        ],
+        "title":"[ТЕСТУВАННЯ] ",
+        "contracts":[  
+            {  
+                "status":"active",
+                "unitPrices":[  
+                    {  
+                        "value":{  
+                            "currency":"UAH",
+                            "amount":3147716.83,
+                            "valueAddedTaxIncluded":true
+                        },
+                        "relatedItem":"c4cda3292cd04b6da5bc311a3d0c963f"
+                    }
+                ],
+                "suppliers":[  
+                    {  
+                        "contactPoint":{  
+                            "telephone":"4260712",
+                            "url":"http://skinmedic.com.ua",
+                            "faxNumber":"413-41-40",
+                            "name":"Чередниченко Олена Юріївна",
+                            "email":"kmkshvl@ukr.net"
+                        },
+                        "identifier":{  
+                            "scheme":"UA-EDR",
+                            "id":"00037256",
+                            "legalName":"Київська міська клінічна шкірно-венерологічна лікарня"
+                        },
+                        "name":"Київська міська клінічна шкірно-венерологічна лікарня",
+                        "address":{  
+                            "locality":"Київ",
+                            "region":"місто Київ",
+                            "countryName_en":"Ukraine",
+                            "countryName":"Україна",
+                            "streetAddress":"вулиця Богатирська, 32",
+                            "countryName_ru":"Украина",
+                            "postalCode":"04655"
+                        }
+                    }
+                ],
+                "bidID":"f623ad7d987c40beb76667d11b374a62",
+                "date":"2018-10-08T16:13:04.693499+03:00",
+                "awardID":"b19761ed3e78490b94c2fdfa2ae3e8f1",
+                "id":"8e8d6ff4ba8f448695e29d9c595fbea6"
+            },
+            {  
+                "status":"active",
+                "unitPrices":[  
+                    {  
+                        "value":{  
+                            "currency":"UAH",
+                            "amount":3212811.59,
+                            "valueAddedTaxIncluded":true
+                        },
+                        "relatedItem":"c4cda3292cd04b6da5bc311a3d0c963f"
+                    }
+                ],
+                "suppliers":[  
+                    {  
+                        "contactPoint":{  
+                            "telephone":"0445639942",
+                            "url":"http://kpbl.org.ua",
+                            "faxNumber":"044-563-99-05",
+                            "name":"Хильченко Інна Григорівна",
+                            "email":"kpbl@bigmir.net"
+                        },
+                        "identifier":{  
+                            "scheme":"UA-EDR",
+                            "id":"13313462",
+                            "legalName":"Київський професійний будівельний ліцей"
+                        },
+                        "name":"Київський професійний будівельний ліцей",
+                        "address":{  
+                            "locality":"Київ",
+                            "region":"місто Київ",
+                            "countryName_en":"Ukraine",
+                            "countryName":"Україна",
+                            "streetAddress":"вулиця Чернігівська, 220, 8",
+                            "countryName_ru":"Украина",
+                            "postalCode":"02121"
+                        }
+                    }
+                ],
+                "bidID":"56ae8c256cc24f8dae04d2ae61f2bfc8",
+                "date":"2018-10-08T16:13:04.693558+03:00",
+                "awardID":"7d459ac393f64850b535e3cb40eddb39",
+                "id":"983500b0802342708b238cd0fa502e3d"
+            },
+            {  
+                "status":"active",
+                "unitPrices":[  
+                    {  
+                        "value":{  
+                            "currency":"UAH",
+                            "amount":2984722.88,
+                            "valueAddedTaxIncluded":true
+                        },
+                        "relatedItem":"c4cda3292cd04b6da5bc311a3d0c963f"
+                    }
+                ],
+                "suppliers":[  
+                    {  
+                        "contactPoint":{  
+                            "telephone":"2341170",
+                            "url":"http://www.shev.gov.ua/",
+                            "faxNumber":"2343591",
+                            "name":"Ліповець Євген Іванович",
+                            "email":"buh510@ukr.net"
+                        },
+                        "identifier":{  
+                            "scheme":"UA-EDR",
+                            "id":"21725150",
+                            "legalName":"Шевченківська районна в місті Києві державна адміністрація"
+                        },
+                        "name":"Шевченківська районна в місті Києві державна адміністрація",
+                        "address":{  
+                            "locality":"Переяслав-Хмельницький",
+                            "region":"Київська область",
+                            "countryName_en":"Ukraine",
+                            "countryName":"Україна",
+                            "streetAddress":"Богдана Хмельницького вулиця, 21-29",
+                            "countryName_ru":"Украина",
+                            "postalCode":"01030"
+                        }
+                    }
+                ],
+                "bidID":"a27a1d447cee4acc96e435d688586e34",
+                "date":"2018-10-08T16:13:04.693612+03:00",
+                "awardID":"749aa4a748824f328842db2598d9a368",
+                "id":"8f74c97e811e4582ba67de565fc66301"
+            }
+        ],
+        "items":[  
+            {  
+                "relatedLot":"4f84a33b8e5144099f6bb4f680616e42",
+                "description":"i-78a19e05: Папір офісний призначений для друку та копіювання на лазерній, струменевій техніці, формат А4 - 210 х 297 мм, щільність 80г/м2.",
+                "classification":{  
+                    "scheme":"ДК021",
+                    "description":"Оброблені папір і картон",
+                    "id":"30197600-2"
+                },
+                "description_en":"Test item #0",
+                "additionalClassifications":[  
+                    {  
+                        "scheme":"ДКПП",
+                        "id":"17.23.14-00.00",
+                        "description":"Папір і картон, інші, для писання, друкування чи іншої графічної призначеності, віддруковані, тиснені або перфоровані"
+                    }
+                ],
+                "deliveryLocation":{  
+                    "latitude":"50.451137000000002786",
+                    "longitude":"30.448389099999999985"
+                },
+                "deliveryAddress":{  
+                    "locality":"Київ",
+                    "region":"місто Київ",
+                    "countryName_en":"Ukraine",
+                    "countryName":"Україна",
+                    "streetAddress":"Польовий провулок, 8, 9",
+                    "countryName_ru":"Украина",
+                    "postalCode":"03057"
+                },
+                "deliveryDate":{  
+                    "startDate":"2018-10-23T00:00:00+03:00",
+                    "endDate":"2018-10-24T00:00:00+03:00"
+                },
+                "description_ru":"i-ea4a4585: Бумага офисная предназначен для печати и копирования на лазерной, струйной технике, формат А4 - 210 х 297 мм, плотность 80г м2.",
+                "id":"c4cda3292cd04b6da5bc311a3d0c963f",
+                "unit":{  
+                    "code":"PK",
+                    "name":"упаковка"
+                },
+                "quantity":23
+            }
+        ],
+        "title_en":"[TESTING] ",
+        "period":{  
+            "startDate":"2018-10-08T16:18:23.716127+03:00",
+            "endDate":"2022-01-02T16:18:23.716166+03:00"
+        },
+        "dateSigned":"2018-10-08T16:18:26.306080+03:00",
+        "dateModified":"2018-10-08T16:37:46.255344+03:00",
+        "procuringEntity":{  
+            "kind":"general",
+            "name":"Київська міська клінічна шкірно-венерологічна лікарня",
+            "address":{  
+                "postalCode":"04655",
+                "countryName":"Україна",
+                "streetAddress":"вулиця Богатирська, 32",
+                "region":"місто Київ",
+                "locality":"Київ"
+            },
+            "contactPoint":{  
+                "name":"Чередниченко Олена Юріївна",
+                "url":"http://skinmedic.com.ua",
+                "telephone":"4260712",
+                "faxNumber":"413-41-40",
+                "name_en":"Margaret Mitchell",
+                "email":"kmkshvl@ukr.net",
+                "availableLanguage":"uk"
+            },
+            "identifier":{  
+                "scheme":"UA-EDR",
+                "legalName_en":"Institution \"Vinnytsia City Council primary and secondary general school № 10\"",
+                "id":"00037256",
+                "legalName":"Київська міська клінічна шкірно-венерологічна лікарня"
+            },
+            "name_en":"James Martinez Jr."
+        },
+        "mode":"test",
+        "title_ru":"[ТЕСТИРОВАНИЕ] ",
+        "owner":"broker",
+        "changes":[  
+            {  
+                "status":"active",
+                "modifications":[  
+                    {  
+                        "itemId":"c4cda3292cd04b6da5bc311a3d0c963f",
+                        "addend":0.9
+                    }
+                ],
+                "rationale_ru":"Дылыктуч элитр кибо адмодум хаж рыквюы тамквюам зигнёфэрумквюы коммюны дэльэнйт эжт.",
+                "rationaleType":"taxRate",
+                "rationale_en":"Eligendi nihil dolorum delectus quisquam unde cumque dicta optio nulla neque.",
+                "dateSigned":"2018-10-08T16:34:39.036425+03:00",
+                "rationale":"Ремествувати грун поволовщина фльорес бісовщина поволовщина попівський матюнка.",
+                "date":"2018-10-08T16:34:39.824153+03:00",
+                "id":"d49a2fdeddd24194ab3e8e5c2265f6c0"
+            },
+            {  
+                "status":"cancelled",
+                "modifications":[  
+                    {  
+                        "itemId":"c4cda3292cd04b6da5bc311a3d0c963f",
+                        "factor":1.1
+                    }
+                ],
+                "rationale_ru":"Пхйложопхяа конжтетуто пырикульа зигнёфэрумквюы дёзсэнтёаш мэя мюндй зэнтынтиаэ.",
+                "rationaleType":"itemPriceVariation",
+                "rationale_en":"Ipsa odit facere non pariatur natus quaerat eveniet quis.",
+                "dateSigned":"2018-10-08T16:35:39.580160+03:00",
+                "rationale":"Друженько переплачувати доловлювати ошаліти маґерка заселювати дивовизія морща цехмистриха пальок десяточок драгун грішитель.",
+                "date":"2018-10-08T16:35:40.179391+03:00",
+                "id":"cb74083fa5fb4d959434f159f7fc6692"
+            },
+            {  
+                "status":"active",
+                "modifications":[  
+                    {  
+                        "itemId":"c4cda3292cd04b6da5bc311a3d0c963f",
+                        "factor":0.97
+                    }
+                ],
+                "rationale_ru":"Татион ючю жэмпэр эю зкрипторэм татион квуым пэртинакёа.",
+                "rationaleType":"thirdParty",
+                "rationale_en":"Laboriosam quia atque nostrum eum nemo molestiae totam beatae voluptatem ipsam.",
+                "dateSigned":"2018-10-08T16:36:41.929262+03:00",
+                "rationale":"Шолупайка подружка потіпаха шахрайський убраний доловлювати паливо печерувати постояльний драгун прошколярувати.",
+                "date":"2018-10-08T16:36:42.616617+03:00",
+                "id":"f2811af0b2404ce3a59d43dc1cc3d63a"
+            },
+            {  
+                "status":"cancelled",
+                "modifications":[  
+                    {  
+                        "itemId":"c4cda3292cd04b6da5bc311a3d0c963f",
+                        "contractId":"8e8d6ff4ba8f448695e29d9c595fbea6"
+                    }
+                ],
+                "rationale_ru":"Пырикульа опортэры мэль интылльэгэбат зючкёпит ед едквюэ дектаж альиквуандо попюльо векж аппэтырэ.",
+                "rationaleType":"partyWithdrawal",
+                "rationale_en":"Nam minima nemo aliquid sit non facilis.",
+                "dateSigned":"2018-10-08T16:37:45.301417+03:00",
+                "rationale":"Облізок ласкавий замішанина гривенний приймачка понадрубувати сужена пороспікатися виламуватися змерлий.",
+                "date":"2018-10-08T16:37:46.249533+03:00",
+                "id":"96a7678579ea42b8b57bf94a83e90b1b"
+            }
+        ],
+        "id":"362bc5f899664fa4a5f1ad957e39b88e",
+        "tender_id":"99817d763e264b7ca72d8d6bb85e2f40"
+    }
+}

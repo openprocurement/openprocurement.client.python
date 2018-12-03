@@ -18,6 +18,7 @@ from openprocurement_client.constants import (
 )
 from openprocurement_client.exceptions import InvalidResponse, ResourceNotFound
 from openprocurement_client.resources.contracts import ContractingClient
+from openprocurement_client.resources.agreements import AgreementClient
 from openprocurement_client.resources.plans import PlansClient
 from openprocurement_client.resources.tenders import (
     TendersClient, TendersClientSync
@@ -28,6 +29,7 @@ from openprocurement_client.tests.data_dict import (
     TEST_TENDER_KEYS,
     TEST_TENDER_KEYS_LIMITED,
     TEST_TENDER_KEYS_AGREEMENT,
+    TEST_AGREEMENT_KEYS,
 )
 from openprocurement_client.tests._server import (
     API_KEY,
@@ -1148,6 +1150,66 @@ class ContractingUserTestCase(BaseTestClass):
         self.assertEqual(patched_milestone.data.description, patch_data['data']['description'])
 
 
+class AgreementUserTestCase(BaseTestClass):
+    """"""
+    def setUp(self):
+        self.setting_up(client=AgreementClient)
+
+        with open(ROOT + 'agreement_' + TEST_AGREEMENT_KEYS.agreement_id +
+                  '.json') as agreement:
+            self.agreement = munchify(load(agreement))
+
+        with open(ROOT + 'agreements.json') as agreements:
+            self.agreements = munchify(load(agreements))
+
+        with open(ROOT + 'change_' + TEST_AGREEMENT_KEYS.change_id +
+                  '.json') as change:
+            self.change = munchify(load(change))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_get_agreement(self):
+        setup_routing(self.app, routes=["agreement"])
+        agreement = self.client.get_agreement(self.agreement.data['id'])
+        self.assertEqual(agreement, self.agreement)
+
+    def test_get_agreements(self):
+        setup_routing(self.app, routes=["agreements"])
+        agreements = self.client.get_agreements()
+        self.assertIsInstance(agreements, Iterable)
+        self.assertEqual(agreements, self.agreements.data)
+
+    def test_create_change(self):
+        setup_routing(self.app, routes=['agreement_subpage_item_create'])
+        change = self.client.create_change(self.agreement.data.id, self.change)
+        self.assertEqual(change, self.change)
+
+    def test_patch_agreement(self):
+        setup_routing(self.app, routes=["agreement_patch"])
+        self.agreement.data['status'] = 'terminated'
+        agreement = self.client.patch_agreement(self.agreement.data['id'], self.agreement)
+        self.assertEqual(agreement.data['status'], self.agreement.data['status'])
+
+    def test_patch_change(self):
+        setup_routing(self.app, routes=['agreement_change_patch'])
+        self.change.data['status'] = 'active'
+        change = self.client.patch_change(
+                    self.agreement.data.id,
+                    self.change,
+                    TEST_AGREEMENT_KEYS.change_id)
+        self.assertEqual(change.data['status'], self.change.data['status'])
+
+    def test_patch_document(self):
+        setup_routing(self.app, routes=['agreement_document_patch'])
+        patch_data = {'data': {'documentOf': 'change'}}
+        document = self.client.patch_document(
+                        self.agreement.data.id,
+                        patch_data,
+                        TEST_AGREEMENT_KEYS.document_id)
+        self.assertEqual(document["data"]["documentOf"], patch_data["data"]["documentOf"])
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(ViewerTenderTestCase))
@@ -1155,6 +1217,7 @@ def suite():
     suite.addTest(unittest.makeSuite(ViewerPlanTestCase))
     suite.addTest(unittest.makeSuite(UserTestCase))
     suite.addTest(unittest.makeSuite(ContractingUserTestCase))
+    suite.addTest(unittest.makeSuite(AgreementUserTestCase))
     return suite
 
 
