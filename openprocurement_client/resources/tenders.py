@@ -326,10 +326,11 @@ class TendersClient(APIResourceClient):
                                     doc_registration=doc_registration,
                                     depth_path=depth_path, access_token=access_token)
 
-    def upload_bid_document(self, file_, tender_id, bid_id, doc_type=None, use_ds_client=True,
+    def upload_bid_document(self, file_, tender_id, bid_id, subitem_name=DOCUMENTS, doc_type=None, use_ds_client=True,
                             doc_registration=True, access_token=None):
         depth_path = '{}/{}'.format(BIDS, bid_id)
         return self.upload_document(file_, tender_id,
+                                    subitem_name=subitem_name,
                                     doc_type=doc_type,
                                     use_ds_client=use_ds_client,
                                     doc_registration=doc_registration,
