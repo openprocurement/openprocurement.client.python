@@ -68,3 +68,9 @@ TEST_TENDER_KEYS_AGREEMENT = munchify({
     "agreement_id": '9aa744f37d10468685a77be968bfe979',
     "amount": 2872000,
 })
+
+TEST_AGREEMENT_KEYS = munchify({
+    "agreement_id": '362bc5f899664fa4a5f1ad957e39b88e',
+    "change_id": 'd49a2fdeddd24194ab3e8e5c2265f6c0',
+    "document_id": 'fdf7279ff77d4f7fb307e71a050c687d',
+})

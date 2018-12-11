@@ -119,6 +119,18 @@ def get_monitoring_id_by_uaid(ua_id, client, descending=True, id_field='monitori
     raise IdNotFound
 
 
+def get_agreement_id_by_uaid(ua_id, client, descending=True, id_field='agreementID'):
+    params = {'offset': '', 'opt_fields': id_field, 'descending': descending}
+    tender_list = True
+    client._update_params(params)
+    while tender_list:
+        tender_list = client.get_agreements()
+        for tender in tender_list:
+            if tender[id_field] == ua_id:
+                return tender.id
+    raise IdNotFound
+
+
 def get_response(client, params):
     response_fail = True
     sleep_interval = 0.2

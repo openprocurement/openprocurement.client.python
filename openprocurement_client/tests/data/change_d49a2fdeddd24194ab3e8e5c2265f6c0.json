@@ -1,0 +1,18 @@
+{  
+    "data":{  
+        "status":"pending",
+        "modifications":[  
+            {  
+                "itemId":"c4cda3292cd04b6da5bc311a3d0c963f",
+                "addend":0.9
+            }
+        ],
+        "rationale_ru":"Дылыктуч элитр кибо адмодум хаж рыквюы тамквюам зигнёфэрумквюы коммюны дэльэнйт эжт.",
+        "rationaleType":"taxRate",
+        "rationale_en":"Eligendi nihil dolorum delectus quisquam unde cumque dicta optio nulla neque.",
+        "dateSigned":"2018-10-08T16:34:39.036425+03:00",
+        "rationale":"Ремествувати грун поволовщина фльорес бісовщина поволовщина попівський матюнка.",
+        "date":"2018-10-08T16:34:39.824153+03:00",
+        "id":"d49a2fdeddd24194ab3e8e5c2265f6c0"
+    }
+}

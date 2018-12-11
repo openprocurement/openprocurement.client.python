@@ -8,7 +8,8 @@ from openprocurement_client.tests.data_dict import (
     TEST_PLAN_KEYS,
     TEST_CONTRACT_KEYS,
     TEST_ASSET_KEYS,
-    TEST_LOT_KEYS
+    TEST_LOT_KEYS,
+    TEST_AGREEMENT_KEYS
 )
 import magic
 import os
@@ -26,6 +27,7 @@ API_PATH = '/api/' + API_VERSION + '/{0}'
 TENDERS_PATH = API_PATH.format('tenders')
 PLANS_PATH = API_PATH.format('plans')
 CONTRACTS_PATH = API_PATH.format('contracts')
+AGREEMENTS_PATH = API_PATH.format('agreements')
 SPORE_PATH = API_PATH.format('spore')
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
 RESOURCE_DICT = {
@@ -33,7 +35,8 @@ RESOURCE_DICT = {
     'contract': {'sublink': 'contracts', 'data': TEST_CONTRACT_KEYS},
     'plan': {'sublink': 'plans', 'data': TEST_PLAN_KEYS},
     'asset': {'sublink': 'assets', 'data': TEST_ASSET_KEYS},
-    'lot': {'sublink': 'lots', 'data': TEST_LOT_KEYS}
+    'lot': {'sublink': 'lots', 'data': TEST_LOT_KEYS},
+    'agreement': {'sublink': 'agreements', 'data': TEST_AGREEMENT_KEYS},
 }
 
 
@@ -318,13 +321,23 @@ def contract_document_create(contract_id):
     document.id = TEST_CONTRACT_KEYS.new_document_id
     return dumps({"data": document})
 
-
 def contract_change_patch(contract_id, change_id):
     response.status = 200
     change = resource_partition(change_id, resource_name='change')
     change.data.rationale = TEST_CONTRACT_KEYS.patch_change_rationale
     return dumps(change)
 
+def agreement_change_patch(agreement_id, change_id):
+    response.status = 200
+    change = resource_partition(change_id, resource_name='change')
+    change.update(request.json['data'])
+    return dumps({'data': change})
+
+def agreement_document_patch(agreement_id, document_id):
+    response.status = 200
+    document = resource_partition(agreement_id, resource_name='agreement', part='documents')[0]
+    document.update(request.json['data'])
+    return dumps({'data': document})
 
 def contract_patch_milestone(contract_id, milestone_id):
     response.status = 200
@@ -383,6 +396,12 @@ routes_dict = {
     "lots": (API_PATH.format('<resource_name:resource_filter:lot>'), 'GET', resource_page_get),
     "lot": (API_PATH.format('<resource_name:resource_filter:lot>') + '/<resource_id>', 'GET', resource_page),
     "lot_patch": (API_PATH.format('<resource_name:resource_filter:lot>') + "/<resource_id>", 'PATCH', resource_patch),
+    "agreement": (API_PATH.format('<resource_name:resource_filter:agreement>') + '/<resource_id>', 'GET', resource_page),
+    "agreements": (API_PATH.format('<resource_name:resource_filter:agreement>'), 'GET', resource_page_get),
+    "agreement_patch": (API_PATH.format('<resource_name:resource_filter:agreement>') + "/<resource_id>", 'PATCH', resource_patch),
+    "agreement_subpage_item_create": (AGREEMENTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
+    "agreement_change_patch": (API_PATH.format('agreements') + '/<agreement_id>/changes/<change_id>', 'PATCH', agreement_change_patch),
+    "agreement_document_patch": (API_PATH.format('agreements') + '/<agreement_id>/documents/<document_id>', 'PATCH', agreement_document_patch),
 }
 
 
