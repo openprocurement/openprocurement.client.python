@@ -87,7 +87,10 @@ class APIBaseClient(APITemplateClient):
         _headers.update(headers or {})
         response_item = self.request('GET', url, headers=_headers)
         if response_item.status_code == 200:
-            return munchify(loads(response_item.text))
+            data = loads(response_item.text)
+            if "x-revision-n" in response_item.headers:
+                data["x_revision_n"] = response_item.headers["x-revision-n"]
+            return munchify(data)
         raise InvalidResponse(response_item)
 
     @retry(stop_max_attempt_number=5)
@@ -176,6 +179,12 @@ class APIBaseClient(APITemplateClient):
         LOGGER.warn("'get_resource_item' method is deprecated use APIResoucreClient.get_resource_item from "
                     "from 'openprocurement_client.clients'.")
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id), headers=headers)
+
+    def get_resource_item_historical(self, id, revision="", headers=None):
+        if headers is None:
+            headers = {}
+        headers["x-revision-n"] = str(revision)
+        return self._get_resource_item('{}/{}/historical'.format(self.prefix_path, id), headers=headers)
 
     def patch_credentials(self, id, access_token):
         LOGGER.warn("'pat' method is deprecated use APIResoucreClient.pat from "
