@@ -3,7 +3,8 @@ import unittest
 from openprocurement_client.tests import (
     tests_resources,
     tests_sync,
-    test_registry_client
+    test_registry_client,
+    test_api_base_client
 )
 
 
@@ -12,6 +13,7 @@ def suite():
     suite.addTest(tests_sync.suite())
     suite.addTest(test_registry_client.suite())
     suite.addTest(tests_resources.suite())
+    suite.addTest(test_api_base_client.suite())
     return suite
 
 
