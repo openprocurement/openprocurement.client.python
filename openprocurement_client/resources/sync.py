@@ -140,9 +140,13 @@ class ResourceFeeder(object):
                     LOGGER.info('Stop check backward worker')
                     check_down_worker = False
                 else:
+                    if not self.backward_worker.successful():
+                        LOGGER.warning('Exception from forward_worker: {}'.format(repr(self.backward_worker.exception)))
                     self.restart_sync()
                     check_down_worker = True
             if self.forward_worker.ready():
+                if not self.forward_worker.successful():
+                    LOGGER.warning('Exception from forward_worker: {}'.format(repr(self.forward_worker.exception)))
                 self.restart_sync()
                 check_down_worker = True
             while not self.queue.empty():
