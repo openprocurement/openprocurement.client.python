@@ -9,7 +9,7 @@ from gevent.queue import PriorityQueue, Empty
 
 from openprocurement_client.clients import APIResourceClientSync
 from openprocurement_client.utils import get_response
-
+from copy import deepcopy
 
 DEFAULT_RETRIEVERS_PARAMS = {
     'down_requests_sleep': 5,
@@ -36,7 +36,7 @@ class ResourceFeeder(object):
     def __init__(self, host=DEFAULT_API_HOST, version=DEFAULT_API_VERSION,
                  key=DEFAULT_API_KEY, resource='tenders',
                  extra_params=DEFAULT_API_EXTRA_PARAMS,
-                 retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False,
+                 retrievers_params={}, adaptive=False,
                  with_priority=False):
         super(ResourceFeeder, self).__init__()
         LOGGER.info('Init Resource Feeder...')
@@ -47,8 +47,9 @@ class ResourceFeeder(object):
         self.adaptive = adaptive
 
         self.extra_params = extra_params
-        self.retrievers_params = retrievers_params
-        self.queue = PriorityQueue(maxsize=retrievers_params['queue_size'])
+        self.retrievers_params = deepcopy(DEFAULT_RETRIEVERS_PARAMS)
+        self.retrievers_params.update(retrievers_params)
+        self.queue = PriorityQueue(maxsize=self.retrievers_params['queue_size'])
 
         self.forward_priority = 1 if with_priority else 0
         self.backward_priority = 1000 if with_priority else 0
