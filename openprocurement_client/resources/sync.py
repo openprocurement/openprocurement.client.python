@@ -140,9 +140,13 @@ class ResourceFeeder(object):
                     LOGGER.info('Stop check backward worker')
                     check_down_worker = False
                 else:
+                    if not self.backward_worker.successful():
+                        LOGGER.warning('Exception from forward_worker: {}'.format(repr(self.backward_worker.exception)))
                     self.restart_sync()
                     check_down_worker = True
             if self.forward_worker.ready():
+                if not self.forward_worker.successful():
+                    LOGGER.warning('Exception from forward_worker: {}'.format(repr(self.forward_worker.exception)))
                 self.restart_sync()
                 check_down_worker = True
             while not self.queue.empty():
@@ -185,9 +189,13 @@ class ResourceFeeder(object):
                     LOGGER.info('Stop check backward worker')
                     check_down_worker = False
                 else:
+                    if not self.backward_worker.successful():
+                        LOGGER.warning('Exception from forward_worker: {}'.format(repr(self.backward_worker.exception)))
                     self.restart_sync()
                     check_down_worker = True
             if self.forward_worker.ready():
+                if not self.forward_worker.successful():
+                    LOGGER.warning('Exception from forward_worker: {}'.format(repr(self.forward_worker.exception)))
                 self.restart_sync()
                 check_down_worker = True
             LOGGER.debug('Feeder queue size {} items'.format(self.queue.qsize()),
@@ -204,6 +212,9 @@ class ResourceFeeder(object):
         LOGGER.debug('Backward response length {} items'.format(len(response.data)),
                      extra={'BACKWARD_RESPONSE_LENGTH': len(response.data)})
         if self.cookies != self.backward_client.session.cookies:
+            LOGGER.info('Backward client Cookies mismatch: {}, {}'.format(
+                repr(self.cookies), repr(self.backward_client.session.cookies))
+            )
             raise Exception('LB Server mismatch')
         while response.data:
             LOGGER.debug('Backward: Start process data.')
@@ -215,6 +226,9 @@ class ResourceFeeder(object):
             LOGGER.debug('Backward response length {} items'.format(len(response.data)),
                          extra={'BACKWARD_RESPONSE_LENGTH': len(response.data)})
             if self.cookies != self.backward_client.session.cookies:
+                LOGGER.info('Backward client Cookies mismatch: {}, {}'.format(
+                    repr(self.cookies), repr(self.backward_client.session.cookies))
+                )
                 raise Exception('LB Server mismatch')
             LOGGER.info('Backward: pause between requests {} sec.'.format(
                 self.retrievers_params.get('down_requests_sleep', 5)))
@@ -228,6 +242,9 @@ class ResourceFeeder(object):
         LOGGER.debug('Forward response length {} items'.format(len(response.data)),
                      extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
         if self.cookies != self.forward_client.session.cookies:
+            LOGGER.info('Forward client Cookies mismatch: {}, {}'.format(
+                repr(self.cookies), repr(self.forward_client.session.cookies))
+            )
             raise Exception('LB Server mismatch')
         while 1:
             self.forward_heartbeat = time()
@@ -240,6 +257,9 @@ class ResourceFeeder(object):
                 LOGGER.debug('Forward response length {} items'.format(len(response.data)),
                              extra={'FORWARD_RESPONSE_LENGTH': len(response.data)})
                 if self.cookies != self.forward_client.session.cookies:
+                    LOGGER.info('Forward client Cookies mismatch: {}, {}'.format(
+                        repr(self.cookies), repr(self.forward_client.session.cookies))
+                    )
                     raise Exception('LB Server mismatch')
                 if len(response.data) != 0:
                     LOGGER.info(
@@ -264,6 +284,9 @@ class ResourceFeeder(object):
                     if self.retrievers_params['up_wait_sleep'] < 30:
                         self.retrievers_params['up_wait_sleep'] += 1
             if self.cookies != self.forward_client.session.cookies:
+                LOGGER.info('Forward client Cookies mismatch: {}, {}'.format(
+                    repr(self.cookies), repr(self.forward_client.session.cookies))
+                )
                 raise Exception('LB Server mismatch')
 
         return 1
