@@ -49,7 +49,7 @@ class ResourceFeeder(object):
         self.extra_params = extra_params
         self.retrievers_params = deepcopy(DEFAULT_RETRIEVERS_PARAMS)
         self.retrievers_params.update(retrievers_params)
-        self.queue = PriorityQueue(maxsize=retrievers_params['queue_size'])
+        self.queue = PriorityQueue(maxsize=self.retrievers_params['queue_size'])
 
         self.forward_priority = 1 if with_priority else 0
         self.backward_priority = 1000 if with_priority else 0
