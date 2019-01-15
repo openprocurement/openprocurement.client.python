@@ -4,6 +4,7 @@ from openprocurement_client.templates import APITemplateClient
 from openprocurement_client.clients import APIBaseClient
 from openprocurement_client.utils import verify_file
 from openprocurement_client.exceptions import InvalidResponse
+from openprocurement_client.resources.document_service import DocumentServiceClient
 
 from munch import munchify
 from retrying import retry
@@ -29,12 +30,18 @@ class DasuClient(APIBaseClient, APITemplateClient):
                  api_version=None,
                  params=None,
                  ds_client=None,
-                 user_agent=None):
+                 user_agent=None,
+                 ds_config=None):
 
         APITemplateClient.__init__(self, login_pass=(key, ''), headers=self.headers,
                                    user_agent=user_agent)
 
-        self.ds_client = ds_client
+        if ds_config:
+            self.ds_client = DocumentServiceClient(ds_config['host_url'], ds_config['auth_ds'])
+        if ds_client:
+            self.ds_client = ds_client
+            LOGGER.warn("Positional argument 'ds_client' is deprecated, use 'ds_config' which receive "
+                        "dict with 'host_url' and 'auth_ds' keys")
         self.host_url = host_url or self.host_url
         self.api_version = api_version or self.api_version
 
