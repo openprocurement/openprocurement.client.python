@@ -136,21 +136,6 @@ class DasuClient(APIBaseClient, APITemplateClient):
         )
 
     @verify_file
-    def upload_monitoring_document(self, file_, monitoring, obj,
-                                   use_ds_client=True, doc_registration=True):
-        return self._upload_resource_file(
-            '{}/{}/{}/documents'.format(
-                self.prefix_path,
-                monitoring.data.id,
-                obj
-            ),
-            file_=file_,
-            headers={'X-Access-Token': self._get_access_token(monitoring)},
-            use_ds_client=use_ds_client,
-            doc_registration=doc_registration
-        )
-
-    @verify_file
     def upload_obj_document(self, file_, obj, use_ds_client=True,
                             doc_registration=True):
         response = self.ds_client.document_upload_registered(
