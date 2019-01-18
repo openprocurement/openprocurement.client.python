@@ -1,5 +1,6 @@
 from simplejson import load
 from munch import munchify
+import os
 import mock
 import unittest
 from openprocurement_client.dasu_client import DasuClient
