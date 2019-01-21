@@ -25,12 +25,6 @@ class Response(object):
 
 class TestUtilsFunctions(unittest.TestCase):
 
-    def setUp(self):
-        with open(ROOT + 'monitoring_' + TEST_MONITORING_KEYS.monitoring_id + '.json') as monitoring:
-            self.monitoring = munchify(load(monitoring))
-        with open(ROOT + 'monitorings.json') as monitorings:
-            self.monitorings = munchify(load(monitorings))
-    
     ds_config = {
         'host_url': DS_HOST_URL,
         'auth_ds': AUTH_DS_FAKE
@@ -38,6 +32,11 @@ class TestUtilsFunctions(unittest.TestCase):
 
     client = DasuClient('', ds_config=ds_config)
 
+    def setUp(self):
+        with open(ROOT + 'monitoring_' + TEST_MONITORING_KEYS.monitoring_id + '.json') as monitoring:
+            self.monitoring = munchify(load(monitoring))
+        with open(ROOT + 'monitorings.json') as monitorings:
+            self.monitorings = munchify(load(monitorings))
 
     def test_create_monitoring(self):
         side_effect = [
@@ -55,7 +54,9 @@ class TestUtilsFunctions(unittest.TestCase):
         self.assertEqual(result, self.monitoring)
 
     def test_get_monitorings(self):
-        side_effect = [Response(200, dumps(self.monitorings))]
+        side_effect = [
+            Response(200, dumps(self.monitorings))
+            ]
         self.client.request = mock.MagicMock(side_effect=side_effect)
         result = self.client.get_monitorings()
         self.assertEqual(result, self.monitorings.data)

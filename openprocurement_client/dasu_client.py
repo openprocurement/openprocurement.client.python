@@ -59,20 +59,7 @@ class DasuClient(APIBaseClient, APITemplateClient):
 
     @retry(stop_max_attempt_number=5)
     def get_monitorings(self, params=None, feed='changes'):
-        _params = (params or {}).copy()
-        _params['feed'] = feed
-        self._update_params(_params)
-        response = self.request('GET',
-                                self.prefix_path,
-                                params_dict=self.params)
-        if response.status_code == 200:
-            monitoring_list = munchify(loads(response.text))
-            self._update_params(monitoring_list.next_page)
-            return monitoring_list.data
-        elif response.status_code == 404:
-            del self.params['offset']
-
-        raise InvalidResponse(response)
+        return self._get_resource_items(params=params, feed=feed)
 
     def get_monitoring(self, monitoring_id, access_token=None):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, monitoring_id),
