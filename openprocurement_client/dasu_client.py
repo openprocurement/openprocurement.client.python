@@ -123,10 +123,9 @@ class DasuClient(APIBaseClient, APITemplateClient):
         )
 
     @verify_file
-    def upload_obj_document(self, file_, obj, use_ds_client=True,
-                            doc_registration=True):
+    def upload_obj_document(self, file_):
         response = self.ds_client.document_upload_registered(
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(obj)}
+            headers={}
         )
         return munchify(response)

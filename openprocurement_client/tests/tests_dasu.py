@@ -135,9 +135,9 @@ class TestUtilsFunctions(unittest.TestCase):
         BaseTestClass.setUpClass()
         file_name = "test_document.txt"
         file_path = os.path.join(ROOT, file_name)
-        result = self.client.upload_obj_document(file_path, self.monitoring)
-        BaseTestClass.tearDownClass()
+        result = self.client.upload_obj_document(file_path)
         self.assertEqual(result.data.title, file_name)
+        BaseTestClass.tearDownClass()
 
 
 def suite():
