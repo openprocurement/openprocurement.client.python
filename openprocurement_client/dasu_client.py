@@ -59,20 +59,7 @@ class DasuClient(APIBaseClient, APITemplateClient):
 
     @retry(stop_max_attempt_number=5)
     def get_monitorings(self, params=None, feed='changes'):
-        _params = (params or {}).copy()
-        _params['feed'] = feed
-        self._update_params(_params)
-        response = self.request('GET',
-                                self.prefix_path,
-                                params_dict=self.params)
-        if response.status_code == 200:
-            monitoring_list = munchify(loads(response.text))
-            self._update_params(monitoring_list.next_page)
-            return monitoring_list.data
-        elif response.status_code == 404:
-            del self.params['offset']
-
-        raise InvalidResponse(response)
+        return self._get_resource_items(params=params, feed=feed)
 
     def get_monitoring(self, monitoring_id, access_token=None):
         return self._get_resource_item('{}/{}'.format(self.prefix_path, monitoring_id),
@@ -136,25 +123,9 @@ class DasuClient(APIBaseClient, APITemplateClient):
         )
 
     @verify_file
-    def upload_monitoring_document(self, file_, monitoring, obj,
-                                   use_ds_client=True, doc_registration=True):
-        return self._upload_resource_file(
-            '{}/{}/{}/documents'.format(
-                self.prefix_path,
-                monitoring.data.id,
-                obj
-            ),
-            file_=file_,
-            headers={'X-Access-Token': self._get_access_token(monitoring)},
-            use_ds_client=use_ds_client,
-            doc_registration=doc_registration
-        )
-
-    @verify_file
-    def upload_obj_document(self, file_, obj, use_ds_client=True,
-                            doc_registration=True):
+    def upload_obj_document(self, file_):
         response = self.ds_client.document_upload_registered(
             file_=file_,
-            headers={'X-Access-Token': self._get_access_token(obj)}
+            headers={}
         )
         return munchify(response)

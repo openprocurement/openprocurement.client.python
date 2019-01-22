@@ -74,3 +74,12 @@ TEST_AGREEMENT_KEYS = munchify({
     "change_id": 'd49a2fdeddd24194ab3e8e5c2265f6c0',
     "document_id": 'fdf7279ff77d4f7fb307e71a050c687d',
 })
+
+TEST_MONITORING_KEYS = munchify({
+    "monitoring_id": 'f32f928d57d8485890b694cb2e02f864',
+    "dialogue_id": '484e0eba91d348c9b372e7da7218a095',
+    "description": 'The procurement requirements have been fixed and the changes are attached',
+    "title": 'The procurement requirements have been fixed',
+    "name": 'The State Audit Service of Ukraine',
+    "roles": 'sas'
+})

@@ -4,9 +4,11 @@ monkey.patch_all()
 
 from openprocurement_client.resources.tenders import TendersClient
 from openprocurement_client.resources.agreements import AgreementClient
+from openprocurement_client.dasu_client import DasuClient
 from openprocurement_client.exceptions import IdNotFound
 from openprocurement_client.utils import (
-    tenders_feed, get_tender_id_by_uaid, get_tender_by_uaid, get_agreement_id_by_uaid
+    tenders_feed, get_tender_id_by_uaid, get_tender_by_uaid,
+    get_agreement_id_by_uaid, get_monitoring_id_by_uaid
 )
 
 from munch import munchify
@@ -102,6 +104,16 @@ class TestUtilsFunctions(unittest.TestCase):
         client = TestAgreementClient()
         with self.assertRaises(IdNotFound):
             result = get_agreement_id_by_uaid('f3849ade33534174b8402579152a5f41',
+                                           client, id_field='dateModified')
+            self.assertEqual(result, self.response.data[0]['id'])
+
+    @mock.patch('openprocurement_client.dasu_client.DasuClient.'
+                'get_monitorings')
+    def test_get_monitoring_id_by_uaid(self, mock_get_monitorings):
+        mock_get_monitorings.side_effect = [self.response.data, []]
+        client = DasuClient('')
+        with self.assertRaises(IdNotFound):
+            result = get_monitoring_id_by_uaid('f3849ade33534174b8402579152a5f41',
                                            client, id_field='dateModified')
             self.assertEqual(result, self.response.data[0]['id'])
 
