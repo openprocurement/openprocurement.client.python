@@ -88,8 +88,11 @@ class APIBaseClient(APITemplateClient):
         response_item = self.request('GET', url, headers=_headers)
         if response_item.status_code == 200:
             data = loads(response_item.text)
-            if "x-revision-n" in response_item.headers:
-                data["x_revision_n"] = response_item.headers["x-revision-n"]
+            if isinstance(response_item.headers, dict):
+                if "x-revision-n" in response_item.headers:
+                    data["x_revision_n"] = response_item.headers["x-revision-n"]
+                if "x-revision-date" in response_item.headers:
+                    data["x_revision_date"] = response_item.headers["x-revision-date"]
             return munchify(data)
         raise InvalidResponse(response_item)
 
@@ -180,10 +183,11 @@ class APIBaseClient(APITemplateClient):
                     "from 'openprocurement_client.clients'.")
         return self._get_resource_item('{}/{}'.format(self.prefix_path, id), headers=headers)
 
-    def get_resource_item_historical(self, id, revision="", headers=None):
+    def get_resource_item_historical(self, id, revision="", date="", headers=None):
         if headers is None:
             headers = {}
         headers["x-revision-n"] = str(revision)
+        headers["x-revision-date"] = str(date)
         return self._get_resource_item('{}/{}/historical'.format(self.prefix_path, id), headers=headers)
 
     def patch_credentials(self, id, access_token):
