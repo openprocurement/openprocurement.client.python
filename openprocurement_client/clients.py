@@ -88,7 +88,7 @@ class APIBaseClient(APITemplateClient):
         response_item = self.request('GET', url, headers=_headers)
         if response_item.status_code == 200:
             data = loads(response_item.text)
-            if isinstance(response_item.headers, dict):
+            if hasattr(response_item, "headers") and response_item.headers is not None:
                 if "x-revision-n" in response_item.headers:
                     data["x_revision_n"] = response_item.headers["x-revision-n"]
                 if "x-revision-date" in response_item.headers:
