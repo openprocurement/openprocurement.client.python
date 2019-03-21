@@ -81,8 +81,11 @@ class AuctionsClient(APIResourceClient):
     #                           GET ITEM API METHODS
     ###########################################################################
 
-    def get_auction(self, auction_id):
-        return self.get_resource_item(auction_id)
+    def get_auction(self, auction_id, access_token=None):
+        headers = None
+        if access_token:
+            headers = {'X-Access-Token': access_token}
+        return self.get_resource_item(auction_id, headers=headers)
 
     def get_question(self, auction_id, question_id, access_token=None):
         return self.get_resource_item_subitem(

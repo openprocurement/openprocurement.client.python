@@ -172,11 +172,6 @@ class APIBaseClient(APITemplateClient):
 
         return response
 
-    def get_resource_item(self, id, headers=None):
-        LOGGER.warn("'get_resource_item' method is deprecated use APIResoucreClient.get_resource_item from "
-                    "from 'openprocurement_client.clients'.")
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id), headers=headers)
-
     def patch_credentials(self, id, access_token):
         LOGGER.warn("'pat' method is deprecated use APIResoucreClient.pat from "
                     "from 'openprocurement_client.clients'.")
@@ -248,9 +243,9 @@ class APIResourceClient(APIBaseClient):
     #                          GET CLIENT METHODS
     ###########################################################################
 
-    def get_resource_item(self, resource_item_id):
+    def get_resource_item(self, resource_item_id, headers=None):
         return self._get_resource_item(
-            '{}/{}'.format(self.prefix_path, resource_item_id)
+            '{}/{}'.format(self.prefix_path, resource_item_id), headers=headers
         )
 
     def get_resource_item_subitem(self, resource_item_id, subitem_id_or_name,
