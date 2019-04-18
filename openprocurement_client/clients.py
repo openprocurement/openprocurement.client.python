@@ -50,15 +50,16 @@ class APIBaseClient(APITemplateClient):
         if not isinstance(params, dict):
             params = {'mode': '_all_'}
         self.params = params or {}
+        self.resource = self.resource or resource
+        self.prefix_path = '{}/api/{}/{}'.format(self.host_url, self.api_version, self.resource)
         # To perform some operations (e.g. create a tender)
         # we first need to obtain a cookie. For that reason,
         # here we send a HEAD request to a neutral URL.
-        response = self.session.request(
-            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
-        )
+        self._obtain_cookie()
+
+    def _obtain_cookie(self):
+        response = self.session.request('HEAD', self.prefix_path)
         response.raise_for_status()
-        self.resource = self.resource or resource
-        self.prefix_path = '{}/api/{}/{}'.format(self.host_url, self.api_version, self.resource)
 
     @staticmethod
     def _get_access_token(obj):
@@ -187,8 +188,7 @@ class APIBaseClient(APITemplateClient):
 
         self.session.cookies.clear()
 
-        response = self.session.request('HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version))
-        response.raise_for_status()
+        self._obtain_cookie()
 
         new_cookies = 'New cookies:\n'
         for k in self.session.cookies.keys():
