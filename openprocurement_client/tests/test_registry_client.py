@@ -27,7 +27,7 @@ class BaseTestClass(unittest.TestCase):
     def setting_up(self, client):
         self.app = Bottle()
         self.app.router.add_filter('resource_filter', resource_filter)
-        setup_routing(self.app)
+        setup_routing(self.app, routes=['{}_head'.format(client.resource), 'spore'])
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         try:
             self.server.start()
