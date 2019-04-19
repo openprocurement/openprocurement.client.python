@@ -1,5 +1,5 @@
 from bottle import request, response, redirect, static_file
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
 from simplejson import dumps, load
 from openprocurement_client.resources.document_service \
     import DocumentServiceClient
@@ -14,6 +14,8 @@ from openprocurement_client.tests.data_dict import (
 import magic
 import os
 
+
+munchify = munchify_factory()
 BASIS_URL = "http://localhost"
 API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
 API_VERSION = '0.10'

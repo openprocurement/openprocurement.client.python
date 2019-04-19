@@ -11,11 +11,14 @@ from openprocurement_client.utils import (
     get_agreement_id_by_uaid, get_monitoring_id_by_uaid
 )
 
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
 
 import json
 import mock
 import unittest
+
+
+munchify = munchify_factory()
 
 
 class TestTendersClient(TendersClient):

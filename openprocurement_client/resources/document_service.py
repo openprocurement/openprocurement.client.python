@@ -2,10 +2,12 @@ import hashlib
 from openprocurement_client.templates import APITemplateClient
 from openprocurement_client.exceptions import InvalidResponse
 
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from simplejson import loads
 
 
+munchify = munchify_factory()
 IGNORE_PARAMS = ('uri', 'path')
 
 
