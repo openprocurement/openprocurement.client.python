@@ -7,7 +7,8 @@ from bottle import Bottle
 from StringIO import StringIO
 from collections import Iterable
 from simplejson import loads, load
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 import mock
 import sys
 import unittest
@@ -46,6 +47,9 @@ from openprocurement_client.tests._server import (
     setup_routing,
     setup_routing_ds,
 )
+
+
+munchify = munchify_factory()
 
 
 def generate_file_obj(file_name, content):

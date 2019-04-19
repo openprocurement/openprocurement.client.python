@@ -2,7 +2,8 @@
 import logging
 
 from iso8601 import parse_date
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from retrying import retry
 from simplejson import loads
 
@@ -12,6 +13,8 @@ from openprocurement_client.resources.document_service import DocumentServiceCli
 from openprocurement_client.templates import APITemplateClient
 from openprocurement_client.utils import verify_file
 
+
+munchify = munchify_factory()
 
 LOGGER = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')

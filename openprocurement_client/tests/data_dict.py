@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
+
+munchify = munchify_factory()
+
 
 TEST_TENDER_KEYS = munchify({
     "tender_id": '823d50b3236247adad28a5a66f74db42',

@@ -6,11 +6,13 @@ from openprocurement_client.utils import verify_file
 from openprocurement_client.exceptions import InvalidResponse
 from openprocurement_client.resources.document_service import DocumentServiceClient
 
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from retrying import retry
 from simplejson import loads
 
 
+munchify = munchify_factory()
 logger = logging.getLogger(__name__)
 
 IGNORE_PARAMS = ('uri', 'path')

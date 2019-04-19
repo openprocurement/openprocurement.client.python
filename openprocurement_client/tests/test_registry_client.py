@@ -9,7 +9,8 @@ from gevent.pywsgi import WSGIServer
 from bottle import Bottle
 from collections import Iterable
 from simplejson import load
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from openprocurement_client.resources.assets import AssetsClient
 from openprocurement_client.resources.lots import LotsClient
 from openprocurement_client.exceptions import InvalidResponse
@@ -21,6 +22,9 @@ from openprocurement_client.tests._server import \
     API_VERSION, AUTH_DS_FAKE, DS_HOST_URL, DS_PORT, \
     HOST_URL, PORT, ROOT, setup_routing, setup_routing_ds, \
     resource_filter
+
+
+munchify = munchify_factory()
 
 
 class BaseTestClass(unittest.TestCase):
