@@ -9,7 +9,7 @@ from openprocurement_client.clients import (APIResourceClient,
 from openprocurement_client.constants import (AUCTIONS, AWARDS, BIDS, CANCELLATIONS,
                                               COMPLAINTS, CONTRACTS, DOCUMENTS, ITEMS,
                                               LOTS, PROLONGATIONS, QUALIFICATIONS, QUESTIONS,
-                                              TENDERS, AGREEMENTS, PLANS, CHANGES)
+                                              TENDERS, AGREEMENTS, PLANS)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -38,9 +38,6 @@ class TendersClient(APIResourceClient):
             item_obj,
             headers={'X-Access-Token': self._get_access_token(tender)}
         )
-
-    def get_plans(self, params=None, feed=CHANGES):
-        return self.get_resource_items(params, feed)
 
     def create_question(self, tender_id, question, access_token=None):
         return self.create_resource_item_subitem(
