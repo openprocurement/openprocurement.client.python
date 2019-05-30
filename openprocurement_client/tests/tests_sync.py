@@ -13,7 +13,8 @@ from openprocurement_client.resources.sync import ResourceFeeder
 from openprocurement_client.utils import LOGGER
 
 from gevent.queue import Queue
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from StringIO import StringIO
 from requests.exceptions import ConnectionError, InvalidHeader
 
@@ -21,6 +22,9 @@ import json
 import logging
 import mock
 import unittest
+
+
+munchify = munchify_factory()
 
 
 class AlmostAlwaysTrue(object):

@@ -1,5 +1,6 @@
 from simplejson import load
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 import os
 import mock
 import unittest
@@ -14,6 +15,9 @@ from openprocurement_client.tests._server import (
     DS_HOST_URL,
     ROOT,
 )
+
+
+munchify = munchify_factory()
 
 
 class Response(object):
