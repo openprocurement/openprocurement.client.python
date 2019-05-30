@@ -34,7 +34,7 @@ class TestUtilsFunctions(unittest.TestCase):
         'auth_ds': AUTH_DS_FAKE
         }
 
-    client = DasuClient('', ds_config=ds_config)
+    client = DasuClient(resource='monitorings', ds_config=ds_config)
 
     def setUp(self):
         with open(ROOT + 'monitoring_' + TEST_MONITORING_KEYS.monitoring_id + '.json') as monitoring:

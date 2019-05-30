@@ -114,7 +114,7 @@ class TestUtilsFunctions(unittest.TestCase):
                 'get_monitorings')
     def test_get_monitoring_id_by_uaid(self, mock_get_monitorings):
         mock_get_monitorings.side_effect = [self.response.data, []]
-        client = DasuClient('')
+        client = DasuClient(resource='monitorings')
         with self.assertRaises(IdNotFound):
             result = get_monitoring_id_by_uaid('f3849ade33534174b8402579152a5f41',
                                            client, id_field='dateModified')
