@@ -2,7 +2,8 @@
 import logging
 
 from iso8601 import parse_date
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from retrying import retry
 from simplejson import loads
 
@@ -12,6 +13,8 @@ from openprocurement_client.resources.document_service import DocumentServiceCli
 from openprocurement_client.templates import APITemplateClient
 from openprocurement_client.utils import verify_file
 
+
+munchify = munchify_factory()
 
 LOGGER = logging.getLogger(__name__)
 IGNORE_PARAMS = ('uri', 'path')
@@ -50,15 +53,16 @@ class APIBaseClient(APITemplateClient):
         if not isinstance(params, dict):
             params = {'mode': '_all_'}
         self.params = params or {}
+        self.resource = self.resource or resource
+        self.prefix_path = '{}/api/{}/{}'.format(self.host_url, self.api_version, self.resource)
         # To perform some operations (e.g. create a tender)
         # we first need to obtain a cookie. For that reason,
         # here we send a HEAD request to a neutral URL.
-        response = self.session.request(
-            'HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version)
-        )
+        self._obtain_cookie()
+
+    def _obtain_cookie(self):
+        response = self.session.request('HEAD', self.prefix_path)
         response.raise_for_status()
-        self.resource = self.resource or resource
-        self.prefix_path = '{}/api/{}/{}'.format(self.host_url, self.api_version, self.resource)
 
     @staticmethod
     def _get_access_token(obj):
@@ -172,11 +176,6 @@ class APIBaseClient(APITemplateClient):
 
         return response
 
-    def get_resource_item(self, id, headers=None):
-        LOGGER.warn("'get_resource_item' method is deprecated use APIResoucreClient.get_resource_item from "
-                    "from 'openprocurement_client.clients'.")
-        return self._get_resource_item('{}/{}'.format(self.prefix_path, id), headers=headers)
-
     def patch_credentials(self, id, access_token):
         LOGGER.warn("'pat' method is deprecated use APIResoucreClient.pat from "
                     "from 'openprocurement_client.clients'.")
@@ -192,8 +191,7 @@ class APIBaseClient(APITemplateClient):
 
         self.session.cookies.clear()
 
-        response = self.session.request('HEAD', '{}/api/{}/spore'.format(self.host_url, self.api_version))
-        response.raise_for_status()
+        self._obtain_cookie()
 
         new_cookies = 'New cookies:\n'
         for k in self.session.cookies.keys():
@@ -248,9 +246,9 @@ class APIResourceClient(APIBaseClient):
     #                          GET CLIENT METHODS
     ###########################################################################
 
-    def get_resource_item(self, resource_item_id):
+    def get_resource_item(self, resource_item_id, headers=None):
         return self._get_resource_item(
-            '{}/{}'.format(self.prefix_path, resource_item_id)
+            '{}/{}'.format(self.prefix_path, resource_item_id), headers=headers
         )
 
     def get_resource_item_subitem(self, resource_item_id, subitem_id_or_name,

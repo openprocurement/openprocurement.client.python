@@ -1,0 +1,70 @@
+{
+    "data": {
+        "status": "active",
+        "endDate": "2018-07-31T14:32:24.596027+03:00",
+        "reasons": [
+            "indicator"
+        ],
+        "monitoringPeriod": {
+            "startDate": "2018-07-31T14:17:24.596027+03:00",
+            "endDate": "2018-07-31T14:35:24.596027+03:00"
+        },
+        "decision": {
+            "datePublished": "2018-07-31T14:17:24.596027+03:00",
+            "date": "2018-07-31T14:16:47.297724+03:00",
+            "documents": [
+                {
+                    "hash": "md5:0aa38c3eeeac397f7f777159eae4668a",
+                    "author": "monitoring_owner",
+                    "format": "text/plain",
+                    "url": "https://public.docs-sandbox.openprocurement.org/get/69363c86736d424b891c214e04998364?KeyID=1331dc52&Signature=bc9jszInka4P1G0%2F50NhRrFlnuiQmNnhPzixPKE1Jlj6noZDpc0oaBZnuV1EVDztMO8Pzedl4EspiKrQ%252BgyUAA%253D%253D",
+                    "title": "d-64bf6a26voluptasvIe6I4.doc",
+                    "datePublished": "2018-07-31T14:17:24.588894+03:00",
+                    "dateModified": "2018-07-31T14:17:24.588922+03:00",
+                    "id": "ef240c938a094420b484a15314e2b2c1"
+                }
+            ],
+            "description": "Варт рукописний варіянт чисто оздобний висмівати перемовляти скандзюбити вивагом фарисей дідизний.",
+            "dateCreated": "2018-07-31T14:17:24.588991+03:00"
+        },
+        "monitoring_id": "UA-M-2018-07-31-000074",
+        "dateModified": "2018-07-31T14:17:24.596027+03:00",
+        "mode": "test",
+        "parties": [
+            {
+                "name": "The State Audit Service of Ukraine",
+                "roles": [
+                    "sas"
+                ],
+                "datePublished": "2018-07-31T14:16:47.081463+03:00",
+                "address": {
+                    "postalCode": "04655",
+                    "countryName": "Україна",
+                    "streetAddress": "вулиця Богатирська, 32",
+                    "region": "місто Київ",
+                    "locality": "Київ"
+                },
+                "contactPoint": {
+                    "telephone": "4260712",
+                    "url": "http://skinmedic.com.ua",
+                    "faxNumber": "413-41-40",
+                    "name": "Чередниченко Олена Юріївна",
+                    "email": "kmkshvl@ukr.net"
+                },
+                "identifier": {
+                    "scheme": "UA-EDR",
+                    "id": "00037256",
+                    "legalName": "Київська міська клінічна шкірно-венерологічна лікарня"
+                },
+                "id": "5774db5be34e4f6a8fe6badfa142e032"
+            }
+        ],
+        "id": "f32f928d57d8485890b694cb2e02f864",
+        "monitoringDetails": "quick, accelerator=1440",
+        "dateCreated": "2018-07-31T14:16:47.084820+03:00",
+        "procuringStages": [
+            "awarding"
+        ],
+        "tender_id": "7538b885d2b949d2b073e82803a9e417"
+    }
+}

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
+
+munchify = munchify_factory()
+
 
 TEST_TENDER_KEYS = munchify({
     "tender_id": '823d50b3236247adad28a5a66f74db42',
@@ -73,4 +77,13 @@ TEST_AGREEMENT_KEYS = munchify({
     "agreement_id": '362bc5f899664fa4a5f1ad957e39b88e',
     "change_id": 'd49a2fdeddd24194ab3e8e5c2265f6c0',
     "document_id": 'fdf7279ff77d4f7fb307e71a050c687d',
+})
+
+TEST_MONITORING_KEYS = munchify({
+    "monitoring_id": 'f32f928d57d8485890b694cb2e02f864',
+    "dialogue_id": '484e0eba91d348c9b372e7da7218a095',
+    "description": 'The procurement requirements have been fixed and the changes are attached',
+    "title": 'The procurement requirements have been fixed',
+    "name": 'The State Audit Service of Ukraine',
+    "roles": 'sas'
 })

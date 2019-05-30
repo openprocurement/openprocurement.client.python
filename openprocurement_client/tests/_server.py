@@ -1,5 +1,5 @@
 from bottle import request, response, redirect, static_file
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
 from simplejson import dumps, load
 from openprocurement_client.resources.document_service \
     import DocumentServiceClient
@@ -14,6 +14,8 @@ from openprocurement_client.tests.data_dict import (
 import magic
 import os
 
+
+munchify = munchify_factory()
 BASIS_URL = "http://localhost"
 API_KEY = 'e9c3ccb8e8124f26941d5f9639a4ebc3'
 API_VERSION = '0.10'
@@ -354,6 +356,7 @@ routes_dict = {
                      'GET', offset_error),
     "tenders": (API_PATH.format('<resource_name:resource_filter:tender>'),
                 'GET', resource_page_get),
+    "tenders_head": (TENDERS_PATH, 'HEAD', spore),
     "tender_create": (TENDERS_PATH, 'POST', resource_create),
     "tender": (API_PATH.format(
         '<resource_name:resource_filter:tender>') + '/<resource_id>',
@@ -376,11 +379,13 @@ routes_dict = {
     "redirect": ('/redirect/<filename:path>', 'GET', get_file),
     "download": ('/download/<filename:path>', 'GET', download_file),
     "plans": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', resource_page_get),
+    "plans_head": (API_PATH.format('plans'), 'HEAD', spore),
     "plan_create": (PLANS_PATH, 'POST', resource_create),
     "plan_patch": (API_PATH.format('<resource_name:resource_filter:plan>') + "/<resource_id>", 'PATCH', resource_patch),
     "plan": (API_PATH.format('<resource_name:resource_filter:plan>') + '/<resource_id>', 'GET', resource_page),
     "plan_offset_error": (API_PATH.format('<resource_name:resource_filter:plan>'), 'GET', offset_error),
     "contracts": (API_PATH.format('<resource_name:resource_filter:contract>'), 'GET', resource_page_get),
+    "contracts_head": (CONTRACTS_PATH, 'HEAD', spore),
     "contract_create": (CONTRACTS_PATH, 'POST', resource_create),
     "contract_document_create": (CONTRACTS_PATH + "/<contract_id>/documents", 'POST', contract_document_create),
     "contract": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>', 'GET', resource_page),
@@ -391,13 +396,16 @@ routes_dict = {
     "contract_patch_credentials": (API_PATH.format('<resource_name:resource_filter:contract>') + '/<resource_id>/credentials', 'PATCH', patch_credentials),
     "contract_patch_milestone": (API_PATH.format('contracts') + '/<contract_id>/milestones/<milestone_id>', 'PATCH', contract_patch_milestone),
     "assets": (API_PATH.format('<resource_name:resource_filter:asset>'), 'GET', resource_page_get),
+    "assets_head": (API_PATH.format('assets'), 'HEAD', spore),
     "asset": (API_PATH.format('<resource_name:resource_filter:asset>') + '/<resource_id>', 'GET', resource_page),
     "asset_patch": (API_PATH.format('<resource_name:resource_filter:asset>') + "/<resource_id>", 'PATCH', resource_patch),
     "lots": (API_PATH.format('<resource_name:resource_filter:lot>'), 'GET', resource_page_get),
+    "lots_head": (API_PATH.format('lots'), 'HEAD', spore),
     "lot": (API_PATH.format('<resource_name:resource_filter:lot>') + '/<resource_id>', 'GET', resource_page),
     "lot_patch": (API_PATH.format('<resource_name:resource_filter:lot>') + "/<resource_id>", 'PATCH', resource_patch),
     "agreement": (API_PATH.format('<resource_name:resource_filter:agreement>') + '/<resource_id>', 'GET', resource_page),
     "agreements": (API_PATH.format('<resource_name:resource_filter:agreement>'), 'GET', resource_page_get),
+    "agreements_head": (API_PATH.format('agreements'), 'HEAD', spore),
     "agreement_patch": (API_PATH.format('<resource_name:resource_filter:agreement>') + "/<resource_id>", 'PATCH', resource_patch),
     "agreement_subpage_item_create": (AGREEMENTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
     "agreement_change_patch": (API_PATH.format('agreements') + '/<agreement_id>/changes/<change_id>', 'PATCH', agreement_change_patch),
