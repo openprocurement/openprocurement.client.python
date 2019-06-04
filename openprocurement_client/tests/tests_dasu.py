@@ -1,5 +1,6 @@
 from simplejson import load
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 import os
 import mock
 import unittest
@@ -16,6 +17,9 @@ from openprocurement_client.tests._server import (
 )
 
 
+munchify = munchify_factory()
+
+
 class Response(object):
     def __init__(self, status_code, text=None, headers=None):
         self.status_code = status_code
@@ -30,7 +34,7 @@ class TestUtilsFunctions(unittest.TestCase):
         'auth_ds': AUTH_DS_FAKE
         }
 
-    client = DasuClient('', ds_config=ds_config)
+    client = DasuClient(resource='monitorings', ds_config=ds_config)
 
     def setUp(self):
         with open(ROOT + 'monitoring_' + TEST_MONITORING_KEYS.monitoring_id + '.json') as monitoring:

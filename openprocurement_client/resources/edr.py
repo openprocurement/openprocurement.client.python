@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 from simplejson import loads
 
 from openprocurement_client.exceptions import InvalidResponse
 from openprocurement_client.templates import APITemplateClient
+
+
+munchify = munchify_factory()
 
 
 class EDRClient(APITemplateClient):

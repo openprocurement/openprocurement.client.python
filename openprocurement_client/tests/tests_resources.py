@@ -7,7 +7,8 @@ from bottle import Bottle
 from StringIO import StringIO
 from collections import Iterable
 from simplejson import loads, load
-from munch import munchify
+from openprocurement_client.compatibility_utils import munchify_factory
+
 import mock
 import sys
 import unittest
@@ -48,6 +49,9 @@ from openprocurement_client.tests._server import (
 )
 
 
+munchify = munchify_factory()
+
+
 def generate_file_obj(file_name, content):
     file_ = StringIO()
     file_.name = file_name
@@ -61,7 +65,7 @@ class BaseTestClass(unittest.TestCase):
     def setting_up(self, client):
         self.app = Bottle()
         self.app.router.add_filter('resource_filter', resource_filter)
-        setup_routing(self.app)
+        setup_routing(self.app, routes=['{}_head'.format(client.resource), 'spore'])
         self.server = WSGIServer(('localhost', PORT), self.app, log=None)
         try:
             self.server.start()
