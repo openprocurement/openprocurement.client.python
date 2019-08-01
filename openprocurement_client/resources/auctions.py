@@ -9,7 +9,8 @@ from openprocurement_client.constants import (
     CANCELLATIONS,
     CONTRACTS,
     DOCUMENTS,
-    QUESTIONS
+    QUESTIONS,
+    ITEMS
 )
 from retrying import retry
 
@@ -46,6 +47,11 @@ class AuctionsClient(APIResourceClient):
     def create_thin_document(self, auction_id, document_data, access_token=None):
         return self.create_resource_item_subitem(
             auction_id, document_data, DOCUMENTS, access_token=access_token
+        )
+
+    def create_item(self, auction_id, item, access_token=None):
+        return self.create_resource_item_subitem(
+            auction_id, item, ITEMS, access_token=access_token
         )
 
     ###########################################################################
@@ -116,6 +122,11 @@ class AuctionsClient(APIResourceClient):
     def patch_bid(self, auction_id, bid, bid_id, access_token=None):
         return self.patch_resource_item_subitem(
             auction_id, bid, BIDS, subitem_id=bid_id, access_token=access_token
+        )
+
+    def patch_item(self, auction_id, item, item_id, access_token=None):
+        return self.patch_resource_item_subitem(
+            auction_id, item, ITEMS, subitem_id=item_id, access_token=access_token
         )
 
     def patch_bid_document(self, auction_id, document_data, bid_id,
