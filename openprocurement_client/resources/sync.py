@@ -37,7 +37,7 @@ class ResourceFeeder(object):
                  key=DEFAULT_API_KEY, resource='tenders',
                  extra_params=DEFAULT_API_EXTRA_PARAMS,
                  retrievers_params=DEFAULT_RETRIEVERS_PARAMS, adaptive=False,
-                 with_priority=False):
+                 with_priority=False, user_agent=None):
         super(ResourceFeeder, self).__init__()
         LOGGER.info('Init Resource Feeder...')
         self.host = host
@@ -53,6 +53,8 @@ class ResourceFeeder(object):
         self.forward_priority = 1 if with_priority else 0
         self.backward_priority = 1000 if with_priority else 0
 
+        self.user_agent = user_agent
+
     def init_api_clients(self):
         LOGGER.debug('Init forward and backward clients...')
         self.backward_params = {'descending': True, 'feed': 'changes'}
@@ -62,11 +64,13 @@ class ResourceFeeder(object):
         self.forward_client = APIResourceClientSync(self.key,
                                                     resource=self.resource,
                                                     host_url=self.host,
-                                                    api_version=self.version)
+                                                    api_version=self.version,
+                                                    user_agent=self.user_agent)
         self.backward_client = APIResourceClientSync(self.key,
                                                      resource=self.resource,
                                                      host_url=self.host,
-                                                     api_version=self.version)
+                                                     api_version=self.version,
+                                                     user_agent=self.user_agent)
         self.cookies = self.forward_client.session.cookies = self.backward_client.session.cookies
 
     def handle_response_data(self, data, priority=0):
