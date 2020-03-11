@@ -1,0 +1,24 @@
+{
+    "id": "5fc83cc0a1e544bf9bc1fa7047372e16",
+    "name": "Пилип",
+    "nameEng": "Name eng",
+    "minValue": "1.1",
+    "maxValue": "7.1",
+    "dataType": "number",
+    "status": "active",
+    "classification": {
+        "description": "Послуги гральних закладів і тоталізаторів",
+        "scheme": "ДК021",
+        "id": "92350000-9"
+    },
+    "additionalClassification": {
+        "description": "Солома",
+        "id": "03114100-4",
+        "scheme": "ДК021"
+    },
+    "unit": {
+        "name": "pair",
+        "code": "PR"
+    },
+    "dateModified": "2020-03-11T12:58:47.664731Z"
+}
