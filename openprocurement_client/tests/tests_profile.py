@@ -80,7 +80,7 @@ class TestProfileFunctions(unittest.TestCase):
         profile_id = self.profile_data['data']['id']
         data = self.profile_data['data']
         # Act
-        result = self.client.patch_profile(profile_id, access)
+        result = self.client.delete_profile(profile_id, access)
         # Assert
         self.assertEqual(result, data)
 
