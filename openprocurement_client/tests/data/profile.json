@@ -1,0 +1,62 @@
+{
+   "access":{
+      "token":"e8a3cd4e9abc479495c20f1022c6e802",
+      "owner":"admin"
+   },
+   "data":{
+      "id":"b8385f38ab23420bb0b199f9827bf63e",
+      "unit":{
+         "name":"fixed rate",
+         "code":"1I"
+      },
+      "value":{
+         "valueAddedTaxIncluded":true,
+         "amount":17592874.43,
+         "currency":"UAH"
+      },
+      "criteria":[
+         {
+            "id":"09dae8cb4f9e4e218d132e6c5c53a10a",
+            "requirementGroups":[
+               {
+                  "id":"d1aac1ba3809414a9a3e2008bf1eec17",
+                  "requirements":[
+                     {
+                        "relatedCriteria_id":"16cf4a6e01454dffbcc0f0032d938063",
+                        "maxValue":"3249",
+                        "title":"Здиміти поратування хлястор.",
+                        "description":"83dc5e3e-Аркан протьохкати свистіння буркутовий присилити мужичий перемовляти відом."
+                     }
+                  ],
+                  "description":"dfe43d4a-Пацьор повиводити обачити горіський простирядно кукіль штраповий можновладник привіт людино держиво насупереки."
+               }
+            ],
+            "description":"dc70e30b-Нать висповідатися гаїна переплутувати викликати 1 обдимати лакейча виречи кикати перегортувати фльорес злагідно чудар.",
+            "title":"Таляровий сисак ревучий походистий."
+         }
+      ],
+      "images":[
+         {
+            "sizes":"9",
+            "url":"https://shovkoplias-telychenko.укр/"
+         }
+      ],
+      "dateModified":"2020-03-07T15:32:11.135891Z",
+      "classification":{
+         "description":"Не відображене в інших розділах",
+         "scheme":"ДК021",
+         "id":"99999999-9"
+      },
+      "additionalClassification":[
+         {
+            "description":"Вибуховики",
+            "id":"7112",
+            "scheme":"ДК003"
+         }
+      ],
+      "status":"active",
+      "author":"user",
+      "title":"Лаверджет потіпаха розжарити.",
+      "description":"Доборотися прокадити солодкомовний дідизний вичухатися шамшити ласкавий кулага."
+   }
+}
