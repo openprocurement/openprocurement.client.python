@@ -268,7 +268,7 @@ class CategoriesClientTestCase(BaseTestClass):
     def test_get_suppliers(self):
         setup_routing(self.app, routes=['category_suppliers'])
         suppliers = self.client.get_category_suppliers(TEST_CATEGORY_KEYS.category_id)
-        self.assertEqual(suppliers, self.category)
+        self.assertEqual(suppliers["data"], self.category["data"]["suppliers"])
 
 
 class UserTestCase(BaseTestClass):

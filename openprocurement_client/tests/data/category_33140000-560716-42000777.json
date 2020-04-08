@@ -1,73 +1,114 @@
 {
-  "data": [
-    {
-      "address": {
-        "countryName": "Україна",
-        "locality": "м.Ірпінь",
-        "postalCode": "08202",
-        "region": "Київська область",
-        "streetAddress": "вул. Соборна, 152"
-      },
-      "contactPoint": {
-        "email": "galinakirilenkohosp@tmngroup.com.ua",
-        "name": "Галина Кириленко",
-        "telephone": "067-470-07-03"
-      },
-      "id": "UA-EDR-38571763",
-      "identifier": {
-        "id": "38571763",
-        "legalName": "ТОВ «ТМН-ГРУП УКРАЇНА»",
-        "scheme": "UA-EDR"
-      },
-      "name": "ТОВ «ТМН-ГРУП УКРАЇНА»",
-      "scale": "sme",
-      "status": "active"
+  "data": {
+    "classification": {
+      "description": "Медичні матеріали",
+      "id": "33140000-3",
+      "scheme": "ДК021"
     },
-    {
+    "dateModified": "2019-08-06T06:16:41.391680+03:00",
+    "description": "",
+    "id": "33140000-560716-42000777",
+    "images": [
+      {
+        "sizes": "738x652",
+        "url": "/static/images/medical_cotton_wool.png"
+      }
+    ],
+    "procuringEntity": {
       "address": {
         "countryName": "Україна",
-        "locality": "м. Дубровиця",
-        "postalCode": "34100",
-        "region": "",
-        "streetAddress": "вул. Гагаріна, 29-а"
+        "locality": "м. Київ",
+        "postalCode": "01601",
+        "region": "м. Київ",
+        "streetAddress": "вул. Грушевського, буд. 7"
       },
       "contactPoint": {
-        "email": "info.gbi_clc@mail.ee",
-        "name": "Ярослав Кикоть",
-        "telephone": "38-050-648-24-55"
+        "email": "catalogue@medpro.health",
+        "faxNumber": "",
+        "name": "Надія Бігун",
+        "telephone": "",
+        "url": "http://fb.me/uamedpro"
       },
-      "id": "UA-EDR-40551463",
       "identifier": {
-        "id": "40551463",
-        "legalName": "ТОВ «Захід-Медіка»",
+        "id": "42000777",
+        "legalName": "ДЕРЖАВНЕ ПІДПРИЄМСТВО «МЕДИЧНІ ЗАКУПІВЛІ УКРАЇНИ»",
         "scheme": "UA-EDR"
       },
-      "name": "ТОВ «Захід-Медіка»",
-      "scale": "micro",
-      "status": "active"
+      "kind": "central",
+      "name": "ДЕРЖАВНЕ ПІДПРИЄМСТВО «МЕДИЧНІ ЗАКУПІВЛІ УКРАЇНИ»"
     },
-    {
-      "address": {
-        "countryName": "Україна",
-        "locality": "м. Дніпропетровськ",
-        "postalCode": "49005",
-        "region": "Дніпропетровська область",
-        "streetAddress": "вул. Панікахи 2, корпус 12, кім. 426"
+    "status": "active",
+    "suppliers": [
+      {
+        "address": {
+          "countryName": "Україна",
+          "locality": "м.Ірпінь",
+          "postalCode": "08202",
+          "region": "Київська область",
+          "streetAddress": "вул. Соборна, 152"
+        },
+        "contactPoint": {
+          "email": "galinakirilenkohosp@tmngroup.com.ua",
+          "name": "Галина Кириленко",
+          "telephone": "067-470-07-03"
+        },
+        "id": "UA-EDR-38571763",
+        "identifier": {
+          "id": "38571763",
+          "legalName": "ТОВ «ТМН-ГРУП УКРАЇНА»",
+          "scheme": "UA-EDR"
+        },
+        "name": "ТОВ «ТМН-ГРУП УКРАЇНА»",
+        "scale": "sme",
+        "status": "active"
       },
-      "contactPoint": {
-        "email": "dkanurin@badm-b.biz",
-        "name": "Канурин Дмитрий Александрович",
-        "telephone": "(063) 985-10-75"
+      {
+        "address": {
+          "countryName": "Україна",
+          "locality": "м. Дубровиця",
+          "postalCode": "34100",
+          "region": "",
+          "streetAddress": "вул. Гагаріна, 29-а"
+        },
+        "contactPoint": {
+          "email": "info.gbi_clc@mail.ee",
+          "name": "Ярослав Кикоть",
+          "telephone": "38-050-648-24-55"
+        },
+        "id": "UA-EDR-40551463",
+        "identifier": {
+          "id": "40551463",
+          "legalName": "ТОВ «Захід-Медіка»",
+          "scheme": "UA-EDR"
+        },
+        "name": "ТОВ «Захід-Медіка»",
+        "scale": "micro",
+        "status": "active"
       },
-      "id": "UA-EDR-39273420",
-      "identifier": {
-        "id": "39273420",
-        "legalName": "ТОВ «БАДМ-Б",
-        "scheme": "UA-EDR"
-      },
-      "name": "ТОВ «БАДМ-Б»",
-      "scale": "mid",
-      "status": "active"
-    }
-  ]
+      {
+        "address": {
+          "countryName": "Україна",
+          "locality": "м. Дніпропетровськ",
+          "postalCode": "49005",
+          "region": "Дніпропетровська область",
+          "streetAddress": "вул. Панікахи 2, корпус 12, кім. 426"
+        },
+        "contactPoint": {
+          "email": "dkanurin@badm-b.biz",
+          "name": "Канурин Дмитрий Александрович",
+          "telephone": "(063) 985-10-75"
+        },
+        "id": "UA-EDR-39273420",
+        "identifier": {
+          "id": "39273420",
+          "legalName": "ТОВ «БАДМ-Б",
+          "scheme": "UA-EDR"
+        },
+        "name": "ТОВ «БАДМ-Б»",
+        "scale": "mid",
+        "status": "active"
+      }
+    ],
+    "title": "Вата медична"
+  }
 }
