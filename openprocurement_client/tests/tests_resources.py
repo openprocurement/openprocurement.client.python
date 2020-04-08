@@ -26,7 +26,8 @@ from openprocurement_client.resources.tenders import (
 )
 from openprocurement_client.resources.ecatalogues import (
     CategoriesClient,
-    ProfilesClient)
+    ProfilesClient,
+    ECataloguesClient)
 from openprocurement_client.tests.data_dict import (
     TEST_CONTRACT_KEYS,
     TEST_PLAN_KEYS,
@@ -287,6 +288,54 @@ class ProfileCLientTestCase(BaseTestClass):
     def test_get_profile(self):
         setup_routing(self.app, routes=['profile'])
         profile = self.client.get_profile(TEST_PROFILE_KEYS.profile_id)
+        self.assertEqual(profile, self.profile)
+
+
+class ECataloguesClientTestCase(BaseTestClass):
+
+    def setting_up(self, client, resource_clients):
+        self.app = Bottle()
+        self.app.router.add_filter('resource_filter', resource_filter)
+        for resource_client in resource_clients:
+            setup_routing(self.app, routes=['{}_head'.format(resource_client.resource), 'spore'])
+        self.server = WSGIServer(('localhost', PORT), self.app, log=None)
+        try:
+            self.server.start()
+        except Exception as error:
+            print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2],
+                  file=sys.stderr)
+            raise error
+        ds_config = {
+            'host_url': DS_HOST_URL,
+            'auth_ds': AUTH_DS_FAKE
+        }
+        self.client = client('', host_url=HOST_URL, api_version=API_VERSION, ds_config=ds_config)
+
+    def setUp(self):
+        self.setting_up(client=ECataloguesClient, resource_clients=[CategoriesClient, ProfilesClient])
+
+        with open(ROOT + 'category_' + TEST_CATEGORY_KEYS.category_id + '.json') as category:
+            self.category = munchify(load(category))
+
+        with open(ROOT + 'profile_' + TEST_PROFILE_KEYS.profile_id + '.json') as profile:
+            self.profile = munchify(load(profile))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_get_category(self):
+        setup_routing(self.app, routes=['category'])
+        category = self.client.categories.get_category(TEST_CATEGORY_KEYS.category_id)
+        self.assertEqual(category, self.category)
+
+    def test_get_suppliers(self):
+        setup_routing(self.app, routes=['category_suppliers'])
+        suppliers = self.client.categories.get_category_suppliers(TEST_CATEGORY_KEYS.category_id)
+        self.assertEqual(suppliers["data"], self.category["data"]["suppliers"])
+
+    def test_get_profile(self):
+        setup_routing(self.app, routes=['profile'])
+        profile = self.client.profiles.get_profile(TEST_PROFILE_KEYS.profile_id)
         self.assertEqual(profile, self.profile)
 
 
