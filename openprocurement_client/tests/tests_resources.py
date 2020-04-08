@@ -24,7 +24,9 @@ from openprocurement_client.resources.plans import PlansClient
 from openprocurement_client.resources.tenders import (
     TendersClient, TendersClientSync
 )
-from openprocurement_client.resources.ecatalogues import CategoriesClient
+from openprocurement_client.resources.ecatalogues import (
+    CategoriesClient,
+    ProfilesClient)
 from openprocurement_client.tests.data_dict import (
     TEST_CONTRACT_KEYS,
     TEST_PLAN_KEYS,
@@ -32,7 +34,8 @@ from openprocurement_client.tests.data_dict import (
     TEST_TENDER_KEYS_LIMITED,
     TEST_TENDER_KEYS_AGREEMENT,
     TEST_AGREEMENT_KEYS,
-    TEST_CATEGORY_KEYS)
+    TEST_CATEGORY_KEYS,
+    TEST_PROFILE_KEYS)
 from openprocurement_client.tests._server import (
     API_KEY,
     API_VERSION,
@@ -253,8 +256,7 @@ class CategoriesClientTestCase(BaseTestClass):
     def setUp(self):
         self.setting_up(client=CategoriesClient)
 
-        with open(ROOT + 'category_' + TEST_CATEGORY_KEYS.category_id + '.json') as \
-                category:
+        with open(ROOT + 'category_' + TEST_CATEGORY_KEYS.category_id + '.json') as category:
             self.category = munchify(load(category))
 
     def tearDown(self):
@@ -269,6 +271,23 @@ class CategoriesClientTestCase(BaseTestClass):
         setup_routing(self.app, routes=['category_suppliers'])
         suppliers = self.client.get_category_suppliers(TEST_CATEGORY_KEYS.category_id)
         self.assertEqual(suppliers["data"], self.category["data"]["suppliers"])
+
+
+class ProfileCLientTestCase(BaseTestClass):
+
+    def setUp(self):
+        self.setting_up(client=ProfilesClient)
+
+        with open(ROOT + 'profile_' + TEST_PROFILE_KEYS.profile_id + '.json') as profile:
+            self.profile = munchify(load(profile))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_get_profile(self):
+        setup_routing(self.app, routes=['profile'])
+        profile = self.client.get_profile(TEST_PROFILE_KEYS.profile_id)
+        self.assertEqual(profile, self.profile)
 
 
 class UserTestCase(BaseTestClass):

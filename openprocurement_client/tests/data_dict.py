@@ -91,3 +91,7 @@ TEST_MONITORING_KEYS = munchify({
 TEST_CATEGORY_KEYS = munchify({
     "category_id": '33140000-560716-42000777'
 })
+
+TEST_PROFILE_KEYS = munchify({
+    "profile_id": '195333-32420000-214469-40000777'
+})

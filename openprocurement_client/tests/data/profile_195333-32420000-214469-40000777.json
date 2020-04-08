@@ -1,0 +1,114 @@
+{
+  "data": {
+    "classification": {
+      "description": "Мережеве обладнання",
+      "id": "32420000-3",
+      "scheme": "ДК021"
+    },
+    "criteria": [
+      {
+        "code": "OCDS-FORM-FACTOR",
+        "description": "Форм-фактор",
+        "id": "214469-0001",
+        "requirementGroups": [
+          {
+            "description": "Форм-фактор",
+            "id": "214469-0001-001",
+            "requirements": [
+              {
+                "dataType": "string",
+                "expectedValue": "настільний",
+                "id": "214469-0001-001-01",
+                "title": "Форм-фактор"
+              }
+            ]
+          }
+        ],
+        "title": "Форм-фактор"
+      },
+      {
+        "code": "OCDS-TYPE-SWITCH",
+        "description": "Тип комутатора",
+        "id": "214469-0002",
+        "requirementGroups": [
+          {
+            "description": "Тип комутатора",
+            "id": "214469-0002-001",
+            "requirements": [
+              {
+                "dataType": "string",
+                "expectedValue": "некерований",
+                "id": "214469-0002-001-01",
+                "title": "Тип комутатора"
+              }
+            ]
+          }
+        ],
+        "title": "Тип комутатора"
+      },
+      {
+        "code": "OCDS-PORT-FASTETHERNET",
+        "description": "Кількість портів Fast Ethernet (10/100 Мбит/c)",
+        "id": "214469-0003",
+        "requirementGroups": [
+          {
+            "description": "Кількість портів Fast Ethernet (10/100 Мбит/c), не менше 5",
+            "id": "214469-0003-001",
+            "requirements": [
+              {
+                "dataType": "integer",
+                "id": "214469-0003-001-01",
+                "minValue": 5,
+                "title": "Кількість портів Fast Ethernet (10/100 Мбит/c)",
+                "unit": {
+                  "code": "H87",
+                  "name": "штук"
+                }
+              }
+            ]
+          }
+        ],
+        "title": "Кількість портів Fast Ethernet (10/100 Мбит/c)"
+      },
+      {
+        "code": "OCDS-SWITCH-GUARANTEE",
+        "description": "Гарантія",
+        "id": "214469-0099",
+        "requirementGroups": [
+          {
+            "description": "Гарантія, не менше 12 місяців",
+            "id": "214469-0099-001",
+            "requirements": [
+              {
+                "dataType": "integer",
+                "id": "214469-0099-001-01",
+                "minValue": 12,
+                "title": "Гарантія",
+                "unit": {
+                  "code": "MON",
+                  "name": "місяців"
+                }
+              }
+            ]
+          }
+        ],
+        "title": "Гарантія"
+      }
+    ],
+    "dateModified": "2019-08-06T06:17:07.618531+03:00",
+    "description": "Комутатор настільний 5-портовий 10/100 Мбіт/с",
+    "id": "195333-32420000-214469-40000777",
+    "relatedCategory": "32420000-214469-40000777",
+    "status": "active",
+    "title": "Комутатор настільний 5-портовий 10/100 Мбіт/с",
+    "unit": {
+      "code": "H87",
+      "name": "штуки"
+    },
+    "value": {
+      "amount": 200,
+      "currency": "UAH",
+      "valueAddedTaxIncluded": true
+    }
+  }
+}

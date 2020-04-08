@@ -10,7 +10,8 @@ from openprocurement_client.tests.data_dict import (
     TEST_ASSET_KEYS,
     TEST_LOT_KEYS,
     TEST_AGREEMENT_KEYS,
-    TEST_CATEGORY_KEYS)
+    TEST_CATEGORY_KEYS,
+    TEST_PROFILE_KEYS)
 import magic
 import os
 
@@ -40,7 +41,8 @@ RESOURCE_DICT = {
     'asset': {'sublink': 'assets', 'data': TEST_ASSET_KEYS},
     'lot': {'sublink': 'lots', 'data': TEST_LOT_KEYS},
     'agreement': {'sublink': 'agreements', 'data': TEST_AGREEMENT_KEYS},
-    'category': {'sublink': 'categories', 'data': TEST_CATEGORY_KEYS}
+    'category': {'sublink': 'categories', 'data': TEST_CATEGORY_KEYS},
+    'profile': {'sublink': 'profiles', 'data': TEST_PROFILE_KEYS}
 }
 
 
@@ -423,6 +425,10 @@ routes_dict = {
         '<resource_name:resource_filter:category>') + '/<resource_id>',
         'GET', resource_page),
     "category_suppliers": (CATEGORIES_PATH + "/<category_id>/suppliers", 'GET', category_suppliers),
+    "profiles_head": (API_PATH.format("profiles"), 'HEAD', spore),
+    "profile": (API_PATH.format(
+        '<resource_name:resource_filter:profile>') + '/<resource_id>',
+        'GET', resource_page),
 }
 
 
