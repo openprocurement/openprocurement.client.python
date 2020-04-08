@@ -24,6 +24,7 @@ from openprocurement_client.resources.plans import PlansClient
 from openprocurement_client.resources.tenders import (
     TendersClient, TendersClientSync
 )
+from openprocurement_client.resources.ecatalogues import CategoriesClient
 from openprocurement_client.tests.data_dict import (
     TEST_CONTRACT_KEYS,
     TEST_PLAN_KEYS,
@@ -31,7 +32,7 @@ from openprocurement_client.tests.data_dict import (
     TEST_TENDER_KEYS_LIMITED,
     TEST_TENDER_KEYS_AGREEMENT,
     TEST_AGREEMENT_KEYS,
-)
+    TEST_CATEGORY_KEYS)
 from openprocurement_client.tests._server import (
     API_KEY,
     API_VERSION,
@@ -245,6 +246,29 @@ class TendersClientSyncTestCase(BaseTestClass):
         tenders = self.client.sync_tenders()
         self.assertIsInstance(tenders.data, Iterable)
         self.assertEqual(tenders.data, self.tenders.data)
+
+
+class CategoriesClientTestCase(BaseTestClass):
+
+    def setUp(self):
+        self.setting_up(client=CategoriesClient)
+
+        with open(ROOT + 'category_' + TEST_CATEGORY_KEYS.category_id + '.json') as \
+                category:
+            self.category = munchify(load(category))
+
+    def tearDown(self):
+        self.server.stop()
+
+    def test_get_category(self):
+        setup_routing(self.app, routes=['category'])
+        category = self.client.get_category(TEST_CATEGORY_KEYS.category_id)
+        self.assertEqual(category, self.category)
+
+    def test_get_suppliers(self):
+        setup_routing(self.app, routes=['category_suppliers'])
+        suppliers = self.client.get_category_suppliers(TEST_CATEGORY_KEYS.category_id)
+        self.assertEqual(suppliers, self.category)
 
 
 class UserTestCase(BaseTestClass):

@@ -87,3 +87,7 @@ TEST_MONITORING_KEYS = munchify({
     "name": 'The State Audit Service of Ukraine',
     "roles": 'sas'
 })
+
+TEST_CATEGORY_KEYS = munchify({
+    "category_id": '33140000-560716-42000777'
+})
