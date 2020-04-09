@@ -305,11 +305,8 @@ class ECataloguesClientTestCase(BaseTestClass):
             print(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2],
                   file=sys.stderr)
             raise error
-        ds_config = {
-            'host_url': DS_HOST_URL,
-            'auth_ds': AUTH_DS_FAKE
-        }
-        self.client = client('', host_url=HOST_URL, api_version=API_VERSION, ds_config=ds_config)
+
+        self.client = client(host_url=HOST_URL, api_version=API_VERSION)
 
     def setUp(self):
         self.setting_up(client=ECataloguesClient, resource_clients=[CategoriesClient, ProfilesClient])
