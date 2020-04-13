@@ -9,7 +9,7 @@ from openprocurement_client.clients import (APIResourceClient,
 from openprocurement_client.constants import (AUCTIONS, AWARDS, BIDS, CANCELLATIONS,
                                               COMPLAINTS, CONTRACTS, DOCUMENTS, ITEMS,
                                               LOTS, PROLONGATIONS, QUALIFICATIONS, QUESTIONS,
-                                              TENDERS, AGREEMENTS, PLANS)
+                                              TENDERS, AGREEMENTS, PLANS, PUSH)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -21,6 +21,17 @@ class CreateTenderClient(APIResourceClient):
 
     def create_tender(self, plan_id, tender, access_token=None):
         return self.create_resource_item_subitem(plan_id, tender, TENDERS, access_token=access_token)
+
+
+class CreatePaymentClient(APIResourceClient):
+    """client only for payment creation"""
+    resource = PUSH
+
+    def create_payment(self, payment):
+        return self.create_resource_item(payment)
+
+    def _obtain_cookie(self):
+        pass
 
 
 class TendersClient(APIResourceClient):
@@ -265,6 +276,20 @@ class TendersClient(APIResourceClient):
             access_token=access_token
         )
 
+    def patch_cancellation_complaint(self, tender_id, complaint, cancellation_id, complaint_id='', access_token=None):
+        return self.patch_resource_item_subitem(
+            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
+            depth_path='{}/{}'.format(CANCELLATIONS, cancellation_id),
+            access_token=access_token
+        )
+
+    def patch_qualification_complaint(self, tender_id, complaint, qualification_id, complaint_id='', access_token=None):
+        return self.patch_resource_item_subitem(
+            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
+            depth_path='{}/{}'.format(QUALIFICATIONS, qualification_id),
+            access_token=access_token
+        )
+
     def patch_lot(self, tender_id, lot, lot_id='', access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, lot, LOTS, subitem_id=lot_id, access_token=access_token
@@ -477,6 +502,10 @@ class TendersClient(APIResourceClient):
         return self.delete_resource_item_subitem(tender_id, LOTS, lot_id, access_token=access_token)
 
     ###########################################################################
+
+
+class PaymentClient(CreatePaymentClient):
+    """client for payment push only"""
 
 
 class Client(TendersClient):
