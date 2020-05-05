@@ -288,20 +288,6 @@ class TendersClient(APIResourceClient):
             access_token=access_token
         )
 
-    def patch_cancellation_complaint(self, tender_id, complaint, cancellation_id, complaint_id='', access_token=None):
-        return self.patch_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
-            depth_path='{}/{}'.format(CANCELLATIONS, cancellation_id),
-            access_token=access_token
-        )
-
-    def patch_qualification_complaint(self, tender_id, complaint, qualification_id, complaint_id='', access_token=None):
-        return self.patch_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
-            depth_path='{}/{}'.format(QUALIFICATIONS, qualification_id),
-            access_token=access_token
-        )
-
     def patch_lot(self, tender_id, lot, lot_id='', access_token=None):
         return self.patch_resource_item_subitem(
             tender_id, lot, LOTS, subitem_id=lot_id, access_token=access_token
