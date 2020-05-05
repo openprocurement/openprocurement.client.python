@@ -9,7 +9,7 @@ from openprocurement_client.clients import (APIResourceClient,
 from openprocurement_client.constants import (AUCTIONS, AWARDS, BIDS, CANCELLATIONS,
                                               COMPLAINTS, CONTRACTS, DOCUMENTS, ITEMS,
                                               LOTS, PROLONGATIONS, QUALIFICATIONS, QUESTIONS,
-                                              TENDERS, AGREEMENTS, PLANS, PUSH)
+                                              TENDERS, AGREEMENTS, PLANS, PUSH, MILESTONES)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -117,6 +117,18 @@ class TendersClient(APIResourceClient):
         depth_path = '{}/{}'.format(CONTRACTS, contract_id)
         return self.create_resource_item_subitem(
             tender_id, prolongation_data, PROLONGATIONS, depth_path=depth_path, access_token=access_token
+        )
+
+    def create_award_milestone(self, tender_id, milestone, award_id, access_token=None):
+        depth_path = '{}/{}'.format(AWARDS, award_id)
+        return self.create_resource_item_subitem(
+            tender_id, milestone, MILESTONES, depth_path=depth_path, access_token=access_token
+        )
+
+    def create_qualification_milestone(self, tender_id, milestone, qualification_id, access_token=None):
+        depth_path = '{}/{}'.format(QUALIFICATIONS, qualification_id)
+        return self.create_resource_item_subitem(
+            tender_id, milestone, MILESTONES, depth_path=depth_path, access_token=access_token
         )
 
     ###########################################################################
@@ -273,20 +285,6 @@ class TendersClient(APIResourceClient):
         return self.patch_resource_item_subitem(
             tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
             depth_path='{}/{}'.format(AWARDS, award_id),
-            access_token=access_token
-        )
-
-    def patch_cancellation_complaint(self, tender_id, complaint, cancellation_id, complaint_id='', access_token=None):
-        return self.patch_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
-            depth_path='{}/{}'.format(CANCELLATIONS, cancellation_id),
-            access_token=access_token
-        )
-
-    def patch_qualification_complaint(self, tender_id, complaint, qualification_id, complaint_id='', access_token=None):
-        return self.patch_resource_item_subitem(
-            tender_id, complaint, COMPLAINTS, subitem_id=complaint_id,
-            depth_path='{}/{}'.format(QUALIFICATIONS, qualification_id),
             access_token=access_token
         )
 
