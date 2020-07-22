@@ -1,0 +1,114 @@
+{
+  "data": {
+    "classification": {
+      "description": "Текстильні матеріали",
+      "id": "33140000-3",
+      "scheme": "ДК021"
+    },
+    "dateModified": "2019-08-06T06:16:41.391680+03:00",
+    "description": "",
+    "id": "33140000-560716-42000777",
+    "images": [
+      {
+        "sizes": "738x652",
+        "url": "/static/images/cotton_wool.png"
+      }
+    ],
+    "procuringEntity": {
+      "address": {
+        "countryName": "Україна",
+        "locality": "м. Київ",
+        "postalCode": "01001",
+        "region": "м. Київ",
+        "streetAddress": "вул. Дубова, буд. 54"
+      },
+      "contactPoint": {
+        "email": "user1@domain.org",
+        "faxNumber": "",
+        "name": "Юзер 1",
+        "telephone": "",
+        "url": "http://fb.me/user1_profile"
+      },
+      "identifier": {
+        "id": "42000777",
+        "legalName": "ПРИВАТНЕ ПІДПРИЄМСТВО «ТЕКСТИЛЬНІ ЗАКУПІВЛІ УКРАЇНИ»",
+        "scheme": "UA-EDR"
+      },
+      "kind": "central",
+      "name": "ПРИВАТНЕ ПІДПРИЄМСТВО «ТЕКСТИЛЬНІ ЗАКУПІВЛІ УКРАЇНИ»"
+    },
+    "status": "active",
+    "suppliers": [
+      {
+        "address": {
+          "countryName": "Україна",
+          "locality": "м.Ірпінь",
+          "postalCode": "08200",
+          "region": "Київська область",
+          "streetAddress": "вул. Липова, 23"
+        },
+        "contactPoint": {
+          "email": "user2@domain.org",
+          "name": "Юзер 2",
+          "telephone": "067-000-00-00"
+        },
+        "id": "UA-EDR-38571763",
+        "identifier": {
+          "id": "38571763",
+          "legalName": "ТОВ «ВИГАДАЙКА УА»",
+          "scheme": "UA-EDR"
+        },
+        "name": "ТОВ «ВИГАДАЙКА УА»",
+        "scale": "sme",
+        "status": "active"
+      },
+      {
+        "address": {
+          "countryName": "Україна",
+          "locality": "м. Дубровиця",
+          "postalCode": "34100",
+          "region": "",
+          "streetAddress": "вул. Смерекова, 16"
+        },
+        "contactPoint": {
+          "email": "user3@domain.org",
+          "name": "Юзер 3",
+          "telephone": "38-050-000-00-11"
+        },
+        "id": "UA-EDR-40551463",
+        "identifier": {
+          "id": "40551463",
+          "legalName": "ТОВ «МОРШИН ТЕКСТИЛЬ»",
+          "scheme": "UA-EDR"
+        },
+        "name": "ТОВ «МОРШИН ТЕКСТИЛЬ»",
+        "scale": "micro",
+        "status": "active"
+      },
+      {
+        "address": {
+          "countryName": "Україна",
+          "locality": "м. Дніпро",
+          "postalCode": "49000",
+          "region": "Дніпропетровська область",
+          "streetAddress": "вул. Річкова 71"
+        },
+        "contactPoint": {
+          "email": "user4@domain.org",
+          "name": "Юзер 4",
+          "telephone": "(063) 985-10-75"
+        },
+        "id": "UA-EDR-39273420",
+        "identifier": {
+          "id": "39273420",
+          "legalName": "ТОВ «Дніпрові кручі",
+          "scheme": "UA-EDR"
+        },
+        "name": "ТОВ «Дніпрові кручі",
+        "scale": "mid",
+        "status": "active"
+      }
+    ],
+    "title": "Вата будівельна"
+  }
+}

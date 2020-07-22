@@ -9,8 +9,9 @@ from openprocurement_client.tests.data_dict import (
     TEST_CONTRACT_KEYS,
     TEST_ASSET_KEYS,
     TEST_LOT_KEYS,
-    TEST_AGREEMENT_KEYS
-)
+    TEST_AGREEMENT_KEYS,
+    TEST_CATEGORY_KEYS,
+    TEST_PROFILE_KEYS)
 import magic
 import os
 
@@ -31,6 +32,7 @@ PLANS_PATH = API_PATH.format('plans')
 CONTRACTS_PATH = API_PATH.format('contracts')
 AGREEMENTS_PATH = API_PATH.format('agreements')
 SPORE_PATH = API_PATH.format('spore')
+CATEGORIES_PATH = API_PATH.format('categories')
 DOWNLOAD_URL_EXTENSION = 'some_key_etc'
 RESOURCE_DICT = {
     'tender': {'sublink': 'tenders', 'data': TEST_TENDER_KEYS},
@@ -39,6 +41,8 @@ RESOURCE_DICT = {
     'asset': {'sublink': 'assets', 'data': TEST_ASSET_KEYS},
     'lot': {'sublink': 'lots', 'data': TEST_LOT_KEYS},
     'agreement': {'sublink': 'agreements', 'data': TEST_AGREEMENT_KEYS},
+    'category': {'sublink': 'categories', 'data': TEST_CATEGORY_KEYS},
+    'profile': {'sublink': 'profiles', 'data': TEST_PROFILE_KEYS}
 }
 
 
@@ -347,6 +351,12 @@ def contract_patch_milestone(contract_id, milestone_id):
     milestone.update(request.json['data'])
     return dumps({'data': milestone})
 
+#categories operations
+
+def category_suppliers(category_id):
+    subpage = resource_partition(category_id, resource_name="category", part="suppliers")
+    return dumps({'data': subpage})
+
 # Routes
 
 
@@ -410,6 +420,15 @@ routes_dict = {
     "agreement_subpage_item_create": (AGREEMENTS_PATH + "/<resource_id>/<subpage_name>", 'POST', resource_subpage_item_create),
     "agreement_change_patch": (API_PATH.format('agreements') + '/<agreement_id>/changes/<change_id>', 'PATCH', agreement_change_patch),
     "agreement_document_patch": (API_PATH.format('agreements') + '/<agreement_id>/documents/<document_id>', 'PATCH', agreement_document_patch),
+    "categories_head": (CATEGORIES_PATH, 'HEAD', spore),
+    "category": (API_PATH.format(
+        '<resource_name:resource_filter:category>') + '/<resource_id>',
+        'GET', resource_page),
+    "category_suppliers": (CATEGORIES_PATH + "/<category_id>/suppliers", 'GET', category_suppliers),
+    "profiles_head": (API_PATH.format("profiles"), 'HEAD', spore),
+    "profile": (API_PATH.format(
+        '<resource_name:resource_filter:profile>') + '/<resource_id>',
+        'GET', resource_page),
 }
 
 
