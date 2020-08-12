@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from retrying import retry
 
 from zope.deprecation import deprecation
 
@@ -45,6 +46,7 @@ class PlansClient(APIResourceClient):
     #             GET ITEM API METHODS
     ###########################################################################
 
+    @retry(stop_max_attempt_number=5)
     def get_plan(self, plan_id):
         return self.get_resource_item(plan_id)
 

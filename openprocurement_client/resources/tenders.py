@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from retrying import retry
 
 from retrying import retry
 from zope.deprecation import deprecation
@@ -188,6 +189,7 @@ class TendersClient(APIResourceClient):
             headers=headers
         )
 
+    @retry(stop_max_attempt_number=5)
     def get_tender(self, tender_id):
         return self.get_resource_item(tender_id)
 
