@@ -143,6 +143,18 @@ class TendersClient(APIResourceClient):
             tender_id, criteria_data, REQUIREMENT_RESPONSES, depth_path=depth_path, access_token=access_token
         )
 
+    def create_qualification_criteria_response(self, tender_id, criteria_data, qualification_id, access_token=None):
+        depth_path = '{}/{}'.format(QUALIFICATIONS, qualification_id)
+        return self.create_resource_item_subitem(
+            tender_id, criteria_data, REQUIREMENT_RESPONSES, depth_path=depth_path, access_token=access_token
+        )
+
+    def create_award_criteria_response(self, tender_id, criteria_data, award_id, access_token=None):
+        depth_path = '{}/{}'.format(AWARDS, award_id)
+        return self.create_resource_item_subitem(
+            tender_id, criteria_data, REQUIREMENT_RESPONSES, depth_path=depth_path, access_token=access_token
+        )
+
     ###########################################################################
     #                        GET ITEMS LIST API METHODS
     ###########################################################################
