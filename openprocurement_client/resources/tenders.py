@@ -10,7 +10,7 @@ from openprocurement_client.clients import (APIResourceClient,
 from openprocurement_client.constants import (AUCTIONS, AWARDS, BIDS, CANCELLATIONS,
                                               COMPLAINTS, CONTRACTS, DOCUMENTS, ITEMS,
                                               LOTS, PROLONGATIONS, QUALIFICATIONS, QUESTIONS,
-                                              TENDERS, AGREEMENTS, PLANS, PUSH, MILESTONES, CRITERIA, REQUIREMENT_RESPONSES)
+                                              TENDERS, AGREEMENTS, PLANS, PUSH, MILESTONES, CRITERIA, REQUIREMENT_RESPONSES, EVIDENCES)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -153,6 +153,13 @@ class TendersClient(APIResourceClient):
         depth_path = '{}/{}'.format(AWARDS, award_id)
         return self.create_resource_item_subitem(
             tender_id, criteria_data, REQUIREMENT_RESPONSES, depth_path=depth_path, access_token=access_token
+        )
+
+    def create_bid_criteria_contract_guarantee_response(self, tender_id, contract_criteria_data, bid_id,
+                                                        requirement_response_id, access_token=None):
+        depth_path = '{}/{}/{}/{}'.format(BIDS, bid_id, REQUIREMENT_RESPONSES, requirement_response_id)
+        return self.create_resource_item_subitem(
+            tender_id, contract_criteria_data, EVIDENCES, depth_path=depth_path, access_token=access_token
         )
 
     ###########################################################################
