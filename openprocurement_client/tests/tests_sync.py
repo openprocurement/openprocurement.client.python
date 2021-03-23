@@ -166,8 +166,8 @@ class ResourceFeederTestCase(unittest.TestCase):
         self.resource_feeder = ResourceFeeder()
         self.assertEqual(self.resource_feeder.key, '')
         self.assertEqual(self.resource_feeder.host,
-                         'https://lb.api-sandbox.openprocurement.org/')
-        self.assertEqual(self.resource_feeder.version, '2.3')
+                         'https://lb-api-staging.prozorro.gov.ua')
+        self.assertEqual(self.resource_feeder.version, '2.5')
         self.assertEqual(self.resource_feeder.resource, 'tenders')
         self.assertEqual(self.resource_feeder.adaptive, False)
         self.assertEqual(self.resource_feeder.extra_params,

@@ -13,8 +13,8 @@ munchify = munchify_factory()
 class EDRClient(APITemplateClient):
     """ Client for validate members by EDR """
 
-    host_url = 'https://api-sandbox.openprocurement.org'
-    api_version = '2.0'
+    host_url = 'https://lb-api-staging.prozorro.gov.ua'
+    api_version = '2.5'
 
     def __init__(self, host_url=None, api_version=None, username=None,
                  password=None):
