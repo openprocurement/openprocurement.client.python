@@ -19,8 +19,8 @@ DEFAULT_RETRIEVERS_PARAMS = {
     'queue_size': 101
 }
 
-DEFAULT_API_HOST = 'https://lb.api-sandbox.openprocurement.org/'
-DEFAULT_API_VERSION = '2.3'
+DEFAULT_API_HOST = 'https://lb-api-staging.prozorro.gov.ua'
+DEFAULT_API_VERSION = '2.5'
 DEFAULT_API_KEY = ''
 DEFAULT_API_EXTRA_PARAMS = {
     'opt_fields': 'status', 'mode': '_all_'

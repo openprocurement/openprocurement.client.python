@@ -21,8 +21,8 @@ IGNORE_PARAMS = ('uri', 'path')
 class DasuClient(APIBaseClient, APITemplateClient):
     """client for monitorings"""
 
-    host_url = 'https://audit-api-sandbox.prozorro.gov.ua'
-    api_version = '2.4'
+    host_url = 'https://audit-api-staging.prozorro.gov.ua'
+    api_version = '2.5'
     headers = {'Content-Type': 'application/json'}
 
     def __init__(self,

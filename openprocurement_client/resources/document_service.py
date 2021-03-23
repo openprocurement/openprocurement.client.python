@@ -14,7 +14,7 @@ IGNORE_PARAMS = ('uri', 'path')
 class DocumentServiceClient(APITemplateClient):
     """class for work with Document Service"""
 
-    host_url = 'https://upload.docs-sandbox.openprocurement.org'
+    host_url = 'https://upload-docs-staging.prozorro.gov.ua'
     url_register_part = 'register'
     url_upload_part = 'upload'
 
