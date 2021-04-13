@@ -10,7 +10,9 @@ from openprocurement_client.clients import (APIResourceClient,
 from openprocurement_client.constants import (AUCTIONS, AWARDS, BIDS, CANCELLATIONS,
                                               COMPLAINTS, CONTRACTS, DOCUMENTS, ITEMS,
                                               LOTS, PROLONGATIONS, QUALIFICATIONS, QUESTIONS,
-                                              TENDERS, AGREEMENTS, PLANS, PUSH, MILESTONES, CRITERIA, REQUIREMENT_RESPONSES, EVIDENCES)
+                                              TENDERS, AGREEMENTS, PLANS, PUSH, MILESTONES,
+                                              CRITERIA, REQUIREMENT_RESPONSES, EVIDENCES, REQUIREMENT_GROUPS,
+                                              REQUIREMENTS)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -482,6 +484,24 @@ class TendersClient(APIResourceClient):
                                     use_ds_client=use_ds_client,
                                     doc_registration=doc_registration,
                                     depth_path=depth_path, access_token=access_token)
+
+    def patch_requirement(self, tender_id, requirement_data, criteria_id, requirement_groups_id, requirement_id='',
+                          access_token=None):
+        return self.put_resource_item_subitem(
+            tender_id, requirement_data, REQUIREMENTS,
+            subitem_id=requirement_id,
+            depth_path='{}/{}/{}/{}'.format(CRITERIA, criteria_id, REQUIREMENT_GROUPS, requirement_groups_id),
+            access_token=access_token
+        )
+
+    def patch_evidence(self, tender_id, evidence_data, criteria_id, requirement_groups_id, requirement_id='',
+                       access_token=None):
+        return self.put_resource_item_subitem(
+            tender_id, evidence_data, REQUIREMENTS,
+            subitem_id=requirement_id,
+            depth_path='{}/{}/{}/{}'.format(CRITERIA, criteria_id, REQUIREMENT_GROUPS, requirement_groups_id),
+            access_token=access_token
+        )
 
     ###########################################################################
     #                            UPDATE FILE API METHODS
