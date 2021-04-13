@@ -117,6 +117,14 @@ class APIBaseClient(APITemplateClient):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
 
+    def _put_resource_item(self, url, payload, headers=None):
+        _headers = self.headers.copy()
+        _headers.update(headers or {})
+        response_item = self.request('PUT', url, headers=_headers, json=payload)
+        if response_item.status_code == 200:
+            return munchify(loads(response_item.text))
+        raise InvalidResponse(response_item)
+
     def _patch_obj_resource_item(self, patched_obj, item_obj, items_name):
         return self._patch_resource_item(
             '{}/{}/{}/{}'.format(self.prefix_path, patched_obj.data.id, items_name, item_obj['data']['id']),
@@ -225,6 +233,23 @@ class APIResourceClient(APIBaseClient):
             url = '{}/{}/{}'.format(self.prefix_path, resource_item_id,
                                     subitem_name)
         return self._create_resource_item(url, subitem_obj, headers=headers)
+
+    def create_resource_item_sub_subitem(self, resource_item_id, sub_subitem_obj,
+                                         sub_subitem_name, access_token=None,
+                                         depth_path=None):
+        headers = None
+        if access_token:
+            headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
+        if depth_path:
+            url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id,
+                                       depth_path, sub_subitem_name)
+        else:
+            url = '{}/{}/{}'.format(self.prefix_path, resource_item_id,
+                                    sub_subitem_name)
+        return self._create_resource_item(url, sub_subitem_obj, headers=headers)
 
     ###########################################################################
     #                        DELETE CLIENT METHODS
@@ -362,6 +387,27 @@ class APIResourceClient(APIBaseClient):
             resource_item_id, document_data, DOCUMENTS, document_id,
             access_token, depth_path
         )
+
+    def put_resource_item_subitem(self, resource_item_id, put_data, subitem_name, subitem_id=None,
+                                  access_token=None, depth_path=None):
+        headers = None
+        if access_token:
+            headers = {'X-Access-Token': access_token}
+        if isinstance(resource_item_id, dict):
+            headers = {'X-Access-Token': self._get_access_token(resource_item_id)}
+            resource_item_id = resource_item_id['data']['id']
+        if not subitem_id:
+            subitem_id = put_data['data']['id']
+        if depth_path:
+            url = '{}/{}/{}/{}/{}'.format(
+                self.prefix_path, resource_item_id, depth_path, subitem_name,
+                subitem_id
+            )
+        else:
+            url = '{}/{}/{}/{}'.format(
+                self.prefix_path, resource_item_id, subitem_name, subitem_id
+            )
+        return self._put_resource_item(url, put_data, headers=headers)
 
     ###########################################################################
     #                          UPLOAD CLIENT METHODS
