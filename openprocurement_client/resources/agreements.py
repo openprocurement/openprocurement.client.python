@@ -48,7 +48,5 @@ class AgreementClient(APIResourceClient):
         if response.status_code == 200:
             resource_items_list = munchify(loads(response.text))
             return resource_items_list.data
-        elif response.status_code == 404:
-            del self.params['offset']
 
         raise InvalidResponse(response)
