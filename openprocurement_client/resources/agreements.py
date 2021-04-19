@@ -47,7 +47,6 @@ class AgreementClient(APIResourceClient):
         response = self.request('GET', url, params_dict=params)
         if response.status_code == 200:
             resource_items_list = munchify(loads(response.text))
-            self._update_params(resource_items_list.next_page)
             return resource_items_list.data
         elif response.status_code == 404:
             del self.params['offset']
