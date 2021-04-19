@@ -33,3 +33,10 @@ class AgreementClient(APIResourceClient):
     def patch_document(self, agreement_id, data, document_id, access_token=None):
         return self.patch_resource_item_subitem(
             agreement_id, data, DOCUMENTS, document_id, access_token=access_token)
+
+    def find_agreements_by_classification_ids(self, classification_id, additional_classifications=""):
+        url = "{}_by_classification/{}".format(self.prefix_path, classification_id)
+        params = {}
+        if additional_classifications:
+            params["additional_classifications"] = additional_classifications.join(",")
+        self.request('GET', url, params_dict=params)
