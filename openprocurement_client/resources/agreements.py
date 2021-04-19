@@ -39,7 +39,7 @@ class AgreementClient(APIResourceClient):
         return self.patch_resource_item_subitem(
             agreement_id, data, DOCUMENTS, document_id, access_token=access_token)
 
-    def find_agreements_by_classification_ids(self, classification_id, additional_classifications=""):
+    def find_agreements_by_classification_id(self, classification_id, additional_classifications=""):
         url = "{}_by_classification/{}".format(self.prefix_path, classification_id)
         params = {}
         if additional_classifications:
@@ -50,3 +50,15 @@ class AgreementClient(APIResourceClient):
             return resource_items_list.data
 
         raise InvalidResponse(response)
+
+    def find_recursive_agreements_by_classification_id(self, classification_id, additional_classifications=""):
+        if "-" in classification_id:
+            classification_id = classification_id[:classification_id.find("-")]
+        needed_level = 2
+        while classification_id[needed_level] != '0':
+            agreements = self.find_agreements_by_classification_id(classification_id, additional_classifications)
+            if agreements:
+                return agreements
+
+            pos = classification_id[1:].find('0')
+            classification_id = classification_id[:pos] + '0' + classification_id[pos+1:]
