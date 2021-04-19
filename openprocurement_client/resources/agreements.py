@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from zope.deprecation import deprecation
+from simplejson import loads
 
+from openprocurement_client.compatibility_utils import munchify_factory
+from openprocurement_client.exceptions import InvalidResponse
 from openprocurement_client.clients import APIResourceClient
 from openprocurement_client.constants import (
    AGREEMENTS,
    CHANGES,
    DOCUMENTS,
 )
+
+munchify = munchify_factory()
 
 
 class AgreementClient(APIResourceClient):
@@ -39,4 +44,12 @@ class AgreementClient(APIResourceClient):
         params = {}
         if additional_classifications:
             params["additional_classifications"] = additional_classifications.join(",")
-        self.request('GET', url, params_dict=params)
+        response = self.request('GET', url, params_dict=params)
+        if response.status_code == 200:
+            resource_items_list = munchify(loads(response.text))
+            self._update_params(resource_items_list.next_page)
+            return resource_items_list.data
+        elif response.status_code == 404:
+            del self.params['offset']
+
+        raise InvalidResponse(response)
