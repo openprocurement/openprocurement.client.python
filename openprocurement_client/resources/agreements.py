@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from zope.deprecation import deprecation
+from simplejson import loads
 
+from openprocurement_client.compatibility_utils import munchify_factory
+from openprocurement_client.exceptions import InvalidResponse
 from openprocurement_client.clients import APIResourceClient
 from openprocurement_client.constants import (
    AGREEMENTS,
    CHANGES,
    DOCUMENTS,
 )
+
+munchify = munchify_factory()
 
 
 class AgreementClient(APIResourceClient):
@@ -33,3 +38,27 @@ class AgreementClient(APIResourceClient):
     def patch_document(self, agreement_id, data, document_id, access_token=None):
         return self.patch_resource_item_subitem(
             agreement_id, data, DOCUMENTS, document_id, access_token=access_token)
+
+    def find_agreements_by_classification_id(self, classification_id, additional_classifications=""):
+        url = "{}_by_classification/{}".format(self.prefix_path, classification_id)
+        params = {}
+        if additional_classifications:
+            params["additional_classifications"] = additional_classifications.join(",")
+        response = self.request('GET', url, params_dict=params)
+        if response.status_code == 200:
+            resource_items_list = munchify(loads(response.text))
+            return resource_items_list.data
+
+        raise InvalidResponse(response)
+
+    def find_recursive_agreements_by_classification_id(self, classification_id, additional_classifications=""):
+        if "-" in classification_id:
+            classification_id = classification_id[:classification_id.find("-")]
+        needed_level = 2
+        while classification_id[needed_level] != '0':
+            agreements = self.find_agreements_by_classification_id(classification_id, additional_classifications)
+            if agreements:
+                return agreements
+
+            pos = classification_id[1:].find('0')
+            classification_id = classification_id[:pos] + '0' + classification_id[pos+1:]
