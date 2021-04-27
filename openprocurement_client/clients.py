@@ -68,6 +68,7 @@ class APIBaseClient(APITemplateClient):
     def _get_access_token(obj):
         return getattr(getattr(obj, 'access', ''), 'token', '')
 
+    @retry(stop_max_attempt_number=5)
     def _create_resource_item(self, url, payload, headers=None, method='POST'):
         _headers = self.headers.copy()
         _headers.update(headers or {})
@@ -109,6 +110,7 @@ class APIBaseClient(APITemplateClient):
 
         raise InvalidResponse(response)
 
+    @retry(stop_max_attempt_number=5)
     def _patch_resource_item(self, url, payload, headers=None):
         _headers = self.headers.copy()
         _headers.update(headers or {})
