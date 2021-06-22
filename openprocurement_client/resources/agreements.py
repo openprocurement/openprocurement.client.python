@@ -39,11 +39,11 @@ class AgreementClient(APIResourceClient):
         return self.patch_resource_item_subitem(
             agreement_id, data, DOCUMENTS, document_id, access_token=access_token)
 
-    def find_agreements_by_classification_id(self, classification_id, additional_classifications=""):
+    def find_agreements_by_classification_id(self, classification_id, additional_classifications=()):
         url = "{}_by_classification/{}".format(self.prefix_path, classification_id)
         params = {}
         if additional_classifications:
-            params["additional_classifications"] = additional_classifications.join(",")
+            params["additional_classifications"] = ",".join(additional_classifications)
         response = self.request('GET', url, params_dict=params)
         if response.status_code == 200:
             resource_items_list = munchify(loads(response.text))
@@ -51,7 +51,7 @@ class AgreementClient(APIResourceClient):
 
         raise InvalidResponse(response)
 
-    def find_recursive_agreements_by_classification_id(self, classification_id, additional_classifications=""):
+    def find_recursive_agreements_by_classification_id(self, classification_id, additional_classifications=()):
         if "-" in classification_id:
             classification_id = classification_id[:classification_id.find("-")]
         needed_level = 2
