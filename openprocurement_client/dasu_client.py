@@ -86,6 +86,24 @@ class DasuClient(APIBaseClient, APITemplateClient):
             headers={'X-Access-Token': self._get_access_token(monitoring)}
         )
 
+    def create_liability(self, monitoring, monitoring_id):
+        return self._create_resource_item(
+            '{}/{}/{}'.format(
+                self.prefix_path, monitoring_id, 'liabilities'
+            ),
+            payload=monitoring,
+            headers={'X-Access-Token': self._get_access_token(monitoring)},
+        )
+
+    def patch_liability(self, monitoring, monitoring_id, liability_id):
+        return self._patch_resource_item(
+            '{}/{}/{}/{}'.format(
+                self.prefix_path, monitoring_id, 'liabilities', liability_id
+            ),
+            payload=monitoring,
+            headers={'X-Access-Token': self._get_access_token(monitoring)}
+        )
+
     def patch_monitoring(self, monitoring, monitoring_id):
         return self._patch_resource_item(
             '{}/{}'.format(self.prefix_path, monitoring_id),
@@ -114,7 +132,7 @@ class DasuClient(APIBaseClient, APITemplateClient):
             method='PUT'
         )
 
-    def patch_appeal(self, monitoring, appeal):
+    def create_appeal(self, monitoring, appeal):
         return self._create_resource_item(
             '{}/{}/{}'.format(
                 self.prefix_path, monitoring.data.id,
@@ -123,6 +141,16 @@ class DasuClient(APIBaseClient, APITemplateClient):
             payload=appeal,
             headers={'X-Access-Token': self._get_access_token(monitoring)},
             method='PUT'
+        )
+
+    def patch_appeal(self, monitoring, appeal):
+        return self._patch_resource_item(
+            '{}/{}/{}'.format(
+                self.prefix_path, monitoring.data.id,
+                'appeal'
+            ),
+            payload=appeal,
+            headers={'X-Access-Token': self._get_access_token(monitoring)},
         )
 
     @verify_file
