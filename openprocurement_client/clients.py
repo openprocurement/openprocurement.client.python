@@ -156,6 +156,20 @@ class APIBaseClient(APITemplateClient):
                                           file_=file_, headers=headers, doc_registration=doc_registration,
                                           doc_type=doc_type, use_ds_client=use_ds_client)
 
+    @verify_file
+    def register_and_upload_document(self, file_, use_ds_client=True, doc_registration=True):
+        headers = None
+        return self._register_and_upload_file(file_=file_, headers=headers, use_ds_client=use_ds_client,
+                                              doc_registration=doc_registration)
+
+    def _register_and_upload_file(self, file_=None, headers=None, use_ds_client=True, doc_registration=True):
+        if hasattr(self, 'ds_client') and use_ds_client:
+            if doc_registration:
+                response = self.ds_client.document_upload_registered(file_=file_, headers=headers)
+            else:
+                response = self.ds_client.document_upload_not_registered(file_=file_, headers=headers)
+        return response
+
     def _update_params(self, params):
         for key in params:
             if key not in IGNORE_PARAMS:
