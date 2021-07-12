@@ -188,6 +188,10 @@ class TendersClient(APIResourceClient):
     def get_documents(self, tender_id, access_token=None):
         return self.get_resource_item_subitem(tender_id, DOCUMENTS, access_token=access_token)
 
+    def get_bid_documents(self, tender_id, bid_id, access_token=None):
+        return self.get_resource_item_subitem(
+            tender_id, DOCUMENTS, depth_path='{}/{}'.format(BIDS, bid_id), access_token=access_token)
+
     def get_awards_documents(self, tender_id, award_id, access_token=None):
         return self.get_resource_item_subitem(
             tender_id, DOCUMENTS, depth_path='{}/{}'.format(AWARDS, award_id),
@@ -206,6 +210,9 @@ class TendersClient(APIResourceClient):
 
     def get_lots(self, tender_id, access_token=None):
         return self.get_resource_item_subitem(tender_id, LOTS, access_token=access_token)
+
+    def get_bids(self, tender_id, access_token=None):
+        return self.get_resource_item_subitem(tender_id, BIDS, access_token=access_token)
 
     ###########################################################################
     #                           GET ITEM API METHODS
