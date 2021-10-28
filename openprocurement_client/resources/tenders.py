@@ -164,6 +164,11 @@ class TendersClient(APIResourceClient):
             tender_id, contract_criteria_data, EVIDENCES, depth_path=depth_path, access_token=access_token
         )
 
+    def aggregate_plans(self, tender_id, plans_data, access_token=None):
+        return self.create_resource_item_subitem(
+            tender_id, plans_data, PLANS, access_token=access_token
+        )
+
     ###########################################################################
     #                        GET ITEMS LIST API METHODS
     ###########################################################################
