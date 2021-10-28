@@ -74,7 +74,7 @@ class APIBaseClient(APITemplateClient):
         _headers.update(headers or {})
 
         response_item = self.request(method, url, headers=_headers, json=payload)
-        if ((response_item.status_code == 201 and method == 'POST') or
+        if ((response_item.status_code in (200, 201) and method == 'POST') or
                 (response_item.status_code in (200, 204) and method in ('PUT', 'DELETE'))):
             return munchify(loads(response_item.text))
         raise InvalidResponse(response_item)
