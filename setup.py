@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = '2.1.1dp'
+version = '2.1.1+dp'
 
 install_requires = [
     'gevent',
