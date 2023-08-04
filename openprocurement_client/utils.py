@@ -107,6 +107,18 @@ def get_plan_id_by_uaid(ua_id, client, descending=True, id_field='planID'):
     raise IdNotFound
 
 
+def get_qualification_id_by_uaid(ua_id, client, descending=True, id_field='qualificationID'):
+    params = {'offset': '', 'opt_fields': id_field, 'descending': descending}
+    qualification_list = True
+    client._update_params(params)
+    while qualification_list:
+        qualification_list = client.get_qualifications()
+        for qualification in qualification_list:
+            if qualification[id_field] == ua_id:
+                return qualification.id
+    raise IdNotFound
+
+
 def get_monitoring_id_by_uaid(ua_id, client, descending=True, id_field='monitoring_id'):
     params = {'offset': '', 'opt_fields': id_field, 'descending': descending}
     monitoring_list = True

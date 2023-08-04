@@ -17,6 +17,10 @@ class FrameworksClient(APIResourceClient):
     #             GET ITEMS LIST API METHODS
     ###########################################################################
 
+    retry(stop_max_attempt_number=5)
+    def get_qualifications(self, params=None, feed='changes'):
+        return self.get_resource_items(params=params, feed=feed)
+
     ###########################################################################
     #             CREATE ITEM API METHODS
     ###########################################################################
@@ -27,6 +31,10 @@ class FrameworksClient(APIResourceClient):
     ###########################################################################
     #             GET ITEM API METHODS
     ###########################################################################
+
+    @retry(stop_max_attempt_number=5)
+    def get_qualification(self, qualification_id):
+        return self.get_resource_item(qualification_id)
 
     ###########################################################################
     #             PATCH ITEM API METHODS
