@@ -46,8 +46,7 @@ class FrameworksClient(APIResourceClient):
     ###########################################################################
     def upload_framework_document(self, file, framework_id, use_ds_client=True,
                               doc_registration=True, access_token=None):
-        depth_path = '{}'.format(DOCUMENTS)
         return self.upload_document(file, framework_id,
                                     use_ds_client=use_ds_client,
                                     doc_registration=doc_registration,
-                                    depth_path=depth_path, access_token=access_token)
+                                    access_token=access_token)
