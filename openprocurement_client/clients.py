@@ -152,7 +152,6 @@ class APIBaseClient(APITemplateClient):
             url = '{}/{}/{}/{}'.format(self.prefix_path, resource_item_id, depth_path, subitem_name)
         else:
             url = '{}/{}/{}'.format(self.prefix_path, resource_item_id, subitem_name)
-        LOGGER.warn(url)
         return self._upload_resource_file(url,
                                           file_=file_, headers=headers, doc_registration=doc_registration,
                                           doc_type=doc_type, use_ds_client=use_ds_client)

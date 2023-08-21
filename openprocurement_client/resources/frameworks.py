@@ -36,10 +36,14 @@ class FrameworksClient(APIResourceClient):
     def get_qualification(self, framework_id):
         return self.get_resource_item(framework_id)
 
+    def get_documents(self, framework_id, access_token=None):
+        return self.get_resource_item_subitem(framework_id, DOCUMENTS, access_token=access_token)
+
     ###########################################################################
     #             PATCH ITEM API METHODS
     ###########################################################################
-
+    def patch_framework(self, framework_id, patch_data={}, access_token=None):
+        return self.patch_resource_item(framework_id, patch_data, access_token=access_token)
 
     ###########################################################################
     #             UPLOAD FILE API METHODS
