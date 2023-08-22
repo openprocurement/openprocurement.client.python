@@ -3,7 +3,7 @@ import logging
 from retrying import retry
 
 from openprocurement_client.clients import APIResourceClient
-from openprocurement_client.constants import (FRAMEWORKS, DOCUMENTS, SUBMISSION)
+from openprocurement_client.constants import (FRAMEWORKS, DOCUMENTS, SUBMISSIONS)
 from openprocurement_client.exceptions import InvalidResponse
 
 LOGGER = logging.getLogger(__name__)
@@ -28,8 +28,9 @@ class FrameworksClient(APIResourceClient):
 
     def create_qualification(self, framework):
         return self.create_resource_item(framework)
+
     def create_submission(self, submission):
-        submission_resource= SUBMISSION
+        submission_resource= SUBMISSIONS
         url = self.host_url.replace(self.resource, submission_resource)
         response_item = self.request('POST', url, headers=self.headers, json=submission)
         if response_item.status_code in (200, 201):
