@@ -12,6 +12,6 @@ class SubmissionsClient(APIResourceClient):
     resource = SUBMISSIONS
 
 
-    def create_qualification(self, submission):
+    def create_submission(self, submission):
         return self.create_resource_item(submission)
 
