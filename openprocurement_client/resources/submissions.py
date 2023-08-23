@@ -11,7 +11,14 @@ class SubmissionsClient(APIResourceClient):
 
     resource = SUBMISSIONS
 
-
     def create_submission(self, submission):
         return self.create_resource_item(submission)
+
+    def upload_submission_document(self, file, submission_id, use_ds_client=True,
+                              doc_registration=True, access_token=None):
+        return self.upload_document(file, submission_id,
+                                    use_ds_client=use_ds_client,
+                                    doc_registration=doc_registration,
+                                    access_token=access_token)
+
 
