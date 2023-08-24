@@ -1,7 +1,7 @@
 import logging
 
 from openprocurement_client.clients import APIResourceClient
-from openprocurement_client.constants import (DOCUMENTS, SUBMISSIONS)
+from openprocurement_client.constants import (SUBMISSIONS)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -10,6 +10,9 @@ class SubmissionsClient(APIResourceClient):
     """Client for submissions"""
 
     resource = SUBMISSIONS
+
+    def get_submission(self, submission_id):
+        return self.get_resource_item(submission_id)
 
     def create_submission(self, submission):
         return self.create_resource_item(submission)
