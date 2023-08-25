@@ -3,7 +3,7 @@ import logging
 from retrying import retry
 
 from openprocurement_client.clients import APIResourceClient
-from openprocurement_client.constants import (FRAMEWORKS, DOCUMENTS, SUBMISSIONS)
+from openprocurement_client.constants import (FRAMEWORKS, DOCUMENTS, SUBMISSIONS, QUALIFICATIONS)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,6 +38,12 @@ class FrameworksClient(APIResourceClient):
 
     def get_documents(self, framework_id, access_token=None):
         return self.get_resource_item_subitem(framework_id, DOCUMENTS, access_token=access_token)
+
+    def get_submissions(self, framework_id, access_token=None):
+        return self.get_resource_item_subitem(framework_id, SUBMISSIONS, access_token=access_token)
+
+    def get_qualifications(self, framework_id, access_token=None):
+        return self.get_resource_item_subitem(framework_id, QUALIFICATIONS, access_token=access_token)
 
     ###########################################################################
     #             PATCH ITEM API METHODS
